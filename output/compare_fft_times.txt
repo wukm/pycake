@@ -1,0 +1,9 @@
+A demo of fft-based gaussian blur vs. (standard) convolution-based gaussian blur on a test image.
+
+average of 3 tests were done for each data point.
+
+done on a 512x512 grayscale test image (camera guy).
+
+for each implementation, vary size of sigma logarithmically (from 2^0 to 2^8).
+
+This was produced by running the script hfft_demo.py
