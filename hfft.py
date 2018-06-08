@@ -6,6 +6,7 @@ import scipy.fftpack as fftpack
 
 """
 hfft.py is the implementation of calculating the hessian of a real
+
 image based in frequency space (rather than direct convolution with a gaussian
 as is standard in scipy, for example).
 
@@ -14,6 +15,8 @@ TODO: PROVIDE MAIN USAGE NOTES
 
 def gauss_freq(shape, σ=1.):
     """
+    DEPRECATED
+
     NOTE:
         this function is/should be? for illustrative purposes only--
         we can actually build this much faster using the builtin
@@ -37,6 +40,7 @@ def gauss_freq(shape, σ=1.):
 
 def blur(img, sigma):
     """
+    DEPRECATED
     a roll-your-own FFT-implemented gaussian blur.
     fftgauss below is preferred (it is more efficient)
     """
@@ -61,10 +65,12 @@ def fftgauss(img,sigma):
     "Gaussian blur implemented using FFT convolution. Notice the dark borders
     around the image, due to the zero-padding beyond its boundaries. The
     convolve2d function allows for other types of image boundaries, but is far
-    slower."
+    slower"
+
+    (i.e. doesn't use FFT).
 
     note that here, you actually take the FFT of a gaussian (rather than
-    build it in frequency space. should you do this?
+    build it in frequency space). there are ~6 ways to do this.
     """
 
     #create a 2D gaussian kernel to take the FFT of

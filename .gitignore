@@ -5,5 +5,3 @@
 *.swp # although these shouldn't exist anyway
 __pycache__
 .ropeproject
-
-
