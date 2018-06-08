@@ -4,7 +4,6 @@
 *.pyc
 *.swp # although these shouldn't exist anyway
 __pycache__
-clahe_directions
-clahe_curvatures
+.ropeproject
 
 

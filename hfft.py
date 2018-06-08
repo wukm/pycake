@@ -4,17 +4,44 @@ import numpy as np
 from scipy import signal
 import scipy.fftpack as fftpack
 
+"""
+hfft.py is the implementation of calculating the hessian of a real
+image based in frequency space (rather than direct convolution with a gaussian
+as is standard in scipy, for example).
+
+TODO: PROVIDE MAIN USAGE NOTES
+"""
+
 def gauss_freq(shape, σ=1.):
+    """
+    NOTE:
+        this function is/should be? for illustrative purposes only--
+        we can actually build this much faster using the builtin
+        scipy.signal.gaussian rather than a roll-your-own
+
+    build a shape=(M,N) sized gaussian kernel in frequency space
+    with size σ
+
+    (due to the convolution theorem for fourier transforms, the function
+    created here may simply be *multiplied" against the signal.
+
+    """
 
     M,  N = shape
     fgauss = np.fromfunction(lambda μ,ν: ((μ+M+1)/2)**2 + ((ν+N+1)/2)**2, shape=shape)
 
+    # is this used?
     coeff = (1 / (2*np.pi * σ**2))
+
     return np.exp(-fgauss / (2*σ**2))
 
 def blur(img, sigma):
+    """
+    a roll-your-own FFT-implemented gaussian blur.
+    fftgauss below is preferred (it is more efficient)
+    """
 
-    I = fftpack.fft2(img)
+    I = fftpack.fft2(img) # get 2D transform of the image
 
     # do whatever
 
@@ -25,8 +52,22 @@ def blur(img, sigma):
 
 def fftgauss(img,sigma):
 
-    """https://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.signal.fftconvolve.html"""
+    """
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html
 
+    in particular the example in which a gaussian blur is implemented.
+
+    along with the comment:
+    "Gaussian blur implemented using FFT convolution. Notice the dark borders
+    around the image, due to the zero-padding beyond its boundaries. The
+    convolve2d function allows for other types of image boundaries, but is far
+    slower."
+
+    note that here, you actually take the FFT of a gaussian (rather than
+    build it in frequency space. should you do this?
+    """
+
+    #create a 2D gaussian kernel to take the FFT of
     kernel = np.outer(signal.gaussian(img.shape[0], sigma),
                         signal.gaussian(img.shape[1],sigma))
 
@@ -35,7 +76,7 @@ def fftgauss(img,sigma):
 def fft_hessian(image, sigma=1):
     """
     a reworking of skimage.feature.hessian_matrix that uses
-    a FFT to compute gaussian, which results in a considerable speedup
+    e FFT to compute gaussian, which results in a considerable speedup
 
     INPUT:
         image - a 2D image (which type?)
@@ -62,7 +103,7 @@ def fft_hessian(image, sigma=1):
 
 if __name__ == "__main__":
 
-    #This simply tests fftgaussian on a test image, exemplifying the speedup
+    #This simply tests fftgauss on a test image, exemplifying the speedup
     #compared to a traditional gaussian.
     import matplotlib.pyplot as plt
 
