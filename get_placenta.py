@@ -29,7 +29,7 @@ import os.path
 
 from scipy.ndimage import imread
 
-def get_named_placenta(filename, sample_dir=None, masked=True, mask=None):
+def get_named_placenta(filename, sample_dir=None, masked=True, maskfile=None):
     """
     This function is to be replaced by a more ingenious/natural
     way of accessing a database of unregistered and/or registered
@@ -38,10 +38,20 @@ def get_named_placenta(filename, sample_dir=None, masked=True, mask=None):
     INPUT:
         filename: name of file (including suffix?) but NOT directory
         masked: return it masked.
-        mask: if supplied, this will use a supplied one channel mask. otherwise,
-            this will be calculated automatically.
-        sample_directory: None. defaults to './samples'
+        maskfile: if supplied, this use the file will use a supplied 1-channel
+                mask (where 1 represents an invalid/masked pixel, and 0
+                represents a valid/unmasked pixel. the supplied image must be
+                the same shape as the image. if not provided, the mask is
+                calculated (unless masked=False)
+                the file must be located within the sample directory
+        sample_directory: Relative path where sample (and mask file) is located.
+                defaults to './samples'
 
+    if masked is true (default), this returns a masked array.
+
+    NOTE: A previous logical incongruity has been corrected. Masks should have
+    1 as the invalid/background/mask value (to mask), and 0 as the
+    valid/plate/foreground value (to not mask)
     """
     if sample_dir is None:
         sample_dir = 'samples'
@@ -50,16 +60,20 @@ def get_named_placenta(filename, sample_dir=None, masked=True, mask=None):
 
     raw_img = imread(full_filename, mode='L')
 
-    if mask is None:
+    if maskfile is None:
+        print("PLEASE SUPPLY A MASKFILE. AUTOGENERATION OF MASKS IS SLOW / BUGGED.")
         return mask_background(raw_img)
     else:
-        mask = os.path.join(sample_dir, mask)
-        mask = imread(mask, mode='L')
-        return ma.masked_array(raw_img, mask=np.invert(mask))
+        # set maskfile name relative to path
+        maskfile = os.path.join(sample_dir, maskfile)
+        mask = imread(maskfile, mode='L')
+        return ma.masked_array(raw_img, mask=mask)
 
 def mask_background(img):
     """
+    THIS IS BROKEN/ VERY SLOW.  PROVIDE MANUAL MASKS OR FIX.
     Masks all regions of the image outside the placental plate.
+
     The logic of the function could be improved.
 
     INPUT:
@@ -93,7 +107,7 @@ def mask_background(img):
 
     # find the outer boundary and mark outside of it.
     # run with defaults, sufficient
-    bound = convex_hull_image(bg_mask)
+    bound = morphology.convex_hull_image(bg_mask)
     bound = segmentation.find_boundaries(bg_mask, mode='inner', background=1)
     bg_mask[bound] = 1
 
@@ -104,13 +118,36 @@ def mask_background(img):
 
     return ma.masked_array(img, mask=bg_mask)
 
+def imshowmask(img):
+    """
+    show a masked grayscale image with a dark blue masked region
+
+    custom version of imshow that shows grayscale images with the right colormap
+    and, if they're masked arrays, sets makes the mask a dark blue)
+    a better function might make the grayscale value dark blue
+    (so there's no confusion)
+    """
+
+    from numpy.ma import is_masked
+    from skimage.color import gray2rgb
+
+
+    if not is_masked(img):
+        plt.imshow(img, cmap=plt.cm.gray)
+    else:
+
+        mimg = gray2rgb(img.filled(0))
+        # fill blue channel with a relatively dark value for masked elements
+        mimg[img.mask, 2] = 60
+        plt.imshow(mimg)
 
 if __name__ == "__main__":
     """test that this works on an easy image."""
 
     from scipy.ndimage import imread
     import matplotlib.pyplot as plt
+    test_filename = 'barium1.png'
+    test_maskfile = 'barium1.mask.png'
 
-    filename = 'raw_barium.png'
+    img =  get_named_placenta(test_filename, maskfile=test_maskfile)
 
-    img =  get_named_placenta('raw_barium.png')
