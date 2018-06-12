@@ -4,7 +4,7 @@ import numpy as np
 from scipy import signal
 import scipy.fftpack as fftpack
 
-from """
+"""
 hfft.py is the implementation of calculating the hessian of a real
 
 image based in frequency space (rather than direct convolution with a gaussian
