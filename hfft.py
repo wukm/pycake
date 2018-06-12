@@ -107,10 +107,13 @@ def fft_hessian(image, sigma=1):
     return (Lxx, Lxy, Lyy)
 
 
-if __name__ == "__main__":
+def _old_test():
+    """
+    old main function for testing.
 
-    #This simply tests fftgauss on a test image, exemplifying the speedup
-    #compared to a traditional gaussian.
+    This simply tests fftgauss on a test image, exemplifying the speedup
+    compared to a traditional gaussian.
+    """
     import matplotlib.pyplot as plt
 
     from skimage.data import camera
@@ -146,3 +149,6 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.show()
+if __name__ == "__main__":
+
+    pass
