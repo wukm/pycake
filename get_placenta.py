@@ -142,6 +142,7 @@ def imshowmask(img):
         plt.imshow(mimg)
 
 if __name__ == "__main__":
+
     """test that this works on an easy image."""
 
     from scipy.ndimage import imread
@@ -150,4 +151,7 @@ if __name__ == "__main__":
     test_maskfile = 'barium1.mask.png'
 
     img =  get_named_placenta(test_filename, maskfile=test_maskfile)
+
+    print('run plt.show() to see masked output')
+    imshowmask(img)
 
