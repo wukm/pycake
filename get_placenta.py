@@ -118,7 +118,7 @@ def mask_background(img):
 
     return ma.masked_array(img, mask=bg_mask)
 
-def imshowmask(img):
+def mimshow(img):
     """
     show a masked grayscale image with a dark blue masked region
 
@@ -130,6 +130,7 @@ def imshowmask(img):
 
     from numpy.ma import is_masked
     from skimage.color import gray2rgb
+    import matplotlib.pyplot as plt
 
 
     if not is_masked(img):
@@ -153,5 +154,5 @@ if __name__ == "__main__":
     img =  get_named_placenta(test_filename, maskfile=test_maskfile)
 
     print('run plt.show() to see masked output')
-    imshowmask(img)
+    mimshow(img)
 
