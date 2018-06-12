@@ -2,8 +2,8 @@
 *.pickle
 *.npy
 *.pyc
-.*.swp # although these shouldn't exist anyway
-
+*.swp # although these shouldn't exist anyway
+*.py.swp
 
 __pycache__
 .ropeproject
