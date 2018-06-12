@@ -32,3 +32,19 @@ zero_order_accurate_no_boundary = isclose(A_eroded, B_eroded, tol)
 first_order_accurate = isclose(J_A_eroded, J_B_eroded, tol)
 
 """
+
+from get_placenta import get_named_placenta
+
+from hfft import fft_hessian, fft_gaussian
+from scipy.ndimage import gaussian_filter
+
+imgfile = 'barium1.png'
+maskfile = 'barium1.mask.png'
+
+img = get_named_placenta(imgfile, maskfile=maskfile)
+
+
+sigma = 2
+
+A = gaussian_filter(img,sigma)
+B = fft_gaussian(img, sigma)

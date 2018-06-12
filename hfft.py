@@ -4,7 +4,7 @@ import numpy as np
 from scipy import signal
 import scipy.fftpack as fftpack
 
-"""
+from """
 hfft.py is the implementation of calculating the hessian of a real
 
 image based in frequency space (rather than direct convolution with a gaussian
@@ -42,7 +42,7 @@ def blur(img, sigma):
     """
     DEPRECATED
     a roll-your-own FFT-implemented gaussian blur.
-    fftgauss below is preferred (it is more efficient)
+    fft_gaussian below is preferred (it is more efficient)
     """
 
     I = fftpack.fft2(img) # get 2D transform of the image
@@ -54,7 +54,7 @@ def blur(img, sigma):
 
     return fftpack.ifft2(I).real
 
-def fftgauss(img,sigma):
+def fft_gaussian(img,sigma):
 
     """
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html
@@ -97,7 +97,7 @@ def fft_hessian(image, sigma=1):
               [Lxy[j][k], Lyy[j][k]] ]
     """
 
-    gaussian_filtered = fftgauss(image, sigma=sigma)
+    gaussian_filtered = fft_gaussian(image, sigma=sigma)
 
     Lx, Ly = np.gradient(gaussian_filtered)
 
@@ -111,7 +111,7 @@ def _old_test():
     """
     old main function for testing.
 
-    This simply tests fftgauss on a test image, exemplifying the speedup
+    This simply tests fft_gaussian on a test image, exemplifying the speedup
     compared to a traditional gaussian.
     """
     import matplotlib.pyplot as plt
@@ -122,29 +122,29 @@ def _old_test():
 
     sample_sigmas = (.2, 2, 10, 30)
 
-    outputs = (fftgauss(img, sample_sigmas[0]),
-               fftgauss(img, sample_sigmas[1]),
-               fftgauss(img, sample_sigmas[2]),
-               fftgauss(img, sample_sigmas[3]),
+    outputs = (fft_gaussian(img, sample_sigmas[0]),
+               fft_gaussian(img, sample_sigmas[1]),
+               fft_gaussian(img, sample_sigmas[2]),
+               fft_gaussian(img, sample_sigmas[3]),
                )
 
 
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
 
     axes[0, 0].imshow(outputs[0], cmap='gray')
-    axes[0, 0].set_title('fftgauss σ={}'.format(sample_sigmas[0]))
+    axes[0, 0].set_title('fft_gaussian σ={}'.format(sample_sigmas[0]))
     axes[0, 0].axis('off')
 
     axes[0, 1].imshow(outputs[1], cmap='gray')
-    axes[0, 1].set_title('fftgauss σ={}'.format(sample_sigmas[1]))
+    axes[0, 1].set_title('fft_gaussian σ={}'.format(sample_sigmas[1]))
     axes[0, 1].axis('off')
 
     axes[1, 0].imshow(outputs[2], cmap='gray')
-    axes[1, 0].set_title('fftgauss σ={}'.format(sample_sigmas[2]))
+    axes[1, 0].set_title('fft_gaussian σ={}'.format(sample_sigmas[2]))
     axes[1, 0].axis('off')
 
     axes[1, 1].imshow(outputs[3], cmap='gray')
-    axes[1, 1].set_title('fftgauss σ={}'.format(sample_sigmas[3]))
+    axes[1, 1].set_title('fft_gaussian σ={}'.format(sample_sigmas[3]))
     axes[1, 1].axis('off')
 
     plt.tight_layout()
