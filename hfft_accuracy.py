@@ -4,11 +4,11 @@ here you want to show  the accuracy of hfft.py
 
 BOILERPLATE
 
-show that gaussian blur of hfft is accurate, except around the boundary
-proportional to sigma.
+show that gaussian blur of hfft is accurate, except potentially around the
+boundary proportional to sigma.
 
-or if they're off by a scaling factor, show that the derivates (taken the same way)
-are proportional.
+or if they're off by a scaling factor, show that the derivates
+(taken the same way) are proportional.
 
 pseudocode
 
@@ -44,6 +44,13 @@ import numpy as np
 from scipy.ndimage import laplace
 import numpy.ma as ma
 
+def erode_mask(img, sigma, mask=None):
+    """
+    Apply an eroded mask to an image
+    """
+
+    if mask is None:
+        mask = img.mask
 imgfile = 'barium1.png'
 maskfile = 'barium1.mask.png'
 
@@ -52,10 +59,10 @@ img_raw = get_named_placenta(imgfile, maskfile=maskfile)
 # so that scipy.ndimage.gaussian_filter doesn't use uint8 precision (jesus)
 img = img_raw / 255.
 
-# show a matrix with img.mask mask
+# convenience function to show a matrix with img.mask mask
 ms = lambda x: mimshow(ma.masked_array(x, img.mask))
 
-sigma = 2
+sigma = 2.
 
 print('applying standard gauss blur')
 # THIS USES THE SAME DTYPE AS THE INPUT SO DEAR LORD MAKE SURE IT'S A FLOAT
@@ -74,6 +81,9 @@ Ayx, Ayy = np.gradient(Ay)
 
 Bxx, Bxy = np.gradient(Bx)
 Byx, Ayy = np.gradient(By)
+
+# even without scaling (which occurs below) the second derivates should be
+# close. normalize matrices using frobenius norm of the hessian?
 
 print('done.')
 
