@@ -64,3 +64,24 @@ if __name__ == "__main__":
     ax2.set_adjustable('box-forced')
 
     fig.tight_layout()
+
+def mean_squared_error(A,B):
+    """
+    get mean squared error between two matrices of the same size
+
+    input:
+        A, B : two ndarrays of the same size.
+
+    output:
+
+        mse:   a single number.
+    """
+
+    try:
+        mse = ((A-B)**2).sum() / A.size()
+
+    except ValueError:
+        print("inputs must be of the same size")
+        raise
+
+    return mse
