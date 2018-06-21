@@ -45,13 +45,29 @@ import numpy as np
 from scipy.ndimage import laplace
 import numpy.ma as ma
 
+from skimage.segmentation import find_boundaries
+from skimage.morphology import disk, binary_dilation
+
 def erode_plate(img, sigma, mask=None):
     """
     Apply an eroded mask to an image
+    assume (if helpful) that the boundary of the placenta is a connected loop
+    that is, there is a single inside and outside of the shape, and that
+    the placenta is more or less convex
     """
 
     if mask is None:
         mask = img.mask
+
+    # get a boolean array that is 1 along the border of the mask, zero elsewhere
+    # default mode is 'thick' which is fine
+    bounds = find_boundaries(mask)
+
+    dilated_border = binary_dilation(bounds, selem=disk(np.ceil(sigma))
+
+    new_mask = np.logical_or(mask, dilated_border)
+
+    return ma.masked_array(img, mask=new_mask)
 
 # FIX SOME ISSUES, BINARY DILATION IS TAKING HELLA LONG AND ALSO
 # THERE ARE RANDOM BLIPS INSIDE THE MASK!!!
@@ -98,8 +114,8 @@ print('done.')
 A_unscaled = A.copy()
 B_unscaled = B.copy()
 
-A = 255*(A-A.min())/(A.max()-A.min())
-B = 255*(B-B.min())/(B.max()-B.min())
+A = (A-A.min())/(A.max()-A.min())
+B = (B-B.min())/(B.max()-B.min())
 
 # the following shows a random vertical slice of A & B (when scaled)
 # the results are even more fitting when you scale B to coincide with A's max
