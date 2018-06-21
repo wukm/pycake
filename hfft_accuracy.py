@@ -44,13 +44,18 @@ import numpy as np
 from scipy.ndimage import laplace
 import numpy.ma as ma
 
-def erode_mask(img, sigma, mask=None):
+def erode_plate(img, sigma, mask=None):
     """
     Apply an eroded mask to an image
     """
 
     if mask is None:
         mask = img.mask
+
+# FIX SOME ISSUES, BINARY DILATION IS TAKING HELLA LONG AND ALSO
+# THERE ARE RANDOM BLIPS INSIDE THE MASK!!!
+# FIX IN GIMP!:
+
 imgfile = 'barium1.png'
 maskfile = 'barium1.mask.png'
 
@@ -106,3 +111,5 @@ plt.plot(np.arange(A.shape[1]),A[A.shape[0]//2,:],
 plt.plot(np.arange(B.shape[1]), B[B.shape[0]//2,:],
          label='fft_gaussian')
 plt.legend()
+
+MSE = ((A-B)**2).sum() / A.size
