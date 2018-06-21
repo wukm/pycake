@@ -40,6 +40,7 @@ from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 from get_placenta import mimshow
 
+from score import mean_squared_error
 import numpy as np
 from scipy.ndimage import laplace
 import numpy.ma as ma
@@ -112,4 +113,5 @@ plt.plot(np.arange(B.shape[1]), B[B.shape[0]//2,:],
          label='fft_gaussian')
 plt.legend()
 
-MSE = ((A-B)**2).sum() / A.size
+#MSE = ((A-B)**2).sum() / A.size
+MSE = mean_squared_error(A,B)

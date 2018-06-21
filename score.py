@@ -78,7 +78,7 @@ def mean_squared_error(A,B):
     """
 
     try:
-        mse = ((A-B)**2).sum() / A.size()
+        mse = ((A-B)**2).sum() / A.size
 
     except ValueError:
         print("inputs must be of the same size")
