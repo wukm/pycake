@@ -99,6 +99,23 @@ def principal_curvatures(img, sigma=1.0, H=None):
 
     return K1, K2
 
+def reorder_eigs(L1,L2):
+    """
+    L1, L2 contain a 2D matrix of eigenvalues at each point
+    so that L1 <= L2 at each element.
+
+    this reorders this so that |L1| <= |L2| instead.
+
+    this could (if desired) also return the permutation array
+    but does not do so presently
+    """
+
+    L = np.dstack((L1,L2))
+    mag =  np.argsort(abs(L), axis=-1)
+
+    # just some slice nonsense
+
+    ##### FINISH T HISSSS
 def principal_directions(img, sigma, H=None, mask=None):
     """
     will ignore calculation of principal directions of masked areas

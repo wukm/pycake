@@ -63,7 +63,10 @@ def erode_plate(img, sigma, mask=None):
     # default mode is 'thick' which is fine
     bounds = find_boundaries(mask)
 
-    dilated_border = binary_dilation(bounds, selem=disk(np.ceil(sigma))
+    # structure element to dilate by is a disk of diameter sigma
+    # rounded up to the nearest integer. this may be too conservative.
+    selem = disk(np.ceil(sigma))
+    dilated_border = binary_dilation(bounds, selem=selem)
 
     new_mask = np.logical_or(mask, dilated_border)
 
@@ -84,7 +87,7 @@ img = img_raw / 255.
 # convenience function to show a matrix with img.mask mask
 ms = lambda x: mimshow(ma.masked_array(x, img.mask))
 
-sigma = 2.
+sigma = 6
 
 print('applying standard gauss blur')
 # THIS USES THE SAME DTYPE AS THE INPUT SO DEAR LORD MAKE SURE IT'S A FLOAT
@@ -98,6 +101,8 @@ Bx, By = np.gradient(B)
 
 
 print('calculating second derivatives')
+
+# you can verify np.isclose(Axy,Ayx) && np.isclose(Bxy,Byx) -> True
 Axx, Axy = np.gradient(Ax)
 Ayx, Ayy = np.gradient(Ay)
 
