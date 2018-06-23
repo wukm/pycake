@@ -87,13 +87,15 @@ img = img_raw / 255.
 # convenience function to show a matrix with img.mask mask
 ms = lambda x: mimshow(ma.masked_array(x, img.mask))
 
-sigma = 6
+sigma = 11.
 
 print('applying standard gauss blur')
 # THIS USES THE SAME DTYPE AS THE INPUT SO DEAR LORD MAKE SURE IT'S A FLOAT
 A = gaussian_filter(img.astype('f'), sigma, mode='constant') #zero padding
 print('applying fft gauss blur')
 B = fft_gaussian(img, sigma)
+B_unnormalized = B.copy()
+B = B / (2*(sigma**2)*np.pi)
 
 A = erode_plate(A, sigma, mask=img.mask)
 B = erode_plate(B, sigma, mask=img.mask)
@@ -121,8 +123,8 @@ print('done.')
 A_unscaled = A.copy()
 B_unscaled = B.copy()
 
-A = (A-A.min())/(A.max()-A.min())
-B = (B-B.min())/(B.max()-B.min())
+Ascaled = (A-A.min())/(A.max()-A.min())
+Bscaled = (B-B.min())/(B.max()-B.min())
 
 # the following shows a random vertical slice of A & B (when scaled)
 # the results are even more fitting when you scale B to coincide with A's max
