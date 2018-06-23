@@ -95,6 +95,8 @@ A = gaussian_filter(img.astype('f'), sigma, mode='constant') #zero padding
 print('applying fft gauss blur')
 B = fft_gaussian(img, sigma)
 
+A = erode_plate(A, sigma, mask=img.mask)
+B = erode_plate(B, sigma, mask=img.mask)
 print('calculating first derivatives')
 Ax, Ay = np.gradient(A)
 Bx, By = np.gradient(B)
@@ -107,7 +109,7 @@ Axx, Axy = np.gradient(Ax)
 Ayx, Ayy = np.gradient(Ay)
 
 Bxx, Bxy = np.gradient(Bx)
-Byx, Ayy = np.gradient(By)
+Byx, Byy = np.gradient(By)
 
 # even without scaling (which occurs below) the second derivates should be
 # close. normalize matrices using frobenius norm of the hessian?
