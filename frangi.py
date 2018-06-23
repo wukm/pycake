@@ -24,3 +24,11 @@ def get_frangi_targets(K1,K2, beta=0.5, gamma=15, dark_bg=True, threshold=None):
         return F < threshold
     else:
         return F
+
+def anisotropy(K1,K2):
+
+    return (K1/K2) **2
+
+def structureness(K1,K2):
+
+    return K1**2 + K2**2

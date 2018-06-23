@@ -48,6 +48,9 @@ import numpy.ma as ma
 from skimage.segmentation import find_boundaries
 from skimage.morphology import disk, binary_dilation
 
+from diffgeo import principal_curvatures
+from frangi import structureness, anisotropy
+
 def erode_plate(img, sigma, mask=None):
     """
     Apply an eroded mask to an image
@@ -100,8 +103,8 @@ B = B / (2*(sigma**2)*np.pi)
 A = erode_plate(A, sigma, mask=img.mask)
 B = erode_plate(B, sigma, mask=img.mask)
 print('calculating first derivatives')
-Ax, Ay = np.gradient(A)
-Bx, By = np.gradient(B)
+Ax, Ay = np.gradient(A.filled(0))
+Bx, By = np.gradient(B.filled(0))
 
 
 print('calculating second derivatives')
@@ -113,18 +116,30 @@ Ayx, Ayy = np.gradient(Ay)
 Bxx, Bxy = np.gradient(Bx)
 Byx, Byy = np.gradient(By)
 
-# even without scaling (which occurs below) the second derivates should be
-# close. normalize matrices using frobenius norm of the hessian?
 
+
+print('calculating eigenvalues of hessian')
+ak1, ak2 = principal_curvatures(A, sigma=sigma, H=(Axx,Axy,Ayy))
+bk1, bk2 = principal_curvatures(B, sigma=sigma, H=(Bxx,Bxy,Byy))
+
+R1 = anisotropy(ak1,ak2)
+R2 = anisotropy(bk1,bk2)
+
+S1 = structureness(ak1, ak2)
+S2 = structureness(bk1, bk2)
 print('done.')
 
+# even without scaling (which occurs below) the second derivates should be
+# close. normalize matrices using frobenius norm of the hessian?
 # note: A & B are off but have the same shape
-# rescale to [0,255] (actually should keep as 0,1? )
-A_unscaled = A.copy()
-B_unscaled = B.copy()
 
-Ascaled = (A-A.min())/(A.max()-A.min())
-Bscaled = (B-B.min())/(B.max()-B.min())
+
+# rescale to [0,255] (actually should keep as 0,1? )
+#A_unscaled = A.copy()
+#B_unscaled = B.copy()
+
+#Ascaled = (A-A.min())/(A.max()-A.min())
+#Bscaled = (B-B.min())/(B.max()-B.min())
 
 # the following shows a random vertical slice of A & B (when scaled)
 # the results are even more fitting when you scale B to coincide with A's max
