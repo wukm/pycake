@@ -100,7 +100,7 @@ img = img_raw / 255.
 # convenience function to show a matrix with img.mask mask
 ms = lambda x: mimshow(ma.masked_array(x, img.mask))
 
-sigma = 11.
+sigma = 5
 
 print('applying standard gauss blur')
 # THIS USES THE SAME DTYPE AS THE INPUT SO DEAR LORD MAKE SURE IT'S A FLOAT
@@ -144,7 +144,7 @@ bk1, bk2 = principal_curvatures(B, sigma=sigma, H=(Bxx,Bxy,Byy))
 #
 ## ugh, apply masks here. too large to be conservative?
 ## otherwise structureness only shows up for small sizes
-#new_mask = erode_plate(None, 3*sigma, mask=img.mask)
+new_mask = erode_plate(None, 3*sigma, mask=img.mask)
 #R1[new_mask] = 0
 #R2[new_mask] = 0
 #S1[new_mask] = 0
@@ -152,6 +152,9 @@ bk1, bk2 = principal_curvatures(B, sigma=sigma, H=(Bxx,Bxy,Byy))
 
 FA = get_frangi_targets(ak1,ak2)
 FB = get_frangi_targets(bk1,bk2)
+
+FA[new_mask] = 0
+FB[new_mask] = 0
 
 # even without scaling (which occurs below) the second derivates should be
 # close. normalize matrices using frobenius norm of the hessian?
