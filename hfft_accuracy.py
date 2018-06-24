@@ -57,6 +57,10 @@ def erode_plate(img, sigma, mask=None):
     assume (if helpful) that the boundary of the placenta is a connected loop
     that is, there is a single inside and outside of the shape, and that
     the placenta is more or less convex
+
+    alternatively, if img is None, simply erode the mask
+    this function should probably be renamed "dilate mask"
+    and erode plate should be one that just acts on masked inputs
     """
 
     if mask is None:
@@ -73,7 +77,13 @@ def erode_plate(img, sigma, mask=None):
 
     new_mask = np.logical_or(mask, dilated_border)
 
-    return ma.masked_array(img, mask=new_mask)
+    # see comment in docstring. alternatively, the behavior here
+    # could be handled by an "apply mask" parameter
+    if img is None:
+        return new_mask
+    else:
+        return ma.masked_array(img, mask=new_mask)
+
 
 # FIX SOME ISSUES, BINARY DILATION IS TAKING HELLA LONG AND ALSO
 # THERE ARE RANDOM BLIPS INSIDE THE MASK!!!
@@ -100,11 +110,13 @@ B = fft_gaussian(img, sigma)
 B_unnormalized = B.copy()
 B = B / (2*(sigma**2)*np.pi)
 
-A = erode_plate(A, sigma, mask=img.mask)
-B = erode_plate(B, sigma, mask=img.mask)
+#A = erode_plate(A, sigma, mask=img.mask)
+#B = erode_plate(B, sigma, mask=img.mask)
 print('calculating first derivatives')
-Ax, Ay = np.gradient(A.filled(0))
-Bx, By = np.gradient(B.filled(0))
+
+# zero the masks before calculating derivates if they're masked
+Ax, Ay = np.gradient(A)
+Bx, By = np.gradient(B)
 
 
 print('calculating second derivatives')
@@ -122,12 +134,21 @@ print('calculating eigenvalues of hessian')
 ak1, ak2 = principal_curvatures(A, sigma=sigma, H=(Axx,Axy,Ayy))
 bk1, bk2 = principal_curvatures(B, sigma=sigma, H=(Bxx,Bxy,Byy))
 
+
 R1 = anisotropy(ak1,ak2)
 R2 = anisotropy(bk1,bk2)
 
 S1 = structureness(ak1, ak2)
 S2 = structureness(bk1, bk2)
 print('done.')
+
+# ugh, apply masks here. too large to be conservative?
+# otherwise structureness only shows up for small sizes
+new_mask = erode_plate(None, 3*sigma, mask=img.mask)
+R1[new_mask] = 0
+R2[new_mask] = 0
+S1[new_mask] = 0
+S2[new_mask] = 0
 
 # even without scaling (which occurs below) the second derivates should be
 # close. normalize matrices using frobenius norm of the hessian?
