@@ -49,7 +49,7 @@ from skimage.segmentation import find_boundaries
 from skimage.morphology import disk, binary_dilation
 
 from diffgeo import principal_curvatures
-from frangi import structureness, anisotropy
+from frangi import structureness, anisotropy, get_frangi_targets
 
 def erode_plate(img, sigma, mask=None):
     """
@@ -135,20 +135,23 @@ ak1, ak2 = principal_curvatures(A, sigma=sigma, H=(Axx,Axy,Ayy))
 bk1, bk2 = principal_curvatures(B, sigma=sigma, H=(Bxx,Bxy,Byy))
 
 
-R1 = anisotropy(ak1,ak2)
-R2 = anisotropy(bk1,bk2)
+##R1 = anisotropy(ak1,ak2)
+#R2 = anisotropy(bk1,bk2)
+#
+#S1 = structureness(ak1, ak2)
+#S2 = structureness(bk1, bk2)
+#print('done.')
+#
+## ugh, apply masks here. too large to be conservative?
+## otherwise structureness only shows up for small sizes
+#new_mask = erode_plate(None, 3*sigma, mask=img.mask)
+#R1[new_mask] = 0
+#R2[new_mask] = 0
+#S1[new_mask] = 0
+#S2[new_mask] = 0
 
-S1 = structureness(ak1, ak2)
-S2 = structureness(bk1, bk2)
-print('done.')
-
-# ugh, apply masks here. too large to be conservative?
-# otherwise structureness only shows up for small sizes
-new_mask = erode_plate(None, 3*sigma, mask=img.mask)
-R1[new_mask] = 0
-R2[new_mask] = 0
-S1[new_mask] = 0
-S2[new_mask] = 0
+FA = get_frangi_targets(ak1,ak2)
+FB = get_frangi_targets(bk1,bk2)
 
 # even without scaling (which occurs below) the second derivates should be
 # close. normalize matrices using frobenius norm of the hessian?

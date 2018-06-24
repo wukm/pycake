@@ -1,13 +1,17 @@
 import numpy as np
 import numpy.ma
 
-def get_frangi_targets(K1,K2, beta=0.5, gamma=15, dark_bg=True, threshold=None):
+def get_frangi_targets(K1,K2, beta=0.5, gamma=None, dark_bg=True, threshold=None):
     """
     returns results of frangi filter
     """
 
     R = (K1/K2) ** 2 # anisotropy
     S = (K1**2 + K2**2) # structureness
+
+    if gamma is None:
+        # half of max hessian norm (using L2 norm)
+        gamma = .5 * np.abs(K2).max()
 
     F = np.exp(-R / (2*beta**2))
     F *= 1 - np.exp( -S / (2*gamma**2))
