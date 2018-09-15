@@ -29,7 +29,8 @@ import os.path
 
 from scipy.ndimage import imread
 
-def get_named_placenta(filename, sample_dir=None, masked=True, maskfile=None):
+def get_named_placenta(filename, sample_dir=None, masked=True,
+                       maskfile=None):
     """
     This function is to be replaced by a more ingenious/natural
     way of accessing a database of unregistered and/or registered
@@ -44,6 +45,13 @@ def get_named_placenta(filename, sample_dir=None, masked=True, maskfile=None):
                 the same shape as the image. if not provided, the mask is
                 calculated (unless masked=False)
                 the file must be located within the sample directory
+
+                If maskfile is 'None' then this function will look for
+                a default maskname with the following  pattern:
+
+                    test.jpg -> test.mask.jpg
+                    ncs.1029.jpg  -> ncs.1029.mask.jpg
+
         sample_directory: Relative path where sample (and mask file) is located.
                 defaults to './samples'
 
@@ -61,20 +69,34 @@ def get_named_placenta(filename, sample_dir=None, masked=True, maskfile=None):
     raw_img = imread(full_filename, mode='L')
 
     if maskfile is None:
-        print("PLEASE SUPPLY A MASKFILE. AUTOGENERATION OF MASKS IS SLOW / BUGGED.")
-        return mask_background(raw_img)
+        # try to open what the mask *should* be named
+        # this should be done less hackishly
+        # for example, if filename is 'ncs.1029.jpg' then
+        # this would set the maskfile as 'ncs.1029.mask.jpg'
+        *base, suffix = filename.split('.')
+        test_maskfile = ''.join(base) + '.mask.' + suffix
+        test_maskfile = os.path.join(sample_dir, test_maskfile)
+        try:
+            mask = imread(test_maskfile, mode='L')
+        except FileNotFoundError:
+            print('Could not find maskfile', test_maskfile)
+            print('Please supply a maskfile. Autogeneration of mask',
+                  'files is slow and buggy and therefore not supported.')
+            raise
+            #return mask_background(raw_img)
     else:
         # set maskfile name relative to path
         maskfile = os.path.join(sample_dir, maskfile)
         mask = imread(maskfile, mode='L')
-        return ma.masked_array(raw_img, mask=mask)
+
+    return ma.masked_array(raw_img, mask=mask)
 
 def mask_background(img):
     """
-    THIS IS BROKEN/ VERY SLOW.  PROVIDE MANUAL MASKS OR FIX.
-    Masks all regions of the image outside the placental plate.
+    Warning: this function is slow and buggy and therefore deprecated
+    as "out of scope". Please fix or remove.
 
-    The logic of the function could be improved.
+    Masks all regions of the image outside the placental plate.
 
     INPUT:
         img:
@@ -85,6 +107,11 @@ def mask_background(img):
         masked_img:
             A numpy.ma.masked_array with the same dimensions.
     """
+    print("""
+          Warning, this function is slow and buggy and therefore
+          deprecated. Please supply a mask file yourself.
+          """
+          )
 
     if img.ndim == 3:
 
@@ -118,7 +145,7 @@ def mask_background(img):
 
     return ma.masked_array(img, mask=bg_mask)
 
-def mimshow(img):
+def show_mask(img):
     """
     show a masked grayscale image with a dark blue masked region
 
@@ -149,10 +176,11 @@ if __name__ == "__main__":
     from scipy.ndimage import imread
     import matplotlib.pyplot as plt
     test_filename = 'barium1.png'
-    test_maskfile = 'barium1.mask.png'
+    #test_maskfile = 'barium1.mask.png'
 
-    img =  get_named_placenta(test_filename, maskfile=test_maskfile)
+    img =  get_named_placenta(test_filename, maskfile=None)
 
+    print('showing the mask of', test_filename)
     print('run plt.show() to see masked output')
-    mimshow(img)
+    show_mask(img)
 
