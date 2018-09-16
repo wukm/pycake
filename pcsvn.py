@@ -182,7 +182,7 @@ bg_mask = img.mask
 ###Set Parameter(s) for Frangi#################
 
 # set range of sigmas to use (declare these above)
-scales = np.logspace(1,5, num=2, base=2)
+scales = np.logspace(1,5, num=3, base=2)
 
 
 # set betas (anisotropy parameters)
