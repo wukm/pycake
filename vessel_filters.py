@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+NOTE THIS IS THE OLD CODE (FOR BAD PARAMETER FRANGI).
+IT'S HERE FOR LEGACY OR POSSIBLE DEMONSTRATION
+some function / file names have changed and this code probably won't
+work anymore without minor alterations
+"""
+
 import scipy.ndimage as ndi
 import matplotlib.pyplot as plt
 from functools import partial
