@@ -157,26 +157,33 @@ def erode_plate(img, erosion_radius=20, plate_mask=None):
 #################################################################
 #################################################################
 
-###Main Parameters############################
+###Static Parameters############################
 
 # main vesselness threshold
 alpha = 0.2
+
 ###Set base image#############################
 
-filename = 'barium2.png'
-mask = 'barium2_mask.png'
+
+#filename = 'barium1.png'
+#mask = 'barium1.mask.png'
+
+filename = 'NYMH_ID130016i.png'
 
 #raw_img = get_named_placenta('TA-BN2341348.png', mask='TA-BN2341348_mask.png')
-raw_img = get_named_placenta(filename, mask=mask)
+raw_img = get_named_placenta(filename, maskfile=None)
 
 ###Do preprocessing (e.g. clahe)###############
 
+print('Note: no preprocessing is done anymore.')
 img =  raw_img
 bg_mask = img.mask
+
 ###Set Parameter(s) for Frangi#################
 
 # set range of sigmas to use (declare these above)
-scales = np.logspace(1,4, num=5, base=2)
+scales = np.logspace(1,5, num=2, base=2)
+
 
 # set betas (anisotropy parameters)
 # 0.5 is frangi's recommendation... i think
@@ -185,6 +192,16 @@ betas = [0.5 for s in scales]
 # set gammas (structness parameter)
 # declare None here to calculate half of hessian's norm
 gammas = [None for s in scales]
+
+
+###Logging#####################################
+
+print(" Running pcsvn.py on the image file", filename,
+        "with frangi parameters as follows:")
+print("alpha (vesselness threshold): ", alpha)
+print("scales:", scales)
+print("betas:", betas)
+print("gammas will be calculated as half of hessian norm")
 
 # Multiscale Frangi Filter
 
@@ -203,7 +220,7 @@ for i in range(len(multiscale)):
     f, radius = multiscale[i]['F'], int(multiscale[i]['sigma'])
     print('eroding plate for σ={}'.format(radius))
     f = erode_plate(f, erosion_radius=radius, plate_mask=img.mask)
-    multiscale[i]['F'] = f
+    multiscale[i]['F'] = f.filled(0)
 
 # Extract Multiscale Features
 
