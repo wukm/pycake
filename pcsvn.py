@@ -188,10 +188,10 @@ alpha = 0.2
 ###Set base image#############################
 
 
-#filename = 'barium1.png'
+filename = 'barium2.png'
 #mask = 'barium1.mask.png'
 
-filename = 'NYMH_ID130016i.png'
+#filename = 'NYMH_ID130016i.png'
 
 #raw_img = get_named_placenta('TA-BN2341348.png', mask='TA-BN2341348_mask.png')
 raw_img = get_named_placenta(filename, maskfile=None)
