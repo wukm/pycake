@@ -9,7 +9,8 @@ import numpy as np
 import numpy.ma as ma
 import pickle
 
-from skimage.morphology import label, skeletonize, disk, binary_erosion, convex_hull_image
+from skimage.morphology import label, skeletonize, disk, binary_erosion, convex_hull_image, binary_dilation
+from skimage.segmentation import find_boundaries
 
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False, VERBOSE=True):
@@ -151,7 +152,29 @@ def erode_plate(img, erosion_radius=20, plate_mask=None):
     # this is by default additive with whatever
     return ma.masked_array(img, mask=eroded_mask)
 
+def dilate_plate(img, radius=10, plate_mask=None):
+    """
+    grows the mask by a specified radius
+    can this return a masked image rather than return a new one
+    to be more memory efficient? or should this just return a
+    mask to be applied?
+    """
 
+    if plate_mask is None:
+        # grab the mask from input image
+        try:
+            plate_mask = img.mask
+        except AttributeError:
+            raise('Need to supply mask information')
+
+    perimeter = find_boundaries(plate_mask)
+
+    # this is extremely inefficient. can it just convolve around
+    # the loop and skip convolving areas where everything is 0?
+    extra_mask = binary_dilation(perimeter, selem=disk(radius))
+
+    # this is by default additive with whatever mask img already has
+    return ma.masked_array(img, mask=extra_mask)
 #################################################################
 #### MAIN LOOP ##################################################
 #################################################################
@@ -182,7 +205,7 @@ bg_mask = img.mask
 ###Set Parameter(s) for Frangi#################
 
 # set range of sigmas to use (declare these above)
-scales = np.logspace(1,5, num=3, base=2)
+scales = np.logspace(1,5, num=2, base=2)
 
 
 # set betas (anisotropy parameters)
@@ -217,9 +240,9 @@ multiscale = make_multiscale(img, scales, betas, gammas,
 print('trimming collars of plates (per scale)')
 
 for i in range(len(multiscale)):
-    f, radius = multiscale[i]['F'], int(multiscale[i]['sigma'])
-    print('eroding plate for σ={}'.format(radius))
-    f = erode_plate(f, erosion_radius=radius, plate_mask=img.mask)
+    f, radius = multiscale[i]['F'], int(multiscale[i]['sigma']*1.5)
+    print('dilating plate for σ={}'.format(radius))
+    f = dilate_plate(f, radius=radius, plate_mask=img.mask)
     multiscale[i]['F'] = f.filled(0)
 
 # Extract Multiscale Features
