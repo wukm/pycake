@@ -1,4 +1,5 @@
 - get uninjected version of nymh13 going, incl mask
+- get confusion matrix going (with arteries, with veins, with both)
 - pickle your runs so you can play with output generation easier
 - fix coloring & colorbar on graph
 - try it with an eyeball
