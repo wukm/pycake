@@ -191,8 +191,8 @@ def dilate_plate(img, radius=10, plate_mask=None):
     for i,j in np.argwhere(perimeter):
         # just make a cross shape on each of those points
         # these will silently fail if slice is OOB
-        maskpad[min(i-radius,0):max(i+radius,M),j] = 1
-        maskpad[i,min(j-radius,0):max(j+radius,N)] = 1
+        maskpad[max(i-radius,0):min(i+radius,M),j] = 1
+        maskpad[i,max(j-radius,0):min(j+radius,N)] = 1
 
     new_mask = np.bitwise_or(maskpad, plate_mask)
     # this is by default additive with whatever mask img already has
