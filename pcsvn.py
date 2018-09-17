@@ -13,7 +13,7 @@ from skimage.morphology import label, skeletonize, disk, binary_erosion, convex_
 from skimage.segmentation import find_boundaries
 
 
-def make_multiscale(img, scales, betas, gammas, find_principal_directions=False, VERBOSE=True):
+def make_multiscale(img, scales, betas, gammas, find_principal_directions=False, VERBOSE=True, trim_first=False):
     """returns an ordered list of dictionaries for each scale
     multiscale.append(
         {'sigma': sigma,
@@ -32,6 +32,11 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
     multiscale = list()
 
     for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
+
+        if trim_first:
+            radius = int(sigma)
+            print('dilating plate for σ={}'.format(radius))
+            img = dilate_plate(img, radius=radius, plate_mask=img.mask)
 
         if VERBOSE:
             print('σ={}'.format(sigma))
@@ -145,8 +150,14 @@ def erode_plate(img, erosion_radius=20, plate_mask=None):
     # find convex hull of mask (make erosion calculation easier)
     plate_mask = np.invert(convex_hull_image(plate_mask))
 
-    selem = disk(erosion_radius)
-
+    # this is much faster than a disk. a plus sign might be better even.
+    #selem = square(erosion_radius)
+    # also this correctly has erosion radius as the RADIUS!
+    # input for square() and disk() is the diameter!
+    selem = np.zeros((erosion_radius*2 + 1, erosion_radius*2 + 1),
+                        dtype='bool')
+    selem[erosion_radius,:] = 1
+    selem[:,erosion_radius] = 1
     eroded_mask = binary_erosion(plate_mask, selem=selem)
 
     # this is by default additive with whatever
@@ -171,10 +182,19 @@ def dilate_plate(img, radius=10, plate_mask=None):
 
     # this is extremely inefficient. can it just convolve around
     # the loop and skip convolving areas where everything is 0?
-    extra_mask = binary_dilation(perimeter, selem=disk(radius))
+    # maskpad = binary_dilation(perimeter, selem=disk(radius))
 
+    # THIS IS WAY BETTER!
+    maskpad = np.zeros_like(perimeter)
+    for i,j in np.argwhere(perimeter):
+        # just make a cross shape on each of those points
+        maskpad[i-radius:i+radius,j] = 1
+        maskpad[i,j-radius:j+radius] = 1
+
+    new_mask = np.bitwise_or(maskpad, plate_mask)
     # this is by default additive with whatever mask img already has
-    return ma.masked_array(img, mask=extra_mask)
+    # unless it's not...?
+    return ma.masked_array(img, mask=new_mask)
 #################################################################
 #### MAIN LOOP ##################################################
 #################################################################
@@ -197,6 +217,8 @@ filename = 'NYMH_ID130016i.png'
 raw_img = get_named_placenta(filename, maskfile=None)
 
 ###Do preprocessing (e.g. clahe)###############
+
+EARLY_TRIM=False
 
 print('Note: no preprocessing is done anymore.')
 img =  raw_img
@@ -229,7 +251,8 @@ print("gammas will be calculated as half of hessian norm")
 # Multiscale Frangi Filter
 
 multiscale = make_multiscale(img, scales, betas, gammas,
-                             find_principal_directions=False)
+                             find_principal_directions=False,
+                             trim_first=EARLY_TRIM)
 
 #with open('barium2_multiscale_171024.pkl', 'rb') as f:
     #multiscale = pickle.load(f)
@@ -237,13 +260,16 @@ multiscale = make_multiscale(img, scales, betas, gammas,
 # Process Multiscale Targets
 
 # fix targets misreported on edge of plate
-print('trimming collars of plates (per scale)')
 
-for i in range(len(multiscale)):
-    f, radius = multiscale[i]['F'], int(multiscale[i]['sigma']*1.5)
-    print('dilating plate for σ={}'.format(radius))
-    f = dilate_plate(f, radius=radius, plate_mask=img.mask)
-    multiscale[i]['F'] = f.filled(0)
+if not EARLY_TRIM:
+    print('trimming collars of plates (per scale)')
+
+    for i in range(len(multiscale)):
+        f, radius = multiscale[i]['F'], int(multiscale[i]['sigma'])
+        print('dilating plate for σ={}'.format(radius))
+        f = dilate_plate(f, radius=radius, plate_mask=img.mask)
+        multiscale[i]['F'] = f.filled(0)
+
 
 # Extract Multiscale Features
 
@@ -259,9 +285,10 @@ F_max = F_all.max(axis=-1)
 if ma.is_masked(img):
     F_max = ma.masked_array(F_max, mask=img.mask)
 
+# is the frangi vesselness measure strong enough
 F_cumulative = (F_max > alpha)
 
-
+# where there's any match at all (LOOK INTO THIS)
 matched_all = match_on_skeleton(F_cumulative, F_all)
 
 # Process Composite ###############################3
@@ -287,8 +314,12 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
     import os.path
-    # use a colorscheme where you can see each later clearly
 
+    from get_placenta import show_mask as mimshow
+    show = plt.show
+    imshow = plt.imshow
+
+    # use a colorscheme where you can see each later clearly
     plt.imshow(wheres, cmap=plt.cm.tab20b)
     plt.colorbar()
     plt.show()
@@ -300,6 +331,6 @@ if __name__ == "__main__":
     plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
                cmap=plt.cm.gray)
     plt.imsave(base +'_fmax_thresh.png', F_cumulative.filled(0),
-               cmap=plt.cm.Blues)
 
-
+    # list of each scale's frangi targets for easier introspection
+    Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
