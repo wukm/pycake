@@ -186,10 +186,13 @@ def dilate_plate(img, radius=10, plate_mask=None):
 
     # THIS IS WAY BETTER!
     maskpad = np.zeros_like(perimeter)
+
+    M,N = maskpad.shape
     for i,j in np.argwhere(perimeter):
         # just make a cross shape on each of those points
-        maskpad[i-radius:i+radius,j] = 1
-        maskpad[i,j-radius:j+radius] = 1
+        # these will silently fail if slice is OOB
+        maskpad[min(i-radius,0):max(i+radius,M),j] = 1
+        maskpad[i,min(j-radius,0):max(j+radius,N)] = 1
 
     new_mask = np.bitwise_or(maskpad, plate_mask)
     # this is by default additive with whatever mask img already has
@@ -330,7 +333,7 @@ if __name__ == "__main__":
     plt.imsave(base +'_fmax.png', F_max.filled(0), cmap=plt.cm.Blues)
     plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
                cmap=plt.cm.gray)
-    plt.imsave(base +'_fmax_thresh.png', F_cumulative.filled(0),
+    plt.imsave(base +'_fmax_thresh.png', F_cumulative.filled(0))
 
     # list of each scale's frangi targets for easier introspection
     Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
