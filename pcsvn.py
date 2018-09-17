@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#!/usr/bin/env python3
 
 from get_placenta import get_named_placenta
 from hfft import fft_hessian
