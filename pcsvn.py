@@ -210,11 +210,10 @@ alpha = 0.2
 
 ###Set base image#############################
 
-
+filename = 'barium1.png'
 #filename = 'barium2.png'
-
+#filename = 'NYMH_ID130016u.png'
 #filename = 'NYMH_ID130016i.png'
-filename = 'NYMH_ID130016i.png'
 
 #raw_img = get_named_placenta('TA-BN2341348.png', mask='TA-BN2341348_mask.png')
 raw_img = get_named_placenta(filename, maskfile=None)
@@ -268,8 +267,10 @@ if not EARLY_TRIM:
     print('trimming collars of plates (per scale)')
 
     for i in range(len(multiscale)):
-        f, radius = multiscale[i]['F'], int(multiscale[i]['sigma'])
-        print('dilating plate for σ={}'.format(radius))
+        f = multiscale[i]['F']
+        # twice the buffer (be conservative!)
+        radius = int(multiscale[i]['sigma']*2)
+        print('dilating plate for radius={}'.format(radius))
         f = dilate_plate(f, radius=radius, plate_mask=img.mask)
         multiscale[i]['F'] = f.filled(0)
 
