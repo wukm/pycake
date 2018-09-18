@@ -213,15 +213,15 @@ def dilate_plate(img, radius=10, plate_mask=None):
 ###Static Parameters############################
 
 # main vesselness threshold
-alpha = 0.2
+alpha = 0.1
 
 ###Set base image#############################
 
 #filename = 'barium1.png'; DARK_BG = True
 #filename = 'barium2.png'; DARK_BG = True
-filename = 'NYMH_ID130016u.png'; DARK_BG = False
+#filename = 'NYMH_ID130016u.png'; DARK_BG = False
 #filename = 'NYMH_ID130016i.png'; DARK_BG = True
-#filename =  'im0059.png'; DARK_BG = False
+filename =  'im0059.png'; DARK_BG = False
 
 raw_img = get_named_placenta(filename, maskfile=None)
 
@@ -238,7 +238,7 @@ bg_mask = img.mask
 # set range of sigmas to use (declare these above)
 # the
 log_min = 0 # minimum scale is 2**log_min
-log_max = 4.6 # maximum scale is 2**log_max
+log_max = 4.5 # maximum scale is 2**log_max
 scales = np.logspace(log_min, log_max, num=12, base=2)
 
 
@@ -343,21 +343,52 @@ if __name__ == "__main__":
     #plt.imshow(wheres, cmap=plt.cm.tab20b)
     #plt.colorbar()
     #plt.show()
-
+    OUTPUT_DIR = 'output'
     base = os.path.basename(filename)
 
+    *base, suffix = base.split('.')
+
+    # make this its own function and just do a partial here.
+    outname = lambda s: os.path.join(OUTPUT_DIR,
+                                ''.join(base) + '_' + s + '.'+ suffix)
     #plt.imsave(base +'_scales_whole.png', wheres, cmap=plt.cm.tab20b)
-    plt.imsave(base +'_scales_whole_noskel.png', wheres, cmap=plt.cm.tab20b)
+    #plt.imsave(base +'_scales_whole_noskel.png', wheres, cmap=plt.cm.tab20b)
     #plt.imsave(base +'_fmax.png', F_max.filled(0), cmap=plt.cm.Blues)
-    plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
+    #plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
+    #           cmap=plt.cm.gray)
+    plt.imsave(outname('skel'), skeletonize(F_cumulative.filled(0)),
                cmap=plt.cm.gray)
-    plt.imsave(base +'_fmax_thresh.png', F_cumulative.filled(0))
+    plt.imsave(outname('fmax_threshholded'), F_cumulative.filled(0))
 
     plt.imshow(F_max.filled(0), cmap=plt.cm.gist_ncar)
     plt.axis('off')
     plt.colorbar()
     plt.tight_layout()
-    plt.savefig(base +'_fmax.png', dpi=300)
+    plt.savefig(outname('fmax'), dpi=300)
 
+    plt.close()
+
+    # discrete colorbar adapted from https://stackoverflow.com/a/50314773
+    fig, ax = plt.subplots(figsize=(12,8)) # not sure about figsize
+    N = len(scales)+1 # number of scales / labels
+    cmap = plt.get_cmap('nipy_spectral', N) # discrete sample of color map
+
+    imgplot = ax.imshow(wheres, cmap=cmap)
+
+    # discrete colorbar
+    cbar = plt.colorbar(imgplot)
+
+    # this is apparently hackish, beats me
+    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+
+    cbar.set_ticks(tick_locs)
+    # label each tick with the sigma value
+    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
+    scalelabels.insert(0, "(no match)")
+    # label with their label number (or change this to actual sigma value
+    cbar.set_ticklabels(scalelabels)
+    ax.set_title(r"scale ($\sigma$) of matched targets")
+
+    plt.savefig(outname('labeled'), dpi=300)
     # list of each scale's frangi targets for easier introspection
     Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
