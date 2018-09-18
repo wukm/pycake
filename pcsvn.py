@@ -13,7 +13,8 @@ from skimage.morphology import label, skeletonize, disk, binary_erosion, convex_
 from skimage.segmentation import find_boundaries
 
 
-def make_multiscale(img, scales, betas, gammas, find_principal_directions=False, VERBOSE=True, trim_first=False):
+def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
+                    dark_bg=True, VERBOSE=True, trim_first=False):
     """returns an ordered list of dictionaries for each scale
     multiscale.append(
         {'sigma': sigma,
@@ -67,7 +68,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
         # calculate frangi targets at this scale
         targets = get_frangi_targets(k1,k2,
-                    beta=beta, gamma=gamma, dark_bg=True, threshold=False)
+                    beta=beta, gamma=gamma, dark_bg=dark_bg, threshold=False)
 
         #store results as a dictionary
         this_scale = {'sigma': sigma,
@@ -216,12 +217,12 @@ alpha = 0.2
 
 ###Set base image#############################
 
-#filename = 'barium1.png'
-#filename = 'barium2.png'
-filename = 'NYMH_ID130016u.png'
-#filename = 'NYMH_ID130016i.png'
+#filename = 'barium1.png'; DARK_BG = True
+#filename = 'barium2.png'; DARK_BG = True
+filename = 'NYMH_ID130016u.png'; DARK_BG = False
+#filename = 'NYMH_ID130016i.png'; DARK_BG = True
+#filename =  'im0059.png'; DARK_BG = False
 
-#raw_img = get_named_placenta('TA-BN2341348.png', mask='TA-BN2341348_mask.png')
 raw_img = get_named_placenta(filename, maskfile=None)
 
 ###Do preprocessing (e.g. clahe)###############
@@ -263,6 +264,7 @@ print("gammas will be calculated as half of hessian norm")
 
 multiscale = make_multiscale(img, scales, betas, gammas,
                              find_principal_directions=False,
+                             dark_bg=DARK_BG,
                              trim_first=EARLY_TRIM)
 
 #with open('barium2_multiscale_171024.pkl', 'rb') as f:
@@ -354,6 +356,7 @@ if __name__ == "__main__":
     plt.imshow(F_max.filled(0), cmap=plt.cm.gist_ncar)
     plt.axis('off')
     plt.colorbar()
+    plt.tight_layout()
     plt.savefig(base +'_fmax.png', dpi=300)
 
     # list of each scale's frangi targets for easier introspection
