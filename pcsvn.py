@@ -61,6 +61,8 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             # Frangi suggested 'half the max Hessian norm' as an empirical
             # half the max spectral radius is easier to calculate so do that
 
+            # shouldn't be affected by mask data but should make sure the
+            # mask is *welll* far away from perimeter
             gamma = .5 * np.abs(k2).max()
 
         if VERBOSE:
@@ -213,15 +215,15 @@ def dilate_plate(img, radius=10, plate_mask=None):
 ###Static Parameters############################
 
 # main vesselness threshold
-alpha = 0.1
+alpha = 0.08
 
 ###Set base image#############################
 
 #filename = 'barium1.png'; DARK_BG = True
 #filename = 'barium2.png'; DARK_BG = True
-#filename = 'NYMH_ID130016u.png'; DARK_BG = False
 #filename = 'NYMH_ID130016i.png'; DARK_BG = True
-filename =  'im0059.png'; DARK_BG = False
+#filename = 'NYMH_ID130016u.png'; DARK_BG = False
+filename =  'im0059.png'; DARK_BG = False # set alpha much smaller, like .1
 
 raw_img = get_named_placenta(filename, maskfile=None)
 
@@ -239,7 +241,7 @@ bg_mask = img.mask
 # the
 log_min = 0 # minimum scale is 2**log_min
 log_max = 4.5 # maximum scale is 2**log_max
-scales = np.logspace(log_min, log_max, num=12, base=2)
+scales = np.logspace(log_min, log_max, num=10, base=2)
 
 
 # set betas (anisotropy parameters)
