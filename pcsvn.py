@@ -210,8 +210,8 @@ alpha = 0.2
 
 ###Set base image#############################
 
-filename = 'barium1.png'
-#filename = 'barium2.png'
+#filename = 'barium1.png'
+filename = 'barium2.png'
 #filename = 'NYMH_ID130016u.png'
 #filename = 'NYMH_ID130016i.png'
 
@@ -229,7 +229,7 @@ bg_mask = img.mask
 ###Set Parameter(s) for Frangi#################
 
 # set range of sigmas to use (declare these above)
-scales = np.logspace(1,6, num=10, base=2)
+scales = np.logspace(1,5.5, num=12, base=2)
 
 
 # set betas (anisotropy parameters)
@@ -306,6 +306,11 @@ wheres += 1
 wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
 wheres[F_max < alpha] = 0 # or that didn't pass the threshold
 
+# same thing w/o skeleton matching
+wheres2 = F_all.argmax(axis=-1)
+wheres2 += 1
+wheres2[F_max < alpha] = 0
+
 # Make Connected Graph
 
 pass
@@ -324,17 +329,23 @@ if __name__ == "__main__":
     imshow = plt.imshow
 
     # use a colorscheme where you can see each later clearly
-    plt.imshow(wheres, cmap=plt.cm.tab20b)
-    plt.colorbar()
-    plt.show()
+    #plt.imshow(wheres, cmap=plt.cm.tab20b)
+    #plt.colorbar()
+    #plt.show()
 
     base = os.path.basename(filename)
 
     plt.imsave(base +'_scales_whole.png', wheres, cmap=plt.cm.tab20b)
+    plt.imsave(base +'_scales_whole_noskel.png', wheres2, cmap=plt.cm.tab20b)
     plt.imsave(base +'_fmax.png', F_max.filled(0), cmap=plt.cm.Blues)
     plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
                cmap=plt.cm.gray)
     plt.imsave(base +'_fmax_thresh.png', F_cumulative.filled(0))
+
+    plt.imshow(F_max.filled(0), cmap=plt.cm.gist_ncar)
+    plt.axis('off')
+    plt.colorbar()
+    plt.savefig(base +'_fmax.png', dpi=300)
 
     # list of each scale's frangi targets for easier introspection
     Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
