@@ -211,8 +211,8 @@ alpha = 0.2
 ###Set base image#############################
 
 #filename = 'barium1.png'
-filename = 'barium2.png'
-#filename = 'NYMH_ID130016u.png'
+#filename = 'barium2.png'
+filename = 'NYMH_ID130016u.png'
 #filename = 'NYMH_ID130016i.png'
 
 #raw_img = get_named_placenta('TA-BN2341348.png', mask='TA-BN2341348_mask.png')
@@ -229,7 +229,10 @@ bg_mask = img.mask
 ###Set Parameter(s) for Frangi#################
 
 # set range of sigmas to use (declare these above)
-scales = np.logspace(1,5.5, num=12, base=2)
+# the
+log_min = 0 # minimum scale is 2**log_min
+log_max = 4.6 # maximum scale is 2**log_max
+scales = np.logspace(log_min, log_max, num=12, base=2)
 
 
 # set betas (anisotropy parameters)
@@ -293,23 +296,23 @@ if ma.is_masked(img):
 F_cumulative = (F_max > alpha)
 
 # where there's any match at all (LOOK INTO THIS)
-matched_all = match_on_skeleton(F_cumulative, F_all)
+#matched_all = match_on_skeleton(F_cumulative, F_all)
 
 # Process Composite ###############################3
 # make this a function
 
 # assign an index (later color) for where each max was found
-wheres = F_all.argmax(axis=-1)
+#wheres = F_all.argmax(axis=-1)
 
-wheres += 1
+#wheres += 1
 
-wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
-wheres[F_max < alpha] = 0 # or that didn't pass the threshold
+#wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
+#wheres[F_max < alpha] = 0 # or that didn't pass the threshold
 
 # same thing w/o skeleton matching
-wheres2 = F_all.argmax(axis=-1)
-wheres2 += 1
-wheres2[F_max < alpha] = 0
+wheres = F_all.argmax(axis=-1)
+wheres += 1
+wheres[F_max < alpha] = 0
 
 # Make Connected Graph
 
@@ -335,9 +338,9 @@ if __name__ == "__main__":
 
     base = os.path.basename(filename)
 
-    plt.imsave(base +'_scales_whole.png', wheres, cmap=plt.cm.tab20b)
-    plt.imsave(base +'_scales_whole_noskel.png', wheres2, cmap=plt.cm.tab20b)
-    plt.imsave(base +'_fmax.png', F_max.filled(0), cmap=plt.cm.Blues)
+    #plt.imsave(base +'_scales_whole.png', wheres, cmap=plt.cm.tab20b)
+    plt.imsave(base +'_scales_whole_noskel.png', wheres, cmap=plt.cm.tab20b)
+    #plt.imsave(base +'_fmax.png', F_max.filled(0), cmap=plt.cm.Blues)
     plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
                cmap=plt.cm.gray)
     plt.imsave(base +'_fmax_thresh.png', F_cumulative.filled(0))
