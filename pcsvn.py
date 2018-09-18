@@ -33,21 +33,27 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
     for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
 
-        if trim_first:
-            radius = int(sigma)
-            print('dilating plate for σ={}'.format(radius))
-            img = dilate_plate(img, radius=radius, plate_mask=img.mask)
+        if sigma < 5:
+            radius = 5
+        else:
+            radius = int(sigma*2.5) # a little conservative
+        collar = dilate_plate(img, radius=radius, plate_mask=img.mask)
 
+        collar = collar.mask
         if VERBOSE:
             print('σ={}'.format(sigma))
             print('finding hessian')
 
-        # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
+            # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
         hesh = fft_hessian(img, sigma)
 
         if VERBOSE:
             print('finding principal curvatures')
+
         k1, k2 = principal_curvatures(img, sigma=sigma, H=hesh)
+
+        k1[collar] = 0
+        k2[collar] = 0
 
         # set anisotropy parameter if not specified
         if gamma is None:
