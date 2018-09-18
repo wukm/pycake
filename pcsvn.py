@@ -62,7 +62,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             # half the max spectral radius is easier to calculate so do that
 
             # shouldn't be affected by mask data but should make sure the
-            # mask is *welll* far away from perimeter
+            # mask is *well* far away from perimeter
             gamma = .5 * np.abs(k2).max()
 
         if VERBOSE:
@@ -223,7 +223,8 @@ alpha = 0.08
 #filename = 'barium2.png'; DARK_BG = True
 #filename = 'NYMH_ID130016i.png'; DARK_BG = True
 #filename = 'NYMH_ID130016u.png'; DARK_BG = False
-filename =  'im0059.png'; DARK_BG = False # set alpha much smaller, like .1
+#filename = 'NYMH_ID130016u_inset.png'; DARK_BG = False
+#filename =  'im0059.png'; DARK_BG = False # set alpha much smaller, like .1
 
 raw_img = get_named_placenta(filename, maskfile=None)
 
@@ -239,14 +240,14 @@ bg_mask = img.mask
 
 # set range of sigmas to use (declare these above)
 # the
-log_min = 0 # minimum scale is 2**log_min
+log_min = 1 # minimum scale is 2**log_min
 log_max = 4.5 # maximum scale is 2**log_max
 scales = np.logspace(log_min, log_max, num=10, base=2)
 
 
 # set betas (anisotropy parameters)
 # 0.5 is frangi's recommendation... i think
-betas = [0.5 for s in scales]
+betas = [0.6 for s in scales]
 
 # set gammas (structness parameter)
 # declare None here to calculate half of hessian's norm
@@ -299,8 +300,7 @@ F_all = np.dstack([scale['F'] for scale in multiscale])
 # the max Frangi target
 F_max = F_all.max(axis=-1)
 
-if ma.is_masked(img):
-    F_max = ma.masked_array(F_max, mask=img.mask)
+F_max = ma.masked_array(F_max, mask=img.mask)
 
 # is the frangi vesselness measure strong enough
 F_cumulative = (F_max > alpha)
