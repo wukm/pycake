@@ -83,7 +83,9 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
                       'H': hesh,
                       'F': targets,
                       'k1': k1,
-                      'k2': k2}
+                      'k2': k2,
+                      'border_radius': radius
+                      }
 
         if find_principal_directions:
             # principal directions will only be computed for significant regions
@@ -211,6 +213,7 @@ multiscale = make_multiscale(img, scales, betas, gammas,
                              dark_bg=DARK_BG)
 
 gammas = [scale['gamma'] for scale in multiscale]
+border_radii = [scale['border_radius'] for scale in multiscale]
 ###Process Multiscale Targets############################
 
 # fix targets misreported on edge of plate
@@ -338,7 +341,8 @@ if __name__ == "__main__":
             'sigmas': list(scales),
             'log_min': log_min,
             'log_max': log_max,
-            'n_scales': n_scales
+            'n_scales': n_scales,
+            'border_radii': border_radii
             }
 
     dumpfile = os.path.join(OUTPUT_DIR,
