@@ -349,15 +349,22 @@ if __name__ == "__main__":
 
     ###Set base image#############################
 
-    #filename = 'barium1.png'; DARK_BG = True
-    #filename = 'barium2.png'; DARK_BG = True
-    #filename = 'NYMH_ID130016i.png'; DARK_BG = True
-    #filename = 'NYMH_ID130016u.png'; DARK_BG = False
-    filename = 'NYMH_ID130016u_inset.png'; DARK_BG = False
-    #filename = 'im0059.png'; DARK_BG = False; log_range = (-1,3); alpha=0.08
-    #filename = 'im0059_clahe.png'; DARK_BG = False; log_range = (-1,3); alpha=0.08
+    trials = [
+        { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+        { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+        { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+        { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+        { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+        { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
+        { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
+    ]
 
-    alpha = 0.1; log_range = (0, 4.5)
+    for t in trials:
 
-    extract_pcsvn(filename, DARK_BG=DARK_BG, alpha=alpha,
+        filename = t['filename']
+        alpha = t['alpha']
+        DARK_BG = t['DARK_BG']
+        log_range = t['log_range']
+
+        extract_pcsvn(filename, DARK_BG=DARK_BG, alpha=alpha,
                     log_range=log_range)
