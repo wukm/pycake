@@ -11,6 +11,9 @@ from skimage.morphology import label, skeletonize
 
 from plate_morphology import dilate_boundary
 
+import json
+import datetime
+
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
                     dark_bg=True, VERBOSE=True):
     """returns an ordered list of dictionaries for each scale
@@ -33,7 +36,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
     for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
 
         if sigma < 5:
-            radius = 5
+            radius = 10
         else:
             radius = int(sigma*2.5) # a little conservative
 
@@ -163,19 +166,19 @@ filename = 'im0059_clahe.png'; DARK_BG = False
 
 raw_img = get_named_placenta(filename, maskfile=None)
 
-
 ###Multiscale & Frangi Parameters######################
 
 # set range of sigmas to use (declare these above)
 
 log_min = -1 # minimum scale is 2**log_min
 log_max = 3. # maximum scale is 2**log_max
-scales = np.logspace(log_min, log_max, num=20, base=2)
+n_scales = 20
+scales = np.logspace(log_min, log_max, n_scales, base=2)
 
 
 alpha = 0.08 # Threshold for vesselness measure
 
-betas = [0.5 for s in scales] anisotropy measure
+betas = [0.5 for s in scales] #anisotropy measure
 
 # set gammas
 # declare None here to calculate half of hessian's norm
@@ -207,6 +210,7 @@ multiscale = make_multiscale(img, scales, betas, gammas,
                              find_principal_directions=False,
                              dark_bg=DARK_BG)
 
+gammas = [scale['gamma'] for scale in multiscale]
 ###Process Multiscale Targets############################
 
 # fix targets misreported on edge of plate
@@ -294,6 +298,7 @@ if __name__ == "__main__":
     plt.imshow(F_max.filled(0), cmap=plt.cm.gist_ncar)
     plt.axis('off')
     plt.colorbar()
+
     plt.tight_layout()
     plt.savefig(outname('fmax'), dpi=300)
 
@@ -321,6 +326,26 @@ if __name__ == "__main__":
     ax.set_title(r"scale ($\sigma$) of matched targets")
 
     plt.savefig(outname('labeled'), dpi=300)
+
+    time_of_run = datetime.datetime.now()
+    timestring = time_of_run.strftime("%y%m%d_%H%M")
+    logdata = {'time': timestring,
+            'filename': filename,
+            'DARK_BG': DARK_BG,
+            'alpha': alpha,
+            'betas': betas,
+            'gammas': gammas,
+            'sigmas': list(scales),
+            'log_min': log_min,
+            'log_max': log_max,
+            'n_scales': n_scales
+            }
+
+    dumpfile = os.path.join(OUTPUT_DIR,
+                            ''.join(base) + '_' + str(timestring)
+                            + '.json')
+    with open(dumpfile, 'w') as f:
+        json.dump(logdata, f, indent=True)
 
     # list of each scale's frangi targets for easier introspection
     Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
