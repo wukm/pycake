@@ -11,6 +11,8 @@ from skimage.morphology import label, skeletonize
 
 from plate_morphology import dilate_boundary
 
+import matplotlib.pyplot as plt
+import os.path
 import json
 import datetime
 
@@ -35,11 +37,10 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
     for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
 
-        if sigma < 5:
+        if sigma < 2.5:
             radius = 10
         else:
-            radius = int(sigma*2.5) # a little conservative
-
+            radius = int(sigma*4) # a little aggressive
 
         if VERBOSE:
             print('σ={}'.format(sigma))
@@ -147,135 +148,98 @@ def match_on_skeleton(skeleton_of, layers, VERBOSE=True):
     return matched_all
 
 
-#################################################################
-#### MAIN LOOP ##################################################
-#################################################################
-#################################################################
 
-###Static Parameters############################
+def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
+                    n_scales = 20, verbose=True):
+    raw_img = get_named_placenta(filename, maskfile=None)
 
-pass
+    ###Multiscale & Frangi Parameters######################
 
-###Set base image#############################
+    # set range of sigmas to use
 
-#filename = 'barium1.png'; DARK_BG = True
-#filename = 'barium2.png'; DARK_BG = True
-#filename = 'NYMH_ID130016i.png'; DARK_BG = True
-#filename = 'NYMH_ID130016u.png'; DARK_BG = False
-#filename = 'NYMH_ID130016u_inset.png'; DARK_BG = False
-#filename = 'im0059.png'; DARK_BG = False # set alpha much smaller, like .1
-filename = 'im0059_clahe.png'; DARK_BG = False
-
-raw_img = get_named_placenta(filename, maskfile=None)
-
-###Multiscale & Frangi Parameters######################
-
-# set range of sigmas to use (declare these above)
-
-log_min = -1 # minimum scale is 2**log_min
-log_max = 3. # maximum scale is 2**log_max
-n_scales = 20
-scales = np.logspace(log_min, log_max, n_scales, base=2)
+    log_min, log_max = log_range
+    #log_min = -1 # minimum scale is 2**log_min
+    #log_max = 4.5 # maximum scale is 2**log_max
+    n_scales = 20
+    scales = np.logspace(log_min, log_max, n_scales, base=2)
 
 
-alpha = 0.08 # Threshold for vesselness measure
+    #alpha = 0.15 # Threshold for vesselness measure
 
-betas = [0.5 for s in scales] #anisotropy measure
+    betas = [0.5 for s in scales] #anisotropy measure
 
-# set gammas
-# declare None here to calculate half of hessian's norm
-gammas = [None for s in scales] # structureness parameter
+    # set gammas
+    # declare None here to calculate half of hessian's norm
+    gammas = [None for s in scales] # structureness parameter
 
-###Do preprocessing (e.g. clahe)###############
-
-
-print('Note: no preprocessing is done anymore.')
-img =  raw_img
-bg_mask = img.mask
-
-###Set Parameter(s) for Frangi#################
+    ###Do preprocessing (e.g. clahe)###############
 
 
+    img =  raw_img
+    bg_mask = img.mask
 
-###Logging#####################################
+    ###Logging#####################################
+    if verbose:
+        print(" Running pcsvn.py on the image file", filename,
+                "with frangi parameters as follows:")
+        print("alpha (vesselness threshold): ", alpha)
+        print("scales:", scales)
+        print("betas:", betas)
+        print("gammas will be calculated as half of hessian norm")
 
-print(" Running pcsvn.py on the image file", filename,
-        "with frangi parameters as follows:")
-print("alpha (vesselness threshold): ", alpha)
-print("scales:", scales)
-print("betas:", betas)
-print("gammas will be calculated as half of hessian norm")
+    ###Multiscale Frangi Filter##############################
 
-###Multiscale Frangi Filter##############################
+    multiscale = make_multiscale(img, scales, betas, gammas,
+                                find_principal_directions=False,
+                                dark_bg=DARK_BG)
 
-multiscale = make_multiscale(img, scales, betas, gammas,
-                             find_principal_directions=False,
-                             dark_bg=DARK_BG)
+    gammas = [scale['gamma'] for scale in multiscale]
+    border_radii = [scale['border_radius'] for scale in multiscale]
+    ###Process Multiscale Targets############################
 
-gammas = [scale['gamma'] for scale in multiscale]
-border_radii = [scale['border_radius'] for scale in multiscale]
-###Process Multiscale Targets############################
+    # fix targets misreported on edge of plate
+    # wait are we doing this twice?
+    if verbose:
+        print('trimming collars of plates (per scale)')
 
-# fix targets misreported on edge of plate
-# wait are we doing this twice?
-print('trimming collars of plates (per scale)')
-
-for i in range(len(multiscale)):
-    f = multiscale[i]['F']
-    # twice the buffer (be conservative!)
-    radius = int(multiscale[i]['sigma']*2)
-    print('dilating plate for radius={}'.format(radius))
-    f = dilate_boundary(f, radius=radius, mask=img.mask)
-    multiscale[i]['F'] = f.filled(0)
-
-
-###Extract Multiscale Features############################
-
-pass
-
-###Make Composite#########################################
-
-F_all = np.dstack([scale['F'] for scale in multiscale])
-
-###The max Frangi target##################################
-
-F_max = F_all.max(axis=-1)
-
-F_max = ma.masked_array(F_max, mask=img.mask)
-
-# is the frangi vesselness measure strong enough
-F_cumulative = (F_max > alpha)
+        for i in range(len(multiscale)):
+            f = multiscale[i]['F']
+            # twice the buffer (be conservative!)
+            radius = int(multiscale[i]['sigma']*2)
+            print('dilating plate for radius={}'.format(radius))
+            f = dilate_boundary(f, radius=radius, mask=img.mask)
+            multiscale[i]['F'] = f.filled(0)
 
 
-# Process Composite ###############################3
+    ###Extract Multiscale Features############################
 
-# (deprecated, doesn't change much and takes forever)
-#matched_all = match_on_skeleton(F_cumulative, F_all)
-#wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
+    pass
+
+    ###Make Composite#########################################
+
+    F_all = np.dstack([scale['F'] for scale in multiscale])
+
+    ###The max Frangi target##################################
+
+    F_max = F_all.max(axis=-1)
+
+    F_max = ma.masked_array(F_max, mask=img.mask)
+
+    # is the frangi vesselness measure strong enough
+    F_cumulative = (F_max > alpha)
 
 
-# assign a label for where each max was found
-wheres = F_all.argmax(axis=-1)
-wheres += 1 # zero where no match
-wheres[F_max < alpha] = 0
+    # Process Composite ###############################3
+
+    # (deprecated, doesn't change much and takes forever)
+    #matched_all = match_on_skeleton(F_cumulative, F_all)
+    #wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
 
 
-###Make Connected Graph##########################################
-
-pass
-
-###Measure#######################################################
-
-pass
-
-if __name__ == "__main__":
-
-    import matplotlib.pyplot as plt
-    import os.path
-
-    from get_placenta import show_mask as mimshow
-    show = plt.show
-    imshow = plt.imshow
+    # assign a label for where each max was found
+    wheres = F_all.argmax(axis=-1)
+    wheres += 1 # zero where no match
+    wheres[F_max < alpha] = 0
 
     # use a colorscheme where you can see each later clearly
     #plt.imshow(wheres, cmap=plt.cm.tab20b)
@@ -295,8 +259,11 @@ if __name__ == "__main__":
     #plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
     #           cmap=plt.cm.gray)
     plt.imsave(outname('skel'), skeletonize(F_cumulative.filled(0)),
-               cmap=plt.cm.gray)
-    plt.imsave(outname('fmax_threshholded'), F_cumulative.filled(0))
+            cmap=plt.cm.gray)
+    plt.imsave(outname('fmax_threshholded'), F_cumulative.filled(0),
+            cmap=plt.cm.gray_r)
+
+    fig, ax = plt.subplots(figsize=(12,8))
 
     plt.imshow(F_max.filled(0), cmap=plt.cm.gist_ncar)
     plt.axis('off')
@@ -353,3 +320,44 @@ if __name__ == "__main__":
 
     # list of each scale's frangi targets for easier introspection
     Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
+
+    ###Make Connected Graph##########################################
+
+    pass
+
+    ###Measure#######################################################
+
+    pass
+    return Fs
+
+if __name__ == "__main__":
+
+
+    from get_placenta import show_mask as mimshow
+    show = plt.show
+    imshow = plt.imshow
+
+
+    #################################################################
+    #### MAIN LOOP ##################################################
+    #################################################################
+    #################################################################
+
+    ###Static Parameters############################
+
+    #VERBOSE=False
+
+    ###Set base image#############################
+
+    #filename = 'barium1.png'; DARK_BG = True
+    #filename = 'barium2.png'; DARK_BG = True
+    #filename = 'NYMH_ID130016i.png'; DARK_BG = True
+    #filename = 'NYMH_ID130016u.png'; DARK_BG = False
+    filename = 'NYMH_ID130016u_inset.png'; DARK_BG = False
+    #filename = 'im0059.png'; DARK_BG = False; log_range = (-1,3); alpha=0.08
+    #filename = 'im0059_clahe.png'; DARK_BG = False; log_range = (-1,3); alpha=0.08
+
+    alpha = 0.1; log_range = (0, 4.5)
+
+    extract_pcsvn(filename, DARK_BG=DARK_BG, alpha=alpha,
+                    log_range=log_range)
