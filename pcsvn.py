@@ -16,7 +16,7 @@ from skimage.segmentation import find_boundaries
 from plate_morphology import dilate_boundary, erode_plate
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
-                    dark_bg=True, VERBOSE=True, trim_first=False):
+                    dark_bg=True, VERBOSE=True):
     """returns an ordered list of dictionaries for each scale
     multiscale.append(
         {'sigma': sigma,
@@ -153,24 +153,24 @@ def match_on_skeleton(skeleton_of, layers, VERBOSE=True):
 
 ###Static Parameters############################
 
-# main vesselness threshold
-
-alpha = 0.3
+pass
 
 ###Set base image#############################
 
-filename = 'barium1.png'; DARK_BG = True
+#filename = 'barium1.png'; DARK_BG = True
 #filename = 'barium2.png'; DARK_BG = True
 #filename = 'NYMH_ID130016i.png'; DARK_BG = True
 #filename = 'NYMH_ID130016u.png'; DARK_BG = False
 #filename = 'NYMH_ID130016u_inset.png'; DARK_BG = False
-#filename =  'im0059.png'; DARK_BG = False # set alpha much smaller, like .1
+#filename = 'im0059.png'; DARK_BG = False # set alpha much smaller, like .1
+filename = 'im0059_clahe.png'; DARK_BG = False
 
 raw_img = get_named_placenta(filename, maskfile=None)
 
+
+###Multiscale & Frangi Parameters######################
 ###Do preprocessing (e.g. clahe)###############
 
-EARLY_TRIM=False
 
 print('Note: no preprocessing is done anymore.')
 img =  raw_img
@@ -179,15 +179,19 @@ bg_mask = img.mask
 ###Set Parameter(s) for Frangi#################
 
 # set range of sigmas to use (declare these above)
-# the
-log_min = 1 # minimum scale is 2**log_min
-log_max = 4.5 # maximum scale is 2**log_max
-scales = np.logspace(log_min, log_max, num=10, base=2)
 
+log_min = -1 # minimum scale is 2**log_min
+log_max = 3. # maximum scale is 2**log_max
+scales = np.logspace(log_min, log_max, num=20, base=2)
+
+
+# threshold for vesselness measure
+
+alpha = 0.08
 
 # set betas (anisotropy parameters)
 # 0.5 is frangi's recommendation... i think
-betas = [0.6 for s in scales]
+betas = [0.5 for s in scales]
 
 # set gammas (structness parameter)
 # declare None here to calculate half of hessian's norm
@@ -207,26 +211,25 @@ print("gammas will be calculated as half of hessian norm")
 
 multiscale = make_multiscale(img, scales, betas, gammas,
                              find_principal_directions=False,
-                             dark_bg=DARK_BG,
-                             trim_first=EARLY_TRIM)
+                             dark_bg=DARK_BG)
 
 #with open('barium2_multiscale_171024.pkl', 'rb') as f:
     #multiscale = pickle.load(f)
 
 # Process Multiscale Targets
 
+
 # fix targets misreported on edge of plate
 # wait are we doing this twice?
-if not EARLY_TRIM:
-    print('trimming collars of plates (per scale)')
+print('trimming collars of plates (per scale)')
 
-    for i in range(len(multiscale)):
-        f = multiscale[i]['F']
-        # twice the buffer (be conservative!)
-        radius = int(multiscale[i]['sigma']*2)
-        print('dilating plate for radius={}'.format(radius))
-        f = dilate_boundary(f, radius=radius, mask=img.mask)
-        multiscale[i]['F'] = f.filled(0)
+for i in range(len(multiscale)):
+    f = multiscale[i]['F']
+    # twice the buffer (be conservative!)
+    radius = int(multiscale[i]['sigma']*2)
+    print('dilating plate for radius={}'.format(radius))
+    f = dilate_boundary(f, radius=radius, mask=img.mask)
+    multiscale[i]['F'] = f.filled(0)
 
 
 # Extract Multiscale Features
@@ -245,24 +248,24 @@ F_max = ma.masked_array(F_max, mask=img.mask)
 # is the frangi vesselness measure strong enough
 F_cumulative = (F_max > alpha)
 
-# where there's any match at all (LOOK INTO THIS)
-#matched_all = match_on_skeleton(F_cumulative, F_all)
 
 # Process Composite ###############################3
 # make this a function
 
-# assign an index (later color) for where each max was found
-#wheres = F_all.argmax(axis=-1)
 
 #wheres += 1
 
+# where there's any match at all
+# (deprecated, doesn't change much and takes forever)
+#matched_all = match_on_skeleton(F_cumulative, F_all)
 #wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
-#wheres[F_max < alpha] = 0 # or that didn't pass the threshold
 
-# same thing w/o skeleton matching
+
+# assign a label for where each max was found
 wheres = F_all.argmax(axis=-1)
-wheres += 1
+wheres += 1 # zero where no match
 wheres[F_max < alpha] = 0
+
 
 # Make Connected Graph
 
@@ -332,5 +335,6 @@ if __name__ == "__main__":
     ax.set_title(r"scale ($\sigma$) of matched targets")
 
     plt.savefig(outname('labeled'), dpi=300)
+
     # list of each scale's frangi targets for easier introspection
     Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
