@@ -4,14 +4,16 @@ from get_placenta import get_named_placenta
 from hfft import fft_hessian
 from diffgeo import principal_curvatures, principal_directions
 from frangi import get_frangi_targets
-from vessel_filters import rotating_box_filter
+# from vessel_filters import rotating_box_filter
 import numpy as np
 import numpy.ma as ma
-import pickle
+# import pickle
 
-from skimage.morphology import label, skeletonize, disk, binary_erosion, convex_hull_image, binary_dilation
+from skimage.morphology import label, skeletonize, disk
+from skimage.morphology import binary_erosion, convex_hull_image, binary_dilation
 from skimage.segmentation import find_boundaries
 
+from plate_morphology import dilate_boundary, erode_plate
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
                     dark_bg=True, VERBOSE=True, trim_first=False):
@@ -38,9 +40,8 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             radius = 5
         else:
             radius = int(sigma*2.5) # a little conservative
-        collar = dilate_plate(img, radius=radius, plate_mask=img.mask)
 
-        collar = collar.mask
+
         if VERBOSE:
             print('σ={}'.format(sigma))
             print('finding hessian')
@@ -51,7 +52,11 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
         if VERBOSE:
             print('finding principal curvatures')
 
+
         k1, k2 = principal_curvatures(img, sigma=sigma, H=hesh)
+
+        # area of influence to zero out
+        collar = dilate_boundary(None, radius=radius, mask=img.mask)
 
         k1[collar] = 0
         k2[collar] = 0
@@ -140,73 +145,7 @@ def match_on_skeleton(skeleton_of, layers, VERBOSE=True):
 
     return matched_all
 
-def erode_plate(img, erosion_radius=20, plate_mask=None):
-    """Manually remove (erode) a region around the plate
-    This doesn't work well and runs way too long for the simplicity
-    of the task (brew your own erode convex image instead).
-    You need to self-supply radius."""
 
-    if plate_mask is None:
-        # grab the mask from input image
-        try:
-            plate_mask = img.mask
-        except AttributeError:
-            raise('Need to supply mask information')
-
-    # convex_hull_image finds white pixels
-    plate_mask = np.invert(plate_mask)
-
-    # find convex hull of mask (make erosion calculation easier)
-    plate_mask = np.invert(convex_hull_image(plate_mask))
-
-    # this is much faster than a disk. a plus sign might be better even.
-    #selem = square(erosion_radius)
-    # also this correctly has erosion radius as the RADIUS!
-    # input for square() and disk() is the diameter!
-    selem = np.zeros((erosion_radius*2 + 1, erosion_radius*2 + 1),
-                        dtype='bool')
-    selem[erosion_radius,:] = 1
-    selem[:,erosion_radius] = 1
-    eroded_mask = binary_erosion(plate_mask, selem=selem)
-
-    # this is by default additive with whatever
-    return ma.masked_array(img, mask=eroded_mask)
-
-def dilate_plate(img, radius=10, plate_mask=None):
-    """
-    grows the mask by a specified radius
-    can this return a masked image rather than return a new one
-    to be more memory efficient? or should this just return a
-    mask to be applied?
-    """
-
-    if plate_mask is None:
-        # grab the mask from input image
-        try:
-            plate_mask = img.mask
-        except AttributeError:
-            raise('Need to supply mask information')
-
-    perimeter = find_boundaries(plate_mask)
-
-    # this is extremely inefficient. can it just convolve around
-    # the loop and skip convolving areas where everything is 0?
-    # maskpad = binary_dilation(perimeter, selem=disk(radius))
-
-    # THIS IS WAY BETTER!
-    maskpad = np.zeros_like(perimeter)
-
-    M,N = maskpad.shape
-    for i,j in np.argwhere(perimeter):
-        # just make a cross shape on each of those points
-        # these will silently fail if slice is OOB
-        maskpad[max(i-radius,0):min(i+radius,M),j] = 1
-        maskpad[i,max(j-radius,0):min(j+radius,N)] = 1
-
-    new_mask = np.bitwise_or(maskpad, plate_mask)
-    # this is by default additive with whatever mask img already has
-    # unless it's not...?
-    return ma.masked_array(img, mask=new_mask)
 #################################################################
 #### MAIN LOOP ##################################################
 #################################################################
@@ -215,11 +154,12 @@ def dilate_plate(img, radius=10, plate_mask=None):
 ###Static Parameters############################
 
 # main vesselness threshold
-alpha = 0.08
+
+alpha = 0.3
 
 ###Set base image#############################
 
-#filename = 'barium1.png'; DARK_BG = True
+filename = 'barium1.png'; DARK_BG = True
 #filename = 'barium2.png'; DARK_BG = True
 #filename = 'NYMH_ID130016i.png'; DARK_BG = True
 #filename = 'NYMH_ID130016u.png'; DARK_BG = False
@@ -276,7 +216,7 @@ multiscale = make_multiscale(img, scales, betas, gammas,
 # Process Multiscale Targets
 
 # fix targets misreported on edge of plate
-
+# wait are we doing this twice?
 if not EARLY_TRIM:
     print('trimming collars of plates (per scale)')
 
@@ -285,7 +225,7 @@ if not EARLY_TRIM:
         # twice the buffer (be conservative!)
         radius = int(multiscale[i]['sigma']*2)
         print('dilating plate for radius={}'.format(radius))
-        f = dilate_plate(f, radius=radius, plate_mask=img.mask)
+        f = dilate_boundary(f, radius=radius, mask=img.mask)
         multiscale[i]['F'] = f.filled(0)
 
 
