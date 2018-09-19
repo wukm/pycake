@@ -4,16 +4,12 @@ from get_placenta import get_named_placenta
 from hfft import fft_hessian
 from diffgeo import principal_curvatures, principal_directions
 from frangi import get_frangi_targets
-# from vessel_filters import rotating_box_filter
 import numpy as np
 import numpy.ma as ma
-# import pickle
 
-from skimage.morphology import label, skeletonize, disk
-from skimage.morphology import binary_erosion, convex_hull_image, binary_dilation
-from skimage.segmentation import find_boundaries
+from skimage.morphology import label, skeletonize
 
-from plate_morphology import dilate_boundary, erode_plate
+from plate_morphology import dilate_boundary
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
                     dark_bg=True, VERBOSE=True):
@@ -169,6 +165,22 @@ raw_img = get_named_placenta(filename, maskfile=None)
 
 
 ###Multiscale & Frangi Parameters######################
+
+# set range of sigmas to use (declare these above)
+
+log_min = -1 # minimum scale is 2**log_min
+log_max = 3. # maximum scale is 2**log_max
+scales = np.logspace(log_min, log_max, num=20, base=2)
+
+
+alpha = 0.08 # Threshold for vesselness measure
+
+betas = [0.5 for s in scales] anisotropy measure
+
+# set gammas
+# declare None here to calculate half of hessian's norm
+gammas = [None for s in scales] # structureness parameter
+
 ###Do preprocessing (e.g. clahe)###############
 
 
@@ -178,24 +190,6 @@ bg_mask = img.mask
 
 ###Set Parameter(s) for Frangi#################
 
-# set range of sigmas to use (declare these above)
-
-log_min = -1 # minimum scale is 2**log_min
-log_max = 3. # maximum scale is 2**log_max
-scales = np.logspace(log_min, log_max, num=20, base=2)
-
-
-# threshold for vesselness measure
-
-alpha = 0.08
-
-# set betas (anisotropy parameters)
-# 0.5 is frangi's recommendation... i think
-betas = [0.5 for s in scales]
-
-# set gammas (structness parameter)
-# declare None here to calculate half of hessian's norm
-gammas = [None for s in scales]
 
 
 ###Logging#####################################
@@ -207,17 +201,13 @@ print("scales:", scales)
 print("betas:", betas)
 print("gammas will be calculated as half of hessian norm")
 
-# Multiscale Frangi Filter
+###Multiscale Frangi Filter##############################
 
 multiscale = make_multiscale(img, scales, betas, gammas,
                              find_principal_directions=False,
                              dark_bg=DARK_BG)
 
-#with open('barium2_multiscale_171024.pkl', 'rb') as f:
-    #multiscale = pickle.load(f)
-
-# Process Multiscale Targets
-
+###Process Multiscale Targets############################
 
 # fix targets misreported on edge of plate
 # wait are we doing this twice?
@@ -232,15 +222,16 @@ for i in range(len(multiscale)):
     multiscale[i]['F'] = f.filled(0)
 
 
-# Extract Multiscale Features
+###Extract Multiscale Features############################
 
 pass
 
-# Make Composite
+###Make Composite#########################################
 
 F_all = np.dstack([scale['F'] for scale in multiscale])
 
-# the max Frangi target
+###The max Frangi target##################################
+
 F_max = F_all.max(axis=-1)
 
 F_max = ma.masked_array(F_max, mask=img.mask)
@@ -250,12 +241,7 @@ F_cumulative = (F_max > alpha)
 
 
 # Process Composite ###############################3
-# make this a function
 
-
-#wheres += 1
-
-# where there's any match at all
 # (deprecated, doesn't change much and takes forever)
 #matched_all = match_on_skeleton(F_cumulative, F_all)
 #wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
@@ -267,11 +253,11 @@ wheres += 1 # zero where no match
 wheres[F_max < alpha] = 0
 
 
-# Make Connected Graph
+###Make Connected Graph##########################################
 
 pass
 
-# Measure
+###Measure#######################################################
 
 pass
 
