@@ -147,8 +147,6 @@ def match_on_skeleton(skeleton_of, layers, VERBOSE=True):
 
     return matched_all
 
-
-
 def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
                     n_scales = 20, verbose=True):
     raw_img = get_named_placenta(filename, maskfile=None)
@@ -165,7 +163,6 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
 
     #alpha = 0.15 # Threshold for vesselness measure
-
     betas = [0.5 for s in scales] #anisotropy measure
 
     # set gammas
@@ -173,8 +170,6 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     gammas = [None for s in scales] # structureness parameter
 
     ###Do preprocessing (e.g. clahe)###############
-
-
     img =  raw_img
     bg_mask = img.mask
 
@@ -209,7 +204,6 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
             print('dilating plate for radius={}'.format(radius))
             f = dilate_boundary(f, radius=radius, mask=img.mask)
             multiscale[i]['F'] = f.filled(0)
-
 
     ###Extract Multiscale Features############################
 
@@ -328,7 +322,8 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     ###Measure#######################################################
 
     pass
-    return Fs
+    return Fs, locals()
+
 
 if __name__ == "__main__":
 
@@ -350,13 +345,14 @@ if __name__ == "__main__":
     ###Set base image#############################
 
     trials = [
-        { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-        { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-        { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-        { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
-        { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
-        { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-        { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
+      #  { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+      #  { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+      #  { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+      #  { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+      #  { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+      #  { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
+      #  { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
+         { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3.5)},
     ]
 
     for t in trials:
@@ -366,5 +362,5 @@ if __name__ == "__main__":
         DARK_BG = t['DARK_BG']
         log_range = t['log_range']
 
-        extract_pcsvn(filename, DARK_BG=DARK_BG, alpha=alpha,
+        F, L = extract_pcsvn(filename, DARK_BG=DARK_BG, alpha=alpha,
                     log_range=log_range)
