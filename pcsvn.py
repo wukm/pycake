@@ -69,7 +69,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
             # shouldn't be affected by mask data but should make sure the
             # mask is *well* far away from perimeter
-            gamma = .5 * np.abs(k2).max()
+            gamma = .75 * np.abs(k2).max()
 
         if VERBOSE:
             print('finding Frangi targets with β={} and γ={:.2}'.format(beta, gamma))
@@ -352,14 +352,15 @@ if __name__ == "__main__":
     ###Set base image#############################
 
     trials = [
-         { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+      #   { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-         { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+      #   { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
       #  { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-         { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
+      #   { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
+         { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,2.5)},
     ]
 
     for t in trials:
