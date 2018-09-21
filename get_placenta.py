@@ -29,6 +29,51 @@ import os.path
 
 from scipy.ndimage import imread
 
+def open_typefile(filename, filetype, sample_dir=None):
+    """
+    filetype is either 'mask' or 'trace'
+    """
+    # try to open what the mask *should* be named
+    # this should be done less hackishly
+    # for example, if filename is 'ncs.1029.jpg' then
+    # this would set the maskfile as 'ncs.1029.mask.jpg'
+
+    if filetype not in ("mask", "trace"):
+        raise NotImplementedError("Can only deal with mask or trace files.")
+
+    *base, suffix = filename.split('.')
+    base = ''.join(base)
+    typefile = '.'.join((base, filetype ,suffix))
+
+    if sample_dir is None:
+        sample_dir = 'samples'
+
+    typefile = os.path.join(sample_dir, typefile)
+
+    try:
+        M = imread(typefile, mode='L')
+
+    except FileNotFoundError:
+        print('Could not find file', typefile)
+        raise
+
+    return M
+
+def open_tracefile(tracefile):
+    """
+    open up the trace matrix with filename 'tracefile'
+    #TODO: expand this later to handle arterial traces and venous traces
+    """
+
+    if sample_dir is None:
+        sample_dir = 'samples'
+
+    tracefile = os.path.join(sample_dir, tracefile)
+    trace =  imread(tracefile, mode='L')
+
+    # return 1's and 0's (or convert to binary instead
+    return trace != 0
+
 def get_named_placenta(filename, sample_dir=None, masked=True,
                        maskfile=None):
     """

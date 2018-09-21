@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+from get_placenta import open_typefile, open_tracefile
 
 def confusion(a, b, a_color=None, b_color=None):
     """
@@ -64,6 +65,32 @@ if __name__ == "__main__":
     ax2.set_adjustable('box-forced')
 
     fig.tight_layout()
+
+def compare_trace(approx, trace=None, tracefile=None, filename=None,
+                  sample_dir=None, a_color=None, b_color=None):
+    """
+    compare approx matrix to trace matrix and output a confusion matrix.
+    if trace is not supplied, open the image from the tracefile.
+    if tracefile is not supplied, filename must be supplied, and
+    tracefile will be opened according to the standard pattern.
+
+    a_color and b_color are parameters to pass to confusion()
+
+    returns a matrix
+    """
+
+    # load the tracefile if not supplied
+    if trace is None:
+        if tracefile is not None:
+            trace = open_tracefile(filename)
+        elif filename is not None:
+            trace = open_typefile(filename, 'trace')
+
+    # calculate the confusion matrix
+    # assert same size and dimension?
+    C = confusion(approx, trace, a_color, b_color)
+
+    return C
 
 def mean_squared_error(A,B):
     """

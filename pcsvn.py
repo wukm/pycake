@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from get_placenta import get_named_placenta
+from score import compare_trace
 from hfft import fft_hessian
 from diffgeo import principal_curvatures, principal_directions
 from frangi import get_frangi_targets
@@ -247,6 +248,7 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     # make this its own function and just do a partial here.
     outname = lambda s: os.path.join(OUTPUT_DIR,
                                 ''.join(base) + '_' + s + '.'+ suffix)
+
     #plt.imsave(base +'_scales_whole.png', wheres, cmap=plt.cm.tab20b)
     #plt.imsave(base +'_scales_whole_noskel.png', wheres, cmap=plt.cm.tab20b)
     #plt.imsave(base +'_fmax.png', F_max.filled(0), cmap=plt.cm.Blues)
@@ -291,6 +293,11 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     plt.savefig(outname('labeled'), dpi=300)
 
+    plt.close()
+
+    confusion_matrix = compare_trace(F_cumulative, filename=filename)
+
+    plt.imsave(outname('confusion'), confusion_matrix)
     time_of_run = datetime.datetime.now()
     timestring = time_of_run.strftime("%y%m%d_%H%M")
     logdata = {'time': timestring,
@@ -345,14 +352,14 @@ if __name__ == "__main__":
     ###Set base image#############################
 
     trials = [
-      #  { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+         { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-      #  { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+         { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
       #  { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
       #  { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-         { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3.5)},
+         { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
     ]
 
     for t in trials:
