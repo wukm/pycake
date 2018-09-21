@@ -1,8 +1,9 @@
-- get confusion matrix going (with arteries, with veins, with both)
-- pickle your runs so you can play with output generation easier
-- fix coloring & colorbar on graph
-- try it with an eyeball
-- figure out why smaller things are coloring over larger things (remove the smaller ones and see if larger are still there?)
-- scale for each input better and try larger, more, less scales
-- fix skeleton bullshit
+- add titles on graphs and figures!
+- allow descriptive file names or bunch into folders so that multiple parameters can be swept
+- legend for trace outputs
 - refactor pcsvn code to be more readable & pseudocodey
+- more BN* samples
+- figure out appropriate parameters for BN
+- trace other placenta samples in use
+
+
