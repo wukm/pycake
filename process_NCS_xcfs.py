@@ -38,7 +38,7 @@ def process_NCS_xcf(timg,tdrawable):
     #perimeter = pdb.gimp_image_get_layer_by_name(img, 'perimeter')
 
     for layer in img.layers:
-        if layer.name.lower() == 'perimeter':
+        if layer.name.lower() in ('perimeter', 'perimeters'):
             # .copy() has optional arg of "add_alpha_channel"
             mask = layer.copy()
 
@@ -81,7 +81,7 @@ def process_NCS_xcf(timg,tdrawable):
     # now make a new layer called 'raw_img' from visible
     base = pdb.gimp_layer_new_from_visible(img,img,'base')
     img.add_layer(base,0)
-    pdb.gimp_file_save(img , base, outname(s='base') , '')
+    pdb.gimp_file_save(img , base, outname(s=None) , '')
 
     # now get rid of mask and save the raw image
     mask.visible = False
