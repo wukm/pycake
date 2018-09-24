@@ -1,10 +1,8 @@
 - add titles on graphs and figures!
-- allow descriptive file names or bunch into folders so that multiple parameters can be swept
-- legend for trace outputs
+- allow descriptive file names or bunch into folders so that multiple parameters can be swept - legend for trace outputs
 - refactor pcsvn code to be more readable & pseudocodey
-- more BN* samples
+- variable alpha threshold
 - figure out appropriate parameters for BN
-- trace other placenta samples in use
 - gamma ratio better.
 
 

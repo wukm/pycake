@@ -84,7 +84,15 @@ def compare_trace(approx, trace=None, tracefile=None, filename=None,
         if tracefile is not None:
             trace = open_tracefile(filename)
         elif filename is not None:
-            trace = open_typefile(filename, 'trace')
+            try:
+                trace = open_typefile(filename, 'trace')
+            except FileNotFoundError:
+                print("No trace file found matching ", filename)
+                print("no trace found. generating dummy trace.")
+                trace = np.zeros_like(approx)
+        else:
+            print("no trace supplied/found. generating dummy trace.")
+            trace = np.zeros_like(approx)
 
     # calculate the confusion matrix
     # assert same size and dimension?

@@ -47,7 +47,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             print('σ={}'.format(sigma))
             print('finding hessian')
 
-            # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
+        # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
         hesh = fft_hessian(img, sigma)
 
         if VERBOSE:
@@ -66,11 +66,17 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
         if gamma is None:
             # Frangi suggested 'half the max Hessian norm' as an empirical
             # half the max spectral radius is easier to calculate so do that
-
             # shouldn't be affected by mask data but should make sure the
             # mask is *well* far away from perimeter
-            gamma = .75 * np.abs(k2).max()
+            gamma_alt = .5 * np.abs(k2).max()
+            print("half of k2 max is", gamma_alt)
 
+            # or actually calculate half of max hessian norm
+            # using frob norm = sqrt(trace(AA^T))
+            hxx, hxy, hyy = hesh
+            max_hessian_norm = np.sqrt((hxx**2 + 2*hxy**2 + hyy**2).max())
+            gamma = .5*max_hessian_norm
+            print("half of max hessian norm is", gamma)
         if VERBOSE:
             print('finding Frangi targets with β={} and γ={:.2}'.format(beta, gamma))
 
@@ -216,12 +222,24 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     ###The max Frangi target##################################
 
+    # scale???
+    #F_all = F_all* (scales**-1)
+
     F_max = F_all.max(axis=-1)
 
     F_max = ma.masked_array(F_max, mask=img.mask)
 
     # is the frangi vesselness measure strong enough
     F_cumulative = (F_max > alpha)
+
+    # ALPHA RANGE?
+    N = max(img.shape) // 2
+    #alphas = np.logspace(-2,0, num=len(scales))*.8
+    alphas = 25*scales / (N - scales)
+    #alphas = np.logspace(-2.5,-1, num=len(scales))
+    #alphas = np.linspace(0.01,1,num=len(scales))
+
+    #alphas = np.sqrt(scales / scales.max())
 
 
     # Process Composite ###############################3
@@ -236,6 +254,21 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     wheres += 1 # zero where no match
     wheres[F_max < alpha] = 0
 
+    # using variable alpha model?
+
+    F_VT = F_all.copy()
+    F_VT[F_all < alphas] = 0
+
+    wheres_VT = F_VT.argmax(axis=-1)
+    wheres_VT += 1
+    # zero all pixels that never passed the threshold a t any level
+    wheres_VT[(F_all < alphas).all(axis=-1)] = 0
+    VT = (wheres_VT != 0) # this is the result
+    # pixels where any of the thresholds have been passed
+    #VT = (F_all > alphas).any(axis=-1)
+
+    #wheres_VT[np.invert(VT)] = 0
+
     # use a colorscheme where you can see each later clearly
     #plt.imshow(wheres, cmap=plt.cm.tab20b)
     #plt.colorbar()
@@ -249,19 +282,22 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     outname = lambda s: os.path.join(OUTPUT_DIR,
                                 ''.join(base) + '_' + s + '.'+ suffix)
 
-    #plt.imsave(base +'_scales_whole.png', wheres, cmap=plt.cm.tab20b)
-    #plt.imsave(base +'_scales_whole_noskel.png', wheres, cmap=plt.cm.tab20b)
-    #plt.imsave(base +'_fmax.png', F_max.filled(0), cmap=plt.cm.Blues)
-    #plt.imsave(base +'_skel.png', skeletonize(F_cumulative.filled(0)),
-    #           cmap=plt.cm.gray)
     plt.imsave(outname('skel'), skeletonize(F_cumulative.filled(0)),
             cmap=plt.cm.gray)
     plt.imsave(outname('fmax_threshholded'), F_cumulative.filled(0),
             cmap=plt.cm.gray_r)
+    plt.imsave(outname('fmax_variable_threshold'), wheres_VT > 0)
 
     fig, ax = plt.subplots(figsize=(12,8))
 
-    plt.imshow(F_max.filled(0), cmap=plt.cm.gist_ncar)
+    # anything above threshold is set to 1 and everything else is scaled
+    F_below = F_max.copy()
+    F_below[F_max > alpha] = 0 # zero things above threshold
+    F_below = F_below / alpha # scale remaining range from [0,alpha] to [0,1]
+    F_below[F_max > alpha] = 1 # now add back in things higher than threshold
+
+    plt.imshow(F_max, cmap=plt.cm.gist_ncar)
+    #plt.title(r'Max Frangi vesselness measure below threshold $\alpha={:.2f}$'.format(alpha))
     plt.axis('off')
     plt.colorbar()
 
@@ -295,7 +331,32 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     plt.close()
 
-    confusion_matrix = compare_trace(F_cumulative, filename=filename)
+    # discrete colorbar adapted from https://stackoverflow.com/a/50314773
+    fig, ax = plt.subplots(figsize=(12,8)) # not sure about figsize
+    N = len(scales)+1 # number of scales / labels
+    cmap = plt.get_cmap('nipy_spectral', N) # discrete sample of color map
+
+    imgplot = ax.imshow(wheres_VT, cmap=cmap)
+
+    # discrete colorbar
+    cbar = plt.colorbar(imgplot)
+
+    # this is apparently hackish, beats me
+    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+
+    cbar.set_ticks(tick_locs)
+    # label each tick with the sigma value
+    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
+    scalelabels.insert(0, "(no match)")
+    # label with their label number (or change this to actual sigma value
+    cbar.set_ticklabels(scalelabels)
+    ax.set_title(r"scale ($\sigma$) of matched targets (VT)")
+
+    plt.savefig(outname('labeled_VT'), dpi=300)
+
+    plt.close()
+
+    confusion_matrix = compare_trace(VT, filename=filename)
 
     plt.imsave(outname('confusion'), confusion_matrix)
     time_of_run = datetime.datetime.now()
@@ -352,26 +413,26 @@ if __name__ == "__main__":
     ###Set base image#############################
 
     trials = [
-      #   { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-      #  { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-      #  { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-      #   { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
-      #  { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
-      #  { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-      #  { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-      #   { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
-        { 'filename': 'T-BN0013990_fetalsurface_fixed_ruler_lights_filter_12_0130-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN0033885_fetalsurface_fixed_ruler_lights_filter_12_0109-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN0061827_fetalsurface_fixed_ruler_lights_filter_12_0627-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN0124393_fetalsurface_fixed_ruler_lights_filter_12_0628-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN0164923_fetalsurface_fixed_ruler_lights_filter_12_0320-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN0204423_fetalsurface_fixed_ruler_lights_filter_11_1118-ddy.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN0224265_fetalsurface_fixed_ruler_lights_filter_12_0606-lgm.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
-        { 'filename': 'T-BN9730834_fetalsurface_fixed_ruler_lights_filter_12_0416.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-1,2.5)},
+    #     { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+    #    { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+    #    { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
+    #     { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+    #    { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
+    #    { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
+    #    { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
+         { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
+        { 'filename': 'T-BN0013990_fetalsurface_fixed_ruler_lights_filter_12_0130-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN0033885_fetalsurface_fixed_ruler_lights_filter_12_0109-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN0061827_fetalsurface_fixed_ruler_lights_filter_12_0627-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN0124393_fetalsurface_fixed_ruler_lights_filter_12_0628-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN0164923_fetalsurface_fixed_ruler_lights_filter_12_0320-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN0204423_fetalsurface_fixed_ruler_lights_filter_11_1118-ddy.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN0224265_fetalsurface_fixed_ruler_lights_filter_12_0606-lgm.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN9730834_fetalsurface_fixed_ruler_lights_filter_12_0416.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
     ]
 
-    for t in trials:
+    for i, t in enumerate(trials):
 
         filename = t['filename']
         alpha = t['alpha']
