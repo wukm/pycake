@@ -25,7 +25,10 @@ def _outname(base, s=None):
 def process_NCS_xcf(timg,tdrawable):
     img = timg
     basename, _ = os.path.splitext(img.name)
+    print "*"*80
+    print '\n\n'
 
+    print "Processing " , img.name
     # generate output names easier
     outname = partial(_outname, base=basename)
 
@@ -41,7 +44,17 @@ def process_NCS_xcf(timg,tdrawable):
         if layer.name.lower() in ('perimeter', 'perimeters'):
             # .copy() has optional arg of "add_alpha_channel"
             mask = layer.copy()
+            break
+    else:
+        print("Could not find a perimeter layer.")
+        print("Layers of this image are:")
+        for n,layer in enumerate(img.layers):
+            print "\t", n, ":", layer.name
+        print("Skipping this file.")
 
+        return
+
+    for layer in img.layers:
         layer.visible = False
 
     mask.name = "mask" # name the new layer
@@ -100,6 +113,9 @@ def process_NCS_xcf(timg,tdrawable):
     pdb.gimp_threshold(trace,255,255) # anything not 255 turns black
 
     pdb.gimp_file_save(img, trace, outname(s='trace') ,'')
+
+    print "Saved. "
+
 
 register(
     "process_NCS_xcf",
