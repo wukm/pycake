@@ -233,9 +233,13 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     F_cumulative = (F_max > alpha)
 
     # ALPHA RANGE?
-    N = max(img.shape) // 2
-    #alphas = np.logspace(-2,0, num=len(scales))*.8
-    alphas = 25*scales / (N - scales)
+    N = min(img.shape) // 2
+    alphas = np.logspace(-2,0, num=len(scales))*.7
+    #alphas = np.sqrt(1.2*scales / N)
+    # try a logistic curve
+    #alphas = 1 / (1+np.exp(-.2*(scales-np.sqrt(N))))
+    #alphas = scales/32
+    print(alphas)
     #alphas = np.logspace(-2.5,-1, num=len(scales))
     #alphas = np.linspace(0.01,1,num=len(scales))
 
@@ -291,21 +295,22 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     fig, ax = plt.subplots(figsize=(12,8))
 
     # anything above threshold is set to 1 and everything else is scaled
-    F_below = F_max.copy()
-    F_below[F_max > alpha] = 0 # zero things above threshold
-    F_below = F_below / alpha # scale remaining range from [0,alpha] to [0,1]
-    F_below[F_max > alpha] = 1 # now add back in things higher than threshold
+    #F_below = F_max.copy()
+    #F_below[F_max > alpha] = 0 # zero things above threshold
+    #F_below = F_below / alpha # scale remaining range from [0,alpha] to [0,1]
+    #F_below[F_max > alpha] = 1 # now add back in things higher than threshold
 
     plt.imshow(F_max, cmap=plt.cm.gist_ncar)
     #plt.title(r'Max Frangi vesselness measure below threshold $\alpha={:.2f}$'.format(alpha))
+    plt.title('Maximum Frangi vesselness score')
     plt.axis('off')
     plt.colorbar()
-
     plt.tight_layout()
     plt.savefig(outname('fmax'), dpi=300)
 
     plt.close()
 
+    ### MAKE SCALE LABEL GRAPH
     # discrete colorbar adapted from https://stackoverflow.com/a/50314773
     fig, ax = plt.subplots(figsize=(12,8)) # not sure about figsize
     N = len(scales)+1 # number of scales / labels
@@ -325,10 +330,10 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     scalelabels.insert(0, "(no match)")
     # label with their label number (or change this to actual sigma value
     cbar.set_ticklabels(scalelabels)
-    ax.set_title(r"scale ($\sigma$) of matched targets")
+    ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
 
-    plt.savefig(outname('labeled'), dpi=300)
-
+    plt.savefig(outname('labeled (variable threshold)'), dpi=300)
+    plt.tight_layout()
     plt.close()
 
     # discrete colorbar adapted from https://stackoverflow.com/a/50314773
@@ -337,22 +342,6 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     cmap = plt.get_cmap('nipy_spectral', N) # discrete sample of color map
 
     imgplot = ax.imshow(wheres_VT, cmap=cmap)
-
-    # discrete colorbar
-    cbar = plt.colorbar(imgplot)
-
-    # this is apparently hackish, beats me
-    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
-
-    cbar.set_ticks(tick_locs)
-    # label each tick with the sigma value
-    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
-    scalelabels.insert(0, "(no match)")
-    # label with their label number (or change this to actual sigma value
-    cbar.set_ticklabels(scalelabels)
-    ax.set_title(r"scale ($\sigma$) of matched targets (VT)")
-
-    plt.savefig(outname('labeled_VT'), dpi=300)
 
     plt.close()
 
@@ -420,16 +409,16 @@ if __name__ == "__main__":
     #    { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
     #    { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
     #    { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-         { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
-        { 'filename': 'T-BN0013990_fetalsurface_fixed_ruler_lights_filter_12_0130-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN0033885_fetalsurface_fixed_ruler_lights_filter_12_0109-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN0061827_fetalsurface_fixed_ruler_lights_filter_12_0627-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN0124393_fetalsurface_fixed_ruler_lights_filter_12_0628-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN0164923_fetalsurface_fixed_ruler_lights_filter_12_0320-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN0204423_fetalsurface_fixed_ruler_lights_filter_11_1118-ddy.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN0224265_fetalsurface_fixed_ruler_lights_filter_12_0606-lgm.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN9730834_fetalsurface_fixed_ruler_lights_filter_12_0416.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #     { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
+    #    { 'filename': 'T-BN0013990_fetalsurface_fixed_ruler_lights_filter_12_0130-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN0033885_fetalsurface_fixed_ruler_lights_filter_12_0109-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN0061827_fetalsurface_fixed_ruler_lights_filter_12_0627-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN0124393_fetalsurface_fixed_ruler_lights_filter_12_0628-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN0164923_fetalsurface_fixed_ruler_lights_filter_12_0320-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN0204423_fetalsurface_fixed_ruler_lights_filter_11_1118-ddy.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN0224265_fetalsurface_fixed_ruler_lights_filter_12_0606-lgm.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+        { 'filename': 'T-BN9730834_fetalsurface_fixed_ruler_lights_filter_12_0416.png', 'DARK_BG': False, 'alpha': 0.12, 'log_range':(-1,5)},
     ]
 
     for i, t in enumerate(trials):

@@ -43,11 +43,13 @@ for sigma in sigmas:
     # normalize each matrix by frobenius norm and take difference
     # ideally should try to zero out the "mask" area
     diff = np.abs(f / norm(f) - s / norm(s))
+    raw_diff = np.abs(f - s)
     # don't care if it's the background
     diff[mask==1] = 0
+    raw_diff[mask==1] = 0
 
     # should format this stuff better into a legible table
-    print(sigma, diff.max())
+    print(sigma, diff.max(), raw_diff.max())
 
 lines = plt.plot(sigmas, fft_results, 'go', sigmas, std_results, 'bo')
 plt.xlabel('sigma (gaussian blur parameter)')

@@ -54,7 +54,7 @@ def blur(img, sigma):
 
     return fftpack.ifft2(I).real
 
-def fft_gaussian(img,sigma):
+def fft_gaussian(img,sigma,A=None):
 
     """
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html
@@ -72,14 +72,16 @@ def fft_gaussian(img,sigma):
     note that here, you actually take the FFT of a gaussian (rather than
     build it in frequency space). there are ~6 ways to do this.
     """
-
     #create a 2D gaussian kernel to take the FFT of
-    kernel = np.outer(signal.gaussian(img.shape[0], sigma),
-                        signal.gaussian(img.shape[1],sigma))
+
+    # scale factor!
+    A = 1 / (2*np.pi*sigma**2)
+    kernel = np.outer(A*signal.gaussian(img.shape[0], sigma),
+                        A*signal.gaussian(img.shape[1],sigma))
 
     return signal.fftconvolve(img, kernel, mode='same')
 
-def fft_hessian(image, sigma=1):
+def fft_hessian(image, sigma=1, ):
     """
     a reworking of skimage.feature.hessian_matrix that uses
     e FFT to compute gaussian, which results in a considerable speedup
