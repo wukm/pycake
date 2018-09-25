@@ -89,3 +89,19 @@ def dilate_boundary(img, radius=10, mask=None):
     else:
         # replace the original mask or create a new masked array
         return ma.masked_array(img, mask=new_mask)
+
+if __name__ == "__main__":
+
+    # demonstrate the effect of dilate_plate on a mask
+    from get_placenta import get_named_placenta
+    import matplotlib.pyplot as plt
+
+    import os.path
+    dest_dir = 'demo_outputs'
+    img = get_named_placenta('T-BN0164923.png')
+
+
+
+
+
+
