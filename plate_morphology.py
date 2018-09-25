@@ -95,13 +95,31 @@ if __name__ == "__main__":
     # demonstrate the effect of dilate_plate on a mask
     from get_placenta import get_named_placenta
     import matplotlib.pyplot as plt
+    import numpy as np
 
     import os.path
-    dest_dir = 'demo_outputs'
+
+    dest_dir = 'demo_output'
     img = get_named_placenta('T-BN0164923.png')
 
+    inset = np.s_[100:300,300:500]
 
+    D = dilate_boundary(img, radius=80)
 
+    fig, (ax_img, ax_D) = plt.subplots(ncols=2, figsize=(14, 7))
 
+    ax_img.imshow(img[inset].filled(0), cmap=plt.cm.gray)
+    ax_D.imshow(D[inset].filled(0), cmap=plt.cm.gray)
 
+    fig.tight_layout()
+
+    # SAVE IT IN THE RIGHT DIRECTORY, ETC plt.savefig(
+
+    # NOW SHOW FRANGI ON THESE IMAGES
+    # IMG WITHOUT DILATING, THEN IMAGE WITH DILATING
+    sigma = 20
+
+    # NOW SHOW THE SAME PICTURE
+    hesh = fft_hessian(img,sigma)
+    k1,k2 = principal_curvatures(img, sigma=sigma, H=hesh)
 
