@@ -417,8 +417,8 @@ if __name__ == "__main__":
     #    { 'filename': 'T-BN0164923_fetalsurface_fixed_ruler_lights_filter_12_0320-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
     #    { 'filename': 'T-BN0204423_fetalsurface_fixed_ruler_lights_filter_11_1118-ddy.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
     #    { 'filename': 'T-BN0224265_fetalsurface_fixed_ruler_lights_filter_12_0606-lgm.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN9730834_fetalsurface_fixed_ruler_lights_filter_12_0416.png', 'DARK_BG': False, 'alpha': 0.12, 'log_range':(-1,5)},
+        { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
+    #    { 'filename': 'T-BN9730834_fetalsurface_fixed_ruler_lights_filter_12_0416.png', 'DARK_BG': False, 'alpha': 0.12, 'log_range':(-1,5)},
     ]
 
     for i, t in enumerate(trials):

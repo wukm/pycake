@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
+# change this module to placenta instead of get_placenta
+
 """
+
 Get registered, unpreprocessed placental images.  No automatic registration
 (i.e. segmentation of placental plate) takes place here. The background,
 however, *is* masked.
@@ -26,6 +29,7 @@ import numpy as np
 import numpy.ma as ma
 from skimage import segmentation, morphology
 import os.path
+import os
 
 from scipy.ndimage import imread
 
@@ -135,6 +139,69 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
         mask = imread(maskfile, mode='L')
 
     return ma.masked_array(raw_img, mask=mask)
+
+def check_filetype(filename, assert_png=True, assert_standard=False):
+    """
+    'T-BN8333878.raw.png' returns 'raw'
+    'T-BN8333878.mask.png' returns 'mask'
+    'T-BN8333878.png' returns 'base'
+
+    if assert_png is True, then raise assertion error if the file
+    is not of type png
+
+    if assert_standard, then assert the filetype is
+    mask, base, trace, or raw.
+
+    etc.
+    """
+    basename, ext = os.path.splitext(filename)
+
+    if ext != '.png':
+        if assert_png:
+            assert ext == '.png'
+
+    sample_name, typestub = os.path.splitext(basename)
+
+    if typestub == '':
+        # it's just something like  'T-BN8333878.png'
+        return 'base'
+    elif typestub in ('.mask','.trace', '.raw'):
+        # return 'mask' or 'trace' or 'raw'
+        return typestub.strip('.')
+    else:
+        print('unknown filetype:', typestub)
+        print('is it a weird filename?')
+
+        print('warning: lookup failed, unknown filetype:' + typestub)
+
+        return typestub
+
+def list_placentas(label=None, sample_dir=None):
+    """
+    label is the specifier, basically just ''.startswith()
+
+    only real use is to find all the T-BN* files
+
+    this is hackish, if you ever decide to use a file other than
+    png then this needs to change
+    """
+
+    if sample_dir is None:
+        sample_dir = 'samples'
+
+    if label is None:
+        label = '' # str.startswith('') is always True
+
+    placentas = list()
+
+    for f in os.listdir(sample_dir):
+
+        if f.startswith(label):
+            # oh man they gotta be png files
+            if check_filetype(f) == 'base':
+                placentas.append(f)
+
+    return sorted(placentas)
 
 def mask_background(img):
     """
