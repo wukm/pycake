@@ -296,3 +296,37 @@ if __name__ == "__main__":
     print('run plt.show() to see masked output')
     show_mask(img)
 
+
+def _cropped_bounds(img):
+
+    X,Y = (np.argwhere(np.invert(img.mask).any(axis=k)).squeeze() for k in (0,1))
+
+    if X.size == 0:
+        X = [None,None] # these will slice correctly
+    if Y.size == 0:
+        Y = [None,None]
+
+    return Y[0],Y[-1],X[0],X[-1]
+
+def cropped_args(img):
+    """
+    get a slice that would crop image
+    i.e. img[cropped_args(img)] would be a cropped view
+    """
+
+    x0, x1, y0,y1 = _cropped_bounds(img)
+
+    return np.s_[x0:x1,y0:y1]
+
+def cropped_view(img):
+    """
+    removes entire masked rows and columns from the borders of a masked array.
+    will return a masked array of smaller size
+
+    don't ask me about data
+    """
+
+    # find first and last row with content
+    x0, x1, y0,y1 = _cropped_bounds(img)
+
+    return img[x0:x1,y0:y1]

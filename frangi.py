@@ -47,6 +47,8 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
     if gamma is None:
 
         gamma = .5 * max_hessian_norm(hesh)
+        if np.isclose(gamma,0):
+            print("WARNING: gamma is close to 0. should skip this layer.")
 
     targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma,
                                  dark_bg=dark_bg, threshold=threshold)
@@ -70,6 +72,11 @@ def get_frangi_targets(K1,K2, beta=0.5, gamma=None, dark_bg=True, threshold=None
     if gamma is None:
         # half of max hessian norm (using L2 norm)
         gamma = .5 * np.abs(K2).max()
+        if np.isclose(gamma,0):
+            print("warning! gamma is very close to zero. maybe this layer isn't worth it...")
+            print("sigma={:.3f}, gamma={}".format(sigma,gamma))
+            print("returning an empty array")
+            return np.zeros_like(img)
 
     F = np.exp(-R / (2*beta**2))
     F *= 1 - np.exp( -S / (2*gamma**2))
