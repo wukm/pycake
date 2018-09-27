@@ -18,7 +18,7 @@ import json
 import datetime
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
-                    dark_bg=True, VERBOSE=True):
+                    dilate=True, dark_bg=True, VERBOSE=True):
     """returns an ordered list of dictionaries for each scale
     multiscale.append(
         {'sigma': sigma,
@@ -36,18 +36,23 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
     # store results of each scale (create as empty list)
     multiscale = list()
 
-    for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
+    img = img / 255.
 
-        if sigma < 2.5:
-            radius = 10
+    for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
+        if dilate:
+            if sigma < 2.5:
+                radius = 10
+            else:
+                radius = int(sigma*4) # a little aggressive
         else:
-            radius = int(sigma*4) # a little aggressive
+            radius = None
 
         if VERBOSE:
             print('σ={}'.format(sigma))
             print('finding hessian')
 
         # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
+        print("file type is:", img.dtype)
         hesh = fft_hessian(img, sigma)
 
         if VERBOSE:
@@ -57,10 +62,11 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
         k1, k2 = principal_curvatures(img, sigma=sigma, H=hesh)
 
         # area of influence to zero out
-        collar = dilate_boundary(None, radius=radius, mask=img.mask)
+        if dilate:
+            collar = dilate_boundary(None, radius=radius, mask=img.mask)
 
-        k1[collar] = 0
-        k2[collar] = 0
+            k1[collar] = 0
+            k2[collar] = 0
 
         # set anisotropy parameter if not specified
         if gamma is None:
@@ -155,7 +161,8 @@ def match_on_skeleton(skeleton_of, layers, VERBOSE=True):
     return matched_all
 
 def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
-                    n_scales = 20, verbose=True):
+                   dilate_per_scale=True, n_scales = 20, verbose=True):
+
     raw_img = get_named_placenta(filename, maskfile=None)
 
     ###Multiscale & Frangi Parameters######################
@@ -193,15 +200,17 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     multiscale = make_multiscale(img, scales, betas, gammas,
                                 find_principal_directions=False,
+                                dilate=dilate_per_scale,
                                 dark_bg=DARK_BG)
 
     gammas = [scale['gamma'] for scale in multiscale]
+
     border_radii = [scale['border_radius'] for scale in multiscale]
     ###Process Multiscale Targets############################
 
     # fix targets misreported on edge of plate
     # wait are we doing this twice?
-    if verbose:
+    if dilate_per_scale:
         print('trimming collars of plates (per scale)')
 
         for i in range(len(multiscale)):
@@ -211,6 +220,10 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
             print('dilating plate for radius={}'.format(radius))
             f = dilate_boundary(f, radius=radius, mask=img.mask)
             multiscale[i]['F'] = f.filled(0)
+    else:
+        for i in range(len(multiscale)):
+            # harden mask (best way to do this??)
+            multiscale[i]['F'] = multiscale[i]['F'].filled(0)
 
     ###Extract Multiscale Features############################
 
@@ -234,8 +247,8 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     # ALPHA RANGE?
     N = min(img.shape) // 2
-    alphas = np.logspace(-2,0, num=len(scales))*.7
-    #alphas = np.sqrt(1.2*scales / N)
+    #alphas = np.logspace(-2,0, num=len(scales))*.7
+    alphas = np.sqrt(1.2*scales / N)
     # try a logistic curve
     #alphas = 1 / (1+np.exp(-.2*(scales-np.sqrt(N))))
     #alphas = scales/32
@@ -245,6 +258,8 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     #alphas = np.sqrt(scales / scales.max())
 
+    time_of_run = datetime.datetime.now()
+    timestring = time_of_run.strftime("%y%m%d_%H%M")
 
     # Process Composite ###############################3
 
@@ -284,27 +299,25 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     # make this its own function and just do a partial here.
     outname = lambda s: os.path.join(OUTPUT_DIR,
-                                ''.join(base) + '_' + s + '.'+ suffix)
+                                ''.join(base) +'_' + timestring +  '_' + s + '.'+ suffix)
 
     plt.imsave(outname('skel'), skeletonize(F_cumulative.filled(0)),
             cmap=plt.cm.gray)
     plt.imsave(outname('fmax_threshholded'), F_cumulative.filled(0),
             cmap=plt.cm.gray_r)
-    plt.imsave(outname('fmax_variable_threshold'), wheres_VT > 0)
+    plt.imsave(outname('fmax_variable_threshold'), wheres_VT > 0,
+            cmap=plt.cm.gray_r)
 
+
+    # Max Frangi score
     fig, ax = plt.subplots(figsize=(12,8))
-
-    # anything above threshold is set to 1 and everything else is scaled
-    #F_below = F_max.copy()
-    #F_below[F_max > alpha] = 0 # zero things above threshold
-    #F_below = F_below / alpha # scale remaining range from [0,alpha] to [0,1]
-    #F_below[F_max > alpha] = 1 # now add back in things higher than threshold
-
     plt.imshow(F_max, cmap=plt.cm.gist_ncar)
     #plt.title(r'Max Frangi vesselness measure below threshold $\alpha={:.2f}$'.format(alpha))
     plt.title('Maximum Frangi vesselness score')
     plt.axis('off')
-    plt.colorbar()
+    c = plt.colorbar()
+    c.set_ticks(np.linspace(0,1,num=11))
+    plt.clim(0,1)
     plt.tight_layout()
     plt.savefig(outname('fmax'), dpi=300)
 
@@ -332,7 +345,7 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     cbar.set_ticklabels(scalelabels)
     ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
 
-    plt.savefig(outname('labeled (variable threshold)'), dpi=300)
+    plt.savefig(outname('labeled'), dpi=300)
     plt.tight_layout()
     plt.close()
 
@@ -343,17 +356,37 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     imgplot = ax.imshow(wheres_VT, cmap=cmap)
 
+    # discrete colorbar
+    cbar = plt.colorbar(imgplot)
+
+    # this is apparently hackish, beats me
+    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+
+    cbar.set_ticks(tick_locs)
+    # label each tick with the sigma value
+    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
+    scalelabels.insert(0, "(no match)")
+    # label with their label number (or change this to actual sigma value
+    cbar.set_ticklabels(scalelabels)
+    ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
+
+    plt.savefig(outname('labeled_VT'), dpi=300)
+    plt.tight_layout()
     plt.close()
+
+    confusion_matrix = compare_trace(F_cumulative.filled(0), filename=filename)
+
+    plt.imsave(outname('confusion'), confusion_matrix)
 
     confusion_matrix = compare_trace(VT, filename=filename)
 
-    plt.imsave(outname('confusion'), confusion_matrix)
-    time_of_run = datetime.datetime.now()
-    timestring = time_of_run.strftime("%y%m%d_%H%M")
+    plt.imsave(outname('confusion_VT'), confusion_matrix)
+
     logdata = {'time': timestring,
             'filename': filename,
             'DARK_BG': DARK_BG,
-            'alpha': alpha,
+            'fixed_alpha': alpha,
+            'VT_alphas': list(alphas),
             'betas': betas,
             'gammas': gammas,
             'sigmas': list(scales),
@@ -379,6 +412,7 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     ###Measure#######################################################
 
     pass
+
     return Fs, locals()
 
 
@@ -386,6 +420,7 @@ if __name__ == "__main__":
 
 
     from get_placenta import show_mask as mimshow
+    from get_placenta import list_placentas
     show = plt.show
     imshow = plt.imshow
 
@@ -401,32 +436,19 @@ if __name__ == "__main__":
 
     ###Set base image#############################
 
-    trials = [
-    #     { 'filename': 'barium1.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-    #    { 'filename': 'barium2.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-    #    { 'filename': 'NYMH_ID130016i.png', 'DARK_BG': True, 'alpha': 0.15, 'log_range':(0,4.5)},
-    #     { 'filename': 'NYMH_ID130016u.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
-    #    { 'filename': 'NYMH_ID130016u_inset.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(0,4.5)},
-    #    { 'filename': 'im0059.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-    #    { 'filename': 'im0059_clahe.png', 'DARK_BG': False, 'log_range' : (-1,3), 'alpha':0.08},
-    #     { 'filename': 'BN1105196.png', 'DARK_BG': False, 'alpha': 0.15, 'log_range':(-1,3)},
-    #    { 'filename': 'T-BN0013990_fetalsurface_fixed_ruler_lights_filter_12_0130-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN0033885_fetalsurface_fixed_ruler_lights_filter_12_0109-dd.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN0061827_fetalsurface_fixed_ruler_lights_filter_12_0627-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN0124393_fetalsurface_fixed_ruler_lights_filter_12_0628-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN0164923_fetalsurface_fixed_ruler_lights_filter_12_0320-AG.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN0204423_fetalsurface_fixed_ruler_lights_filter_11_1118-ddy.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN0224265_fetalsurface_fixed_ruler_lights_filter_12_0606-lgm.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-        { 'filename': 'T-BN9238868.png', 'DARK_BG': False, 'alpha': 0.10, 'log_range':(-2,5)},
-    #    { 'filename': 'T-BN9730834_fetalsurface_fixed_ruler_lights_filter_12_0416.png', 'DARK_BG': False, 'alpha': 0.12, 'log_range':(-1,5)},
-    ]
+    placentas = list_placentas('T-BN')[:15]
+    N_samples = len(placentas)
+    print(N_samples, "samples total!")
+    for i, filename in enumerate(placentas):
+        print('*'*80)
+        print('extracting PCSVN of', filename,
+              '\t ({} of {})'.format(i,N_samples))
 
-    for i, t in enumerate(trials):
+        alpha = .08
+        DARK_BG = False
+        log_range = (-2,3)
+        dilate_per_scale = False
+        extract_pcsvn(filename, DARK_BG=DARK_BG,
+                          alpha=alpha, log_range=log_range,
+                          dilate_per_scale = False)
 
-        filename = t['filename']
-        alpha = t['alpha']
-        DARK_BG = t['DARK_BG']
-        log_range = t['log_range']
-
-        F, L = extract_pcsvn(filename, DARK_BG=DARK_BG, alpha=alpha,
-                    log_range=log_range)
