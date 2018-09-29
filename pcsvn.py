@@ -222,7 +222,7 @@ def apply_threshold(targets, alphas, return_labels=True):
 def extract_pcsvn(filename, alpha=.15, alphas=None,
                   log_range=(0,4.5), DARK_BG=True,
                   dilate_per_scale=True, n_scales=20,
-                  verbose=True):
+                  verbose=True, generate_graphs=True):
 
     raw_img = get_named_placenta(filename, maskfile=None)
 
@@ -261,7 +261,8 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
     multiscale = make_multiscale(img, scales, betas, gammas,
                                 find_principal_directions=False,
                                 dilate=dilate_per_scale,
-                                dark_bg=DARK_BG)
+                                dark_bg=DARK_BG,
+                                 VERBOSE=verbose)
 
     gammas = [scale['gamma'] for scale in multiscale]
 
@@ -295,8 +296,37 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
 
     F_all = np.dstack([scale['F'] for scale in multiscale])
 
-    ###The max Frangi target##################################
+    if not generate_graphs:
 
+        return  F_all, img, scales
+
+    else:
+
+        analyze_targets(F_all, img)
+
+        return F_all, img, scales
+
+def get_outname_lambda(filename, output_dir=None, timestring=None):
+    """
+    return a lambda function which can build output filenames
+    """
+
+    if output_dir is None:
+        output_dir = 'output'
+
+    base = os.path.basename(filename)
+    *base, suffix = base.split('.')
+
+    if timestring is None:
+        time_of_run = datetime.datetime.now()
+        timestring = time_of_run.strftime("%y%m%d_%H%M")
+
+    outputstub = ''.join(base) +'_' + timestring +  '_{}.'+ suffix
+    return lambda s: os.path.join(output_dir, outputstub.format(s))
+
+def analyze_targets(F_all, img):
+
+    ###The max Frangi target##################################
     # for display purposes
     F_max = F_all.max(axis=-1)
     F_max = ma.masked_array(F_max, mask=img.mask)
@@ -316,8 +346,8 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
     #alphas = np.linspace(0.01,1,num=len(scales))
     #alphas = np.sqrt(scales / scales.max())
 
-    time_of_run = datetime.datetime.now()
-    timestring = time_of_run.strftime("%y%m%d_%H%M")
+    #time_of_run = datetime.datetime.now()
+    #timestring = time_of_run.strftime("%y%m%d_%H%M")
 
     # Process Composite ###############################3
 
@@ -333,7 +363,7 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
 
     print('generating outputs!')
     crop = cropped_args(img)
-
+    """
     OUTPUT_DIR = 'output'
     base = os.path.basename(filename)
 
@@ -342,7 +372,8 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
     # make this its own function and just do a partial here.
     outputstub = ''.join(base) +'_' + timestring +  '_{}.'+ suffix
     outname = lambda s: os.path.join(OUTPUT_DIR, outputstub.format(s))
-
+    """
+    outname = get_outname_lambda(filename)
 
     # SKELETONIZED OUTPUT
     plt.imsave(outname('skel'), skeletonize(FT[crop]),
@@ -402,8 +433,6 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
     with open(dumpfile, 'w') as f:
         json.dump(logdata, f, indent=True)
 
-    # list of each scale's frangi targets for easier introspection
-    Fs = [F_all[:,:,j] for j in range(F_all.shape[-1])]
 
     ###Make Connected Graph##########################################
 
@@ -413,10 +442,10 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
 
     pass
 
-    return Fs, locals()
+    """
 
-
-def scale_label_figure(wheres, scales, savefilename,
+"""
+def scale_label_figure(wheres, scales, savefilename=None,
                         crop=None, show_only=False):
     """
     crop is a slice object.
@@ -454,7 +483,7 @@ def scale_label_figure(wheres, scales, savefilename,
     plt.tight_layout()
 
     #plt.savefig(outname('labeled'), dpi=300)
-    if show_only:
+    if show_only or (savefilename is None):
         plt.show()
     else:
         plt.savefig(savefilename, dpi=300)
@@ -494,7 +523,10 @@ if __name__ == "__main__":
         DARK_BG = False
         log_range = (-2,3)
         dilate_per_scale = False
-        extract_pcsvn(filename, DARK_BG=DARK_BG,
+
+        F, img, scales = extract_pcsvn(filename, DARK_BG=DARK_BG,
                           alpha=alpha, log_range=log_range,
-                          dilate_per_scale = False)
+                          dilate_per_scale=dilate_per_scale,
+                            verbose=False, generate_graphs=False)
+
         break
