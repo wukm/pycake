@@ -222,7 +222,8 @@ def apply_threshold(targets, alphas, return_labels=True):
 def extract_pcsvn(filename, alpha=.15, alphas=None,
                   log_range=(0,4.5), DARK_BG=True,
                   dilate_per_scale=True, n_scales=20,
-                  verbose=True, generate_graphs=True):
+                  verbose=True, generate_graphs=True,
+                  generate_json=True, output_dir=None):
 
     raw_img = get_named_placenta(filename, maskfile=None)
 
@@ -296,15 +297,42 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
 
     F_all = np.dstack([scale['F'] for scale in multiscale])
 
-    if not generate_graphs:
-
-        return  F_all, img, scales
-
-    else:
+    if generate_graphs:
 
         analyze_targets(F_all, img)
 
-        return F_all, img, scales
+    if generate_json:
+
+        time_of_run = datetime.datetime.now()
+        timestring = time_of_run.strftime("%y%m%d_%H%M")
+
+        logdata = {'time': timestring,
+                'filename': filename,
+                'DARK_BG': DARK_BG,
+                'fixed_alpha': alpha,
+                'VT_alphas': list(alphas),
+                'betas': betas,
+                'gammas': gammas,
+                'sigmas': list(scales),
+                'log_min': log_min,
+                'log_max': log_max,
+                'n_scales': n_scales,
+                'border_radii': border_radii
+                }
+
+        if output_dir is None:
+            output_dir = 'output'
+
+        base = os.path.basename(filename)
+        *base, suffix = base.split('.')
+        dumpfile = os.path.join(output_dir,
+                                ''.join(base) + '_' + str(timestring)
+                                + '.json')
+
+        with open(dumpfile, 'w') as f:
+            json.dump(logdata, f, indent=True)
+
+    return F_all, img, scales, alphas
 
 def get_outname_lambda(filename, output_dir=None, timestring=None):
     """
@@ -413,25 +441,6 @@ def analyze_targets(F_all, img):
 
     plt.imsave(outname('confusion_VT'), confusion_matrix[crop])
 
-    logdata = {'time': timestring,
-            'filename': filename,
-            'DARK_BG': DARK_BG,
-            'fixed_alpha': alpha,
-            'VT_alphas': list(alphas),
-            'betas': betas,
-            'gammas': gammas,
-            'sigmas': list(scales),
-            'log_min': log_min,
-            'log_max': log_max,
-            'n_scales': n_scales,
-            'border_radii': border_radii
-            }
-
-    dumpfile = os.path.join(OUTPUT_DIR,
-                            ''.join(base) + '_' + str(timestring)
-                            + '.json')
-    with open(dumpfile, 'w') as f:
-        json.dump(logdata, f, indent=True)
 
 
     ###Make Connected Graph##########################################
@@ -446,7 +455,7 @@ def analyze_targets(F_all, img):
 
 """
 def scale_label_figure(wheres, scales, savefilename=None,
-                        crop=None, show_only=False):
+                        crop=None, show_only=False, image_only=False):
     """
     crop is a slice object.
     if show_only, then just plt.show, not save
@@ -465,30 +474,32 @@ def scale_label_figure(wheres, scales, savefilename=None,
     tabe = np.vstack(([0,0,0,1], tab)) # add black as first entry
     tabemap = mpl.colors.ListedColormap(tabe)
 
-    imgplot = ax.imshow(wheres, cmap=tabemap)
-
-    # discrete colorbar
-    cbar = plt.colorbar(imgplot)
-
-    # this is apparently hackish, beats me
-    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
-
-    cbar.set_ticks(tick_locs)
-    # label each tick with the sigma value
-    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
-    scalelabels.insert(0, "(no match)")
-    # label with their label number (or change this to actual sigma value
-    cbar.set_ticklabels(scalelabels)
-    ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
-    plt.tight_layout()
-
-    #plt.savefig(outname('labeled'), dpi=300)
-    if show_only or (savefilename is None):
-        plt.show()
+    if image_only:
+        plt.imsave(savefilename, wheres, cmap=tabemap)
     else:
-        plt.savefig(savefilename, dpi=300)
+        imgplot = ax.imshow(wheres, cmap=tabemap)
+        # discrete colorbar
+        cbar = plt.colorbar(imgplot)
 
-    plt.close()
+        # this is apparently hackish, beats me
+        tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+
+        cbar.set_ticks(tick_locs)
+        # label each tick with the sigma value
+        scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
+        scalelabels.insert(0, "(no match)")
+        # label with their sigma value
+        cbar.set_ticklabels(scalelabels)
+        #ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
+        plt.tight_layout()
+
+        #plt.savefig(outname('labeled'), dpi=300)
+        if show_only or (savefilename is None):
+            plt.show()
+        else:
+            plt.savefig(savefilename, dpi=300)
+
+        plt.close()
 
 if __name__ == "__main__":
 
