@@ -220,7 +220,7 @@ def apply_threshold(targets, alphas, return_labels=True):
     return passed, wheres
 
 def extract_pcsvn(filename, alpha=.15, alphas=None,
-                  log_range=(0,4.5), DARK_BG=True,
+                  log_range=None, scales=None, DARK_BG=True,
                   dilate_per_scale=True, n_scales=20,
                   verbose=True, generate_graphs=True,
                   generate_json=True, output_dir=None):
@@ -232,9 +232,11 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
     # set range of sigmas to use
 
     log_min, log_max = log_range
-    #log_min = -1 # minimum scale is 2**log_min
-    #log_max = 4.5 # maximum scale is 2**log_max
-    scales = np.logspace(log_min, log_max, n_scales, base=2)
+
+    if scales is None:
+        #log_min = -1 # minimum scale is 2**log_min
+        #log_max = 4.5 # maximum scale is 2**log_max
+        scales = np.logspace(log_min, log_max, n_scales, base=2)
 
 
     #alpha = 0.15 # Threshold for vesselness measure
@@ -306,11 +308,15 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
         time_of_run = datetime.datetime.now()
         timestring = time_of_run.strftime("%y%m%d_%H%M")
 
+        if alphas is None:
+            alphas_out = 'None'
+        else:
+            alphas_out = list(alphas)
         logdata = {'time': timestring,
                 'filename': filename,
                 'DARK_BG': DARK_BG,
                 'fixed_alpha': alpha,
-                'VT_alphas': list(alphas),
+                'VT_alphas': alphas_out,
                 'betas': betas,
                 'gammas': gammas,
                 'sigmas': list(scales),
