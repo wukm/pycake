@@ -17,6 +17,8 @@ import os.path
 import json
 import datetime
 
+from get_placenta import cropped_args
+
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
                     dilate=True, dark_bg=True, VERBOSE=True):
     """returns an ordered list of dictionaries for each scale
@@ -49,10 +51,8 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
         if VERBOSE:
             print('σ={}'.format(sigma))
-            print('finding hessian')
 
         # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
-        print("file type is:", img.dtype)
         hesh = fft_hessian(img, sigma)
 
         if VERBOSE:
@@ -74,15 +74,16 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             # half the max spectral radius is easier to calculate so do that
             # shouldn't be affected by mask data but should make sure the
             # mask is *well* far away from perimeter
-            gamma_alt = .5 * np.abs(k2).max()
-            print("half of k2 max is", gamma_alt)
+            #gamma_alt = .5 * np.abs(k2).max()
+            #print("half of k2 max is", gamma_alt)
 
             # or actually calculate half of max hessian norm
             # using frob norm = sqrt(trace(AA^T))
             hxx, hxy, hyy = hesh
             max_hessian_norm = np.sqrt((hxx**2 + 2*hxy**2 + hyy**2).max())
             gamma = .5*max_hessian_norm
-            print("half of max hessian norm is", gamma)
+
+            #print("gamma (half of max hessian norm is)", gamma)
         if VERBOSE:
             print('finding Frangi targets with β={} and γ={:.2}'.format(beta, gamma))
 
@@ -160,6 +161,62 @@ def match_on_skeleton(skeleton_of, layers, VERBOSE=True):
 
     return matched_all
 
+
+def apply_threshold(targets, alphas, return_labels=True):
+    """
+    if return_labels is True, return 1,..,n for scale at which
+    max target was found (or 0 if no match),
+    otherwise simply return a binary matrix
+
+    targets is a (M,N,n) shape matrix (like F_all)
+    alphas is a list / 1d array of alphas of length n
+
+
+    if alphas is a single number, then this should work just fine
+
+    for convenience,
+
+    if return labels is true, this will return both the final
+    threshold and the labels as two separate matrices
+    """
+
+    # you could make this work in 2D if you wanted to so alphas is a
+    # constant and targets is only 2D but that's a later day
+
+    # make it an array (even if it's a single element)
+    alphas = np.array(alphas)
+
+    # if it's just a MxN matrix, expand it trivially so it works below
+
+    if targets.ndim == 2:
+
+        targets = np.expand_dims(targets,2)
+
+    # either there's an alpha for each channel or there's a single
+    # alpha to be broadcast across all channels
+    assert (targets.shape[-1] == alphas.size) or (alphas.size == 1)
+
+    # pixels that passed the threshold at any level
+    passed = (targets >  alphas).any(axis=-1)
+
+    if not return_labels:
+
+        # works by broadcasting
+        return passed
+
+    # get label of where maximum occurs
+    wheres = targets.argmax(axis=-1)
+
+    # reserve 0 label for no match
+    wheres += 1
+
+    # then remove anything that didn't pass the threshold
+    wheres[np.invert(passed)] = 0
+
+    assert np.all( passed == (wheres > 0) )
+
+    return passed, wheres
+
 def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
                    dilate_per_scale=True, n_scales = 20, verbose=True):
 
@@ -235,27 +292,23 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     ###The max Frangi target##################################
 
-    # scale???
-    #F_all = F_all* (scales**-1)
-
+    # for display purposes
     F_max = F_all.max(axis=-1)
-
     F_max = ma.masked_array(F_max, mask=img.mask)
 
     # is the frangi vesselness measure strong enough
-    F_cumulative = (F_max > alpha)
+    #F_cumulative = (F_max > alpha)
 
-    # ALPHA RANGE?
+
+    # Variable threshold
     N = min(img.shape) // 2
     #alphas = np.logspace(-2,0, num=len(scales))*.7
     alphas = np.sqrt(1.2*scales / N)
     # try a logistic curve
     #alphas = 1 / (1+np.exp(-.2*(scales-np.sqrt(N))))
     #alphas = scales/32
-    print(alphas)
     #alphas = np.logspace(-2.5,-1, num=len(scales))
     #alphas = np.linspace(0.01,1,num=len(scales))
-
     #alphas = np.sqrt(scales / scales.max())
 
     time_of_run = datetime.datetime.now()
@@ -267,7 +320,7 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     #matched_all = match_on_skeleton(F_cumulative, F_all)
     #wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
 
-
+    """
     # assign a label for where each max was found
     wheres = F_all.argmax(axis=-1)
     wheres += 1 # zero where no match
@@ -287,31 +340,37 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     #VT = (F_all > alphas).any(axis=-1)
 
     #wheres_VT[np.invert(VT)] = 0
+    """
 
-    # use a colorscheme where you can see each later clearly
-    #plt.imshow(wheres, cmap=plt.cm.tab20b)
-    #plt.colorbar()
-    #plt.show()
+    FT, wheres = apply_threshold(F_all, alpha)
+    VT , wheres_VT = apply_threshold(F_all, alphas)
+
+    ########################################
+    #### THE REST IS JUST OUTPUT AND LOGGING
+
+    print('generating outputs!')
+    crop = cropped_args(img)
+
     OUTPUT_DIR = 'output'
     base = os.path.basename(filename)
 
     *base, suffix = base.split('.')
 
     # make this its own function and just do a partial here.
-    outname = lambda s: os.path.join(OUTPUT_DIR,
-                                ''.join(base) +'_' + timestring +  '_' + s + '.'+ suffix)
+    outputstub = ''.join(base) +'_' + timestring +  '_{}.'+ suffix
+    outname = lambda s: os.path.join(OUTPUT_DIR, outputstub.format(s))
 
-    plt.imsave(outname('skel'), skeletonize(F_cumulative.filled(0)),
+    plt.imsave(outname('skel'), skeletonize(FT[crop]),
             cmap=plt.cm.gray)
-    plt.imsave(outname('fmax_threshholded'), F_cumulative.filled(0),
+    plt.imsave(outname('fmax_threshholded'), FT[crop],
             cmap=plt.cm.gray_r)
-    plt.imsave(outname('fmax_variable_threshold'), wheres_VT > 0,
+    plt.imsave(outname('fmax_variable_threshold'), VT[crop],
             cmap=plt.cm.gray_r)
 
 
     # Max Frangi score
-    fig, ax = plt.subplots(figsize=(12,8))
-    plt.imshow(F_max, cmap=plt.cm.gist_ncar)
+    fig, ax = plt.subplots()
+    plt.imshow(F_max[crop], cmap=plt.cm.gist_ncar)
     #plt.title(r'Max Frangi vesselness measure below threshold $\alpha={:.2f}$'.format(alpha))
     plt.title('Maximum Frangi vesselness score')
     plt.axis('off')
@@ -325,11 +384,12 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     ### MAKE SCALE LABEL GRAPH
     # discrete colorbar adapted from https://stackoverflow.com/a/50314773
-    fig, ax = plt.subplots(figsize=(12,8)) # not sure about figsize
+    fig, ax = plt.subplots() # not sure about figsize
     N = len(scales)+1 # number of scales / labels
     cmap = plt.get_cmap('nipy_spectral', N) # discrete sample of color map
 
-    imgplot = ax.imshow(wheres, cmap=cmap)
+
+    imgplot = ax.imshow(wheres[crop], cmap=cmap)
 
     # discrete colorbar
     cbar = plt.colorbar(imgplot)
@@ -350,11 +410,11 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     plt.close()
 
     # discrete colorbar adapted from https://stackoverflow.com/a/50314773
-    fig, ax = plt.subplots(figsize=(12,8)) # not sure about figsize
+    fig, ax = plt.subplots() # not sure about figsize
     N = len(scales)+1 # number of scales / labels
     cmap = plt.get_cmap('nipy_spectral', N) # discrete sample of color map
 
-    imgplot = ax.imshow(wheres_VT, cmap=cmap)
+    imgplot = ax.imshow(wheres_VT[crop], cmap=cmap)
 
     # discrete colorbar
     cbar = plt.colorbar(imgplot)
@@ -374,13 +434,13 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     plt.tight_layout()
     plt.close()
 
-    confusion_matrix = compare_trace(F_cumulative.filled(0), filename=filename)
+    confusion_matrix = compare_trace(FT, filename=filename)
 
-    plt.imsave(outname('confusion'), confusion_matrix)
+    plt.imsave(outname('confusion'), confusion_matrix[crop])
 
     confusion_matrix = compare_trace(VT, filename=filename)
 
-    plt.imsave(outname('confusion_VT'), confusion_matrix)
+    plt.imsave(outname('confusion_VT'), confusion_matrix[crop])
 
     logdata = {'time': timestring,
             'filename': filename,
@@ -419,8 +479,8 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 if __name__ == "__main__":
 
 
-    from get_placenta import show_mask as mimshow
     from get_placenta import list_placentas
+
     show = plt.show
     imshow = plt.imshow
 
@@ -451,4 +511,4 @@ if __name__ == "__main__":
         extract_pcsvn(filename, DARK_BG=DARK_BG,
                           alpha=alpha, log_range=log_range,
                           dilate_per_scale = False)
-
+        break

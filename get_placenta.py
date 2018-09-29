@@ -297,7 +297,11 @@ if __name__ == "__main__":
     show_mask(img)
 
 
-def _cropped_bounds(img):
+def _cropped_bounds(img, mask=None):
+
+    if mask is not None:
+
+        img = ma.masked_array(img, mask=mask)
 
     X,Y = (np.argwhere(np.invert(img.mask).any(axis=k)).squeeze() for k in (0,1))
 
@@ -308,25 +312,27 @@ def _cropped_bounds(img):
 
     return Y[0],Y[-1],X[0],X[-1]
 
-def cropped_args(img):
+def cropped_args(img, mask=None):
     """
     get a slice that would crop image
     i.e. img[cropped_args(img)] would be a cropped view
     """
 
-    x0, x1, y0,y1 = _cropped_bounds(img)
+    x0, x1, y0,y1 = _cropped_bounds(img, mask=None)
 
     return np.s_[x0:x1,y0:y1]
 
-def cropped_view(img):
+def cropped_view(img, mask=None):
     """
     removes entire masked rows and columns from the borders of a masked array.
     will return a masked array of smaller size
 
     don't ask me about data
+
+    the name sucks too
     """
 
     # find first and last row with content
-    x0, x1, y0,y1 = _cropped_bounds(img)
+    x0, x1, y0,y1 = _cropped_bounds(img, mask=mask)
 
     return img[x0:x1,y0:y1]
