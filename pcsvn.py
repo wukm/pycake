@@ -13,6 +13,8 @@ from skimage.morphology import label, skeletonize
 from plate_morphology import dilate_boundary
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 import os.path
 import json
 import datetime
@@ -217,8 +219,10 @@ def apply_threshold(targets, alphas, return_labels=True):
 
     return passed, wheres
 
-def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
-                   dilate_per_scale=True, n_scales = 20, verbose=True):
+def extract_pcsvn(filename, alpha=.15, alphas=None,
+                  log_range=(0,4.5), DARK_BG=True,
+                  dilate_per_scale=True, n_scales=20,
+                  verbose=True):
 
     raw_img = get_named_placenta(filename, maskfile=None)
 
@@ -229,7 +233,6 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     log_min, log_max = log_range
     #log_min = -1 # minimum scale is 2**log_min
     #log_max = 4.5 # maximum scale is 2**log_max
-    n_scales = 20
     scales = np.logspace(log_min, log_max, n_scales, base=2)
 
 
@@ -268,13 +271,15 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     # fix targets misreported on edge of plate
     # wait are we doing this twice?
     if dilate_per_scale:
-        print('trimming collars of plates (per scale)')
+        if verbose:
+            print('trimming collars of plates (per scale)')
 
         for i in range(len(multiscale)):
             f = multiscale[i]['F']
             # twice the buffer (be conservative!)
             radius = int(multiscale[i]['sigma']*2)
-            print('dilating plate for radius={}'.format(radius))
+            if verbose:
+                print('dilating plate for radius={}'.format(radius))
             f = dilate_boundary(f, radius=radius, mask=img.mask)
             multiscale[i]['F'] = f.filled(0)
     else:
@@ -320,28 +325,6 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     #matched_all = match_on_skeleton(F_cumulative, F_all)
     #wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
 
-    """
-    # assign a label for where each max was found
-    wheres = F_all.argmax(axis=-1)
-    wheres += 1 # zero where no match
-    wheres[F_max < alpha] = 0
-
-    # using variable alpha model?
-
-    F_VT = F_all.copy()
-    F_VT[F_all < alphas] = 0
-
-    wheres_VT = F_VT.argmax(axis=-1)
-    wheres_VT += 1
-    # zero all pixels that never passed the threshold a t any level
-    wheres_VT[(F_all < alphas).all(axis=-1)] = 0
-    VT = (wheres_VT != 0) # this is the result
-    # pixels where any of the thresholds have been passed
-    #VT = (F_all > alphas).any(axis=-1)
-
-    #wheres_VT[np.invert(VT)] = 0
-    """
-
     FT, wheres = apply_threshold(F_all, alpha)
     VT , wheres_VT = apply_threshold(F_all, alphas)
 
@@ -360,6 +343,8 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     outputstub = ''.join(base) +'_' + timestring +  '_{}.'+ suffix
     outname = lambda s: os.path.join(OUTPUT_DIR, outputstub.format(s))
 
+
+    # SKELETONIZED OUTPUT
     plt.imsave(outname('skel'), skeletonize(FT[crop]),
             cmap=plt.cm.gray)
     plt.imsave(outname('fmax_threshholded'), FT[crop],
@@ -382,57 +367,12 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
 
     plt.close()
 
-    ### MAKE SCALE LABEL GRAPH
-    # discrete colorbar adapted from https://stackoverflow.com/a/50314773
-    fig, ax = plt.subplots() # not sure about figsize
-    N = len(scales)+1 # number of scales / labels
-    cmap = plt.get_cmap('nipy_spectral', N) # discrete sample of color map
-
-
-    imgplot = ax.imshow(wheres[crop], cmap=cmap)
-
-    # discrete colorbar
-    cbar = plt.colorbar(imgplot)
-
-    # this is apparently hackish, beats me
-    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
-
-    cbar.set_ticks(tick_locs)
-    # label each tick with the sigma value
-    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
-    scalelabels.insert(0, "(no match)")
-    # label with their label number (or change this to actual sigma value
-    cbar.set_ticklabels(scalelabels)
-    ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
-
-    plt.savefig(outname('labeled'), dpi=300)
-    plt.tight_layout()
-    plt.close()
-
-    # discrete colorbar adapted from https://stackoverflow.com/a/50314773
-    fig, ax = plt.subplots() # not sure about figsize
-    N = len(scales)+1 # number of scales / labels
-    cmap = plt.get_cmap('nipy_spectral', N) # discrete sample of color map
-
-    imgplot = ax.imshow(wheres_VT[crop], cmap=cmap)
-
-    # discrete colorbar
-    cbar = plt.colorbar(imgplot)
-
-    # this is apparently hackish, beats me
-    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
-
-    cbar.set_ticks(tick_locs)
-    # label each tick with the sigma value
-    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
-    scalelabels.insert(0, "(no match)")
-    # label with their label number (or change this to actual sigma value
-    cbar.set_ticklabels(scalelabels)
-    ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
-
-    plt.savefig(outname('labeled_VT'), dpi=300)
-    plt.tight_layout()
-    plt.close()
+    scale_label_figure(wheres, scales,
+                       outname('labeled_test'),
+                       crop=crop)
+    scale_label_figure(wheres_VT, scales,
+                       outname('labeled_VT_test'),
+                       crop=crop)
 
     confusion_matrix = compare_trace(FT, filename=filename)
 
@@ -476,6 +416,51 @@ def extract_pcsvn(filename, alpha=.15, log_range=(0,4.5), DARK_BG=True,
     return Fs, locals()
 
 
+def scale_label_figure(wheres, scales, savefilename,
+                        crop=None, show_only=False):
+    """
+    crop is a slice object.
+    if show_only, then just plt.show, not save
+    """
+    if crop is not None:
+        wheres = wheres[crop]
+
+    fig, ax = plt.subplots() # not sure about figsize
+    N = len(scales)+1 # number of scales / labels
+
+    # discrete sample of color map
+    #cmap = plt.get_cmap('nipy_spectral', N)
+
+    # get 20 samples from the colormap [R,G,B,A] array
+    tab = plt.cm.viridis_r(np.linspace(0,1,num=N))
+    tabe = np.vstack(([0,0,0,1], tab)) # add black as first entry
+    tabemap = mpl.colors.ListedColormap(tabe)
+
+    imgplot = ax.imshow(wheres, cmap=tabemap)
+
+    # discrete colorbar
+    cbar = plt.colorbar(imgplot)
+
+    # this is apparently hackish, beats me
+    tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+
+    cbar.set_ticks(tick_locs)
+    # label each tick with the sigma value
+    scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
+    scalelabels.insert(0, "(no match)")
+    # label with their label number (or change this to actual sigma value
+    cbar.set_ticklabels(scalelabels)
+    ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
+    plt.tight_layout()
+
+    #plt.savefig(outname('labeled'), dpi=300)
+    if show_only:
+        plt.show()
+    else:
+        plt.savefig(savefilename, dpi=300)
+
+    plt.close()
+
 if __name__ == "__main__":
 
 
@@ -498,6 +483,7 @@ if __name__ == "__main__":
 
     placentas = list_placentas('T-BN')[:15]
     N_samples = len(placentas)
+
     print(N_samples, "samples total!")
     for i, filename in enumerate(placentas):
         print('*'*80)
