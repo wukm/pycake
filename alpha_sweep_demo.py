@@ -31,11 +31,11 @@ n_scales = 20
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
 alphas = scales**(2/3) / scales[-1]
 
-print(N_samples, "samples total!")
+print(n_samples, "samples total!")
 for i, filename in enumerate(placentas):
     print('*'*80)
     print('extracting PCSVN of', filename,
-            '\t ({} of {})'.format(i,N_samples))
+            '\t ({} of {})'.format(i,n_samples))
     F, img, _ , _ = extract_pcsvn(filename, DARK_BG=DARK_BG,
                                 alpha=.1, alphas=alphas,
                                 scales=scales,  log_range=log_range,
@@ -45,7 +45,7 @@ for i, filename in enumerate(placentas):
 
 
     crop = cropped_args(img)
-
+    print("...making outputs")
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
 
 
