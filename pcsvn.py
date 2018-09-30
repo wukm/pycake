@@ -507,6 +507,11 @@ def scale_label_figure(wheres, scales, savefilename=None,
 
         plt.close()
 
+
+
+
+
+
 if __name__ == "__main__":
 
 
@@ -514,18 +519,6 @@ if __name__ == "__main__":
 
     show = plt.show
     imshow = plt.imshow
-
-
-    #################################################################
-    #### MAIN LOOP ##################################################
-    #################################################################
-    #################################################################
-
-    ###Static Parameters############################
-
-    #VERBOSE=False
-
-    ###Set base image#############################
 
     placentas = list_placentas('T-BN')[:15]
     N_samples = len(placentas)
