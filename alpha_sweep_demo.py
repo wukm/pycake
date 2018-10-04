@@ -20,6 +20,8 @@ import numpy.ma as ma
 
 import matplotlib.pyplot as plt
 
+from hfft import fft_gradient
+
 #filename = 'T-BN0033885.png'
 placentas = list_placentas('T-BN')
 n_samples = len(placentas)
@@ -32,7 +34,7 @@ scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
 #alphas = scales**(2/3) / scales[-1]
 alphas = [0.1 for s in scales]
 #betas = np.linspace(.5, .9, num=n_scales)
-
+betas = None
 print(n_samples, "samples total!")
 for i, filename in enumerate(placentas):
     print('*'*80)
@@ -45,7 +47,13 @@ for i, filename in enumerate(placentas):
                                    n_scales=n_scales, generate_json=True,
                                            output_dir=OUTPUT_DIR)
 
+    G = list()
 
+    #for s in scales:
+    #    g = fft_gradient(img, s)
+    #    G.append(g)
+    G = np.dstack(G)
+    f = F.copy()
     crop = cropped_args(img)
     print("...making outputs")
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
@@ -62,6 +70,4 @@ for i, filename in enumerate(placentas):
 
     # something's leaking :(
     plt.close('all')
-    if i > 2:
-
-        break
+    break

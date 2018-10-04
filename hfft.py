@@ -81,7 +81,7 @@ def fft_gaussian(img,sigma,A=None):
 
     return signal.fftconvolve(img, kernel, mode='same')
 
-def fft_hessian(image, sigma=1, ):
+def fft_hessian(image, sigma=1.):
     """
     a reworking of skimage.feature.hessian_matrix that uses
     e FFT to compute gaussian, which results in a considerable speedup
@@ -108,7 +108,14 @@ def fft_hessian(image, sigma=1, ):
 
     return (Lxx, Lxy, Lyy)
 
+def fft_gradient(image, sigma=1.):
+    """ returns gradient norm """
 
+    gaussian_filtered = fft_gaussian(image, sigma=sigma)
+
+    Lx, Ly = np.gradient(gaussian_filtered)
+
+    return np.sqrt(Lx**2 + Ly**2)
 def _old_test():
     """
     old main function for testing.
