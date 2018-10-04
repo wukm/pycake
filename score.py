@@ -13,6 +13,7 @@ def confusion(a, b, a_color=None, b_color=None):
         b - second matrix, a 2D boolean matrix of the same size as a
         a_color : which color to use (default is a nice blue)
         b_color : which color to use (default is inverse color of a)
+
     OUTPUT:
         a matrix of size a, where
             pixels in a exclusively a are a_color
@@ -22,49 +23,53 @@ def confusion(a, b, a_color=None, b_color=None):
 
     """
 
-    if a_color is None:
-        a_color = np.array([0.9, 0.6, 0.1])
-    if b_color is None:
-        b_color = 1 - a_color
+def confusion_4(test, truth):
+    """
+    distinct coloration of false positives and negatives.
+    supply HEX values
 
+    colors output matrix with
+    true_pos if test[-] == truth[-] == 1
+    true_neg if test[-] == truth[-] == 0
+    false_neg if test[-] == 0 and truth[-] == 1
+    false_pos if test[-] == 1 and truth[-] == 0
+    """
+    true_neg_color = np.array([247,247,247], dtype='f')/255 # 'f7f7f7'
+    true_pos_color = np.array([0, 0, 0] , dtype='f')/255  # '000000'
+    false_neg_color = np.array([241,163,64], dtype='f')/255# 'f1a340' orange
+    false_pos_color = np.array([153,142,195], dtype='f')/255 # '998ec4' purple
 
-    a_c = np.tile(a[:,:,np.newaxis], (1, 1, 3)) * a_color
-    b_c = np.tile(b[:,:,np.newaxis], (1, 1, 3)) * b_color
+    #    if a_color is None:
+    #        a_color = np.array([0.9, 0.6, 0.1])
+    #    if b_color is None:
+    #        b_color = 1 - a_color
+    #
 
-    return a_c + b_c
+    #a_c = np.tile(a[:,:,np.newaxis], (1, 1, 3)) * a_color
+    #b_c = np.tile(b[:,:,np.newaxis], (1, 1, 3)) * b_color
 
-if __name__ == "__main__":
+    #return a_c + b_c
 
-    import matplotlib.pyplot as plt
-    from skimage.data import binary_blobs
+    assert test.shape == truth.shape
 
-    A = binary_blobs()
-    B = binary_blobs()
+    # convert to bool
+    test, truth = test.astype('bool'), truth.astype('bool')
 
-    C = confusion(A,B)
+    # RGB array size of test and truth for output
+    output = np.zeros((test.shape[0], test.shape[1], 3), dtype='f')
 
-    fig, (ax0, ax1, ax2) = plt.subplots(nrows=1,
-                                        ncols=3,
-                                        figsize=(8, 2.5),
-                                        sharex=True,
-                                        sharey=True)
+    # truth conditions
+    true_pos = np.bitwise_and(test==truth, truth)
+    true_neg = np.bitwise_and(test==truth, np.invert(truth))
+    false_neg = np.bitwise_and(truth, np.invert(test))
+    false_pos = np.bitwise_and(test, np.invert(truth))
 
-    ax0.imshow(A, cmap='gray')
-    ax0.set_title('A')
-    ax0.axis('off')
-    ax0.set_adjustable('box-forced')
+    output[true_pos,:] = true_pos_color
+    output[true_neg,:] = true_neg_color
+    output[false_pos,:] = false_pos_color
+    output[false_neg,:] = false_neg_color
 
-    ax1.imshow(B, cmap='gray')
-    ax1.set_title('B')
-    ax1.axis('off')
-    ax1.set_adjustable('box-forced')
-
-    ax2.imshow(C)
-    ax2.set_title('confusion matrix of A and B')
-    ax2.axis('off')
-    ax2.set_adjustable('box-forced')
-
-    fig.tight_layout()
+    return output
 
 def compare_trace(approx, trace=None, tracefile=None, filename=None,
                   sample_dir=None, a_color=None, b_color=None):
@@ -94,10 +99,13 @@ def compare_trace(approx, trace=None, tracefile=None, filename=None,
             print("no trace supplied/found. generating dummy trace.")
             trace = np.zeros_like(approx)
 
+    # what a mess... trace should be inverted (black is BG)
+    trace = np.invert(trace)
+
     # calculate the confusion matrix
     # assert same size and dimension?
-    C = confusion(approx, trace, a_color, b_color)
-
+    #C = confusion(approx, trace, a_color, b_color)
+    C = confusion_4(approx,trace)
     return C
 
 def mean_squared_error(A,B):
@@ -120,3 +128,42 @@ def mean_squared_error(A,B):
         raise
 
     return mse
+
+if __name__ == "__main__":
+
+    import matplotlib.pyplot as plt
+    from skimage.data import binary_blobs
+
+    A = binary_blobs()
+    B = binary_blobs()
+
+    true_neg_color = np.array([247,247,247], dtype='f') # 'f7f7f7'
+    true_pos_color = np.array([0, 0, 0] , dtype='f')  # '000000'
+    false_neg_color = np.array([241,163,64], dtype='f')# 'f1a340'
+    false_pos_color = np.array([153,142,195], dtype='f') # '998ec4'
+
+    C = confusion_4(A,B)
+
+    fig, (ax0, ax1, ax2) = plt.subplots(nrows=1,
+                                        ncols=3,
+                                        figsize=(8, 2.5),
+                                        sharex=True,
+                                        sharey=True)
+
+    ax0.imshow(A, cmap='gray')
+    ax0.set_title('A')
+    ax0.axis('off')
+    ax0.set_adjustable('box-forced')
+
+    ax1.imshow(B, cmap='gray')
+    ax1.set_title('B')
+    ax1.axis('off')
+    ax1.set_adjustable('box-forced')
+
+    ax2.imshow(C)
+    ax2.set_title('confusion matrix of A and B')
+    ax2.axis('off')
+    ax2.set_adjustable('box-forced')
+
+    fig.tight_layout()
+

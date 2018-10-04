@@ -29,7 +29,9 @@ DARK_BG = False
 log_range = (-2, 4.5)
 n_scales = 20
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
-alphas = scales**(2/3) / scales[-1]
+#alphas = scales**(2/3) / scales[-1]
+alphas = [0.1 for s in scales]
+#betas = np.linspace(.5, .9, num=n_scales)
 
 print(n_samples, "samples total!")
 for i, filename in enumerate(placentas):
@@ -37,7 +39,7 @@ for i, filename in enumerate(placentas):
     print('extracting PCSVN of', filename,
             '\t ({} of {})'.format(i,n_samples))
     F, img, _ , _ = extract_pcsvn(filename, DARK_BG=DARK_BG,
-                                alpha=.1, alphas=alphas,
+                                alpha=.1, alphas=alphas, betas=betas,
                                 scales=scales,  log_range=log_range,
                                 verbose=False, generate_graphs=False,
                                    n_scales=n_scales, generate_json=True,
@@ -49,11 +51,17 @@ for i, filename in enumerate(placentas):
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
 
 
-    trace, labs = apply_threshold(F, alphas, return_labels=True)
+    approx, labs = apply_threshold(F, alphas, return_labels=True)
     scale_label_figure(labs, scales, crop=crop, savefilename=outname('2_labeled'),
                        image_only=True)
 
-    confusion = compare_trace(trace, filename=filename)
+    confusion = compare_trace(approx, filename=filename)
     plt.imsave(outname('1_confusion'), confusion[crop])
 
     plt.imsave(outname('0_raw'), img[crop].filled(0), cmap=plt.cm.gray)
+
+    # something's leaking :(
+    plt.close('all')
+    if i > 2:
+
+        break

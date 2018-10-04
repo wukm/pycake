@@ -17,8 +17,10 @@ img = get_named_placenta('T-BN2315363.png')
 img = dilate_boundary(img,radius=5)
 F = list()
 fi = list()
+
 #scales = np.logspace(-3,3,base=2,num=8)
 #scales = np.linspace(.25,8,num=8)
+
 scales = np.linspace(.25,4,num=6)
 for n, sigma in enumerate(scales, 1):
     target = frangi_from_image(img, sigma, dark_bg=False)

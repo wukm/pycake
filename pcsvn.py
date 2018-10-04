@@ -220,8 +220,8 @@ def apply_threshold(targets, alphas, return_labels=True):
     return passed, wheres
 
 def extract_pcsvn(filename, alpha=.15, alphas=None,
-                  log_range=None, scales=None, DARK_BG=True,
-                  dilate_per_scale=True, n_scales=20,
+                  log_range=None, scales=None, betas=None,
+                  DARK_BG=True, dilate_per_scale=True, n_scales=20,
                   verbose=True, generate_graphs=True,
                   generate_json=True, output_dir=None):
 
@@ -240,7 +240,8 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
 
 
     #alpha = 0.15 # Threshold for vesselness measure
-    betas = [0.5 for s in scales] #anisotropy measure
+    if betas is None:
+        betas = [0.5 for s in scales] #anisotropy measure
 
     # set gammas
     # declare None here to calculate half of hessian's norm
@@ -317,7 +318,7 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
                 'DARK_BG': DARK_BG,
                 'fixed_alpha': alpha,
                 'VT_alphas': alphas_out,
-                'betas': betas,
+                'betas': list(betas),
                 'gammas': gammas,
                 'sigmas': list(scales),
                 'log_min': log_min,
