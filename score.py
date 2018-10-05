@@ -108,6 +108,49 @@ def compare_trace(approx, trace=None, tracefile=None, filename=None,
     C = confusion_4(approx,trace)
     return C
 
+
+def mcc(test, truth, bg_mask=None, return_counts=False):
+    """
+    Matthews correlation coefficient
+    returns a float between -1 and 1
+    -1 is total disagreement between test & truth
+    0 is "no better than random guessing"
+    1 is perfect prediction
+
+    """
+    true_pos = np.bitwise_and(test==truth, truth)
+    true_neg = np.bitwise_and(test==truth, np.invert(truth))
+    false_neg = np.bitwise_and(truth, np.invert(test))
+    false_pos = np.bitwise_and(test, np.invert(truth))
+
+    if bg_mask is not None:
+        # only get stats in the plate
+        true_pos[bg_mask] = 0
+        true_neg[bg_mask] = 0
+        false_pos[bg_mask] = 0
+        false_neg[bg_mask] = 0
+
+    TP = true_pos.sum()
+    TN = true_neg.sum()
+    FP = false_pos.sum()
+    FN = false_neg.sum()
+    total = np.invert(bg_mask).sum()
+    #print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
+    #print('TP+TN+FN+FP={}\ntotal pixels={}'.format(TP+TN+FP+TN,total))
+    # prevent potential overflow
+    denom = np.sqrt(TP+FP)*np.sqrt(TP+FN)*np.sqrt(TN+FP)*np.sqrt(TN+FN)
+
+    if denom == 0:
+        # set MCC to zero if any are zero
+        m_score =  0
+    else:
+        m_score = ((TP*TN) - (FP*FN)) / denom
+
+    if return_counts:
+        return m_score, (TP,TN,FP,FN)
+    else:
+        return m_score
+
 def mean_squared_error(A,B):
     """
     get mean squared error between two matrices of the same size
@@ -166,4 +209,5 @@ if __name__ == "__main__":
     ax2.set_adjustable('box-forced')
 
     fig.tight_layout()
+
 
