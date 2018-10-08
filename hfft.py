@@ -3,6 +3,7 @@
 import numpy as np
 from scipy import signal
 import scipy.fftpack as fftpack
+from scipy.special import iv
 
 """
 hfft.py is the implementation of calculating the hessian of a real
@@ -81,7 +82,44 @@ def fft_gaussian(img,sigma,A=None):
 
     return signal.fftconvolve(img, kernel, mode='same')
 
-def fft_hessian(image, sigma=1.):
+def discrete_gaussian_kernel(n_samples, t):
+    """
+    t is the scale, n_samples is the number of samples to compute
+    will return a window centered a zero
+    i.e. arange(-n_samples//2, n_samples//2+1)
+
+    this is UNnormalized, oops
+    """
+    dom = np.arange(-n_samples//2, n_samples // 2 + 1)
+    #there should be a scaling parameter alpha but whatever
+    return np.exp(-t) * iv(dom,t)
+
+def fft_dgk(img,sigma,order=0,A=None):
+    """
+    A is scaling factor.
+    This is the discrete gaussian kernel which is supposedly less crappy
+    than using a sampled gaussian.
+    """
+    m,n = img.shape
+    # i don't know if this will suck if there are odd dimensions
+    kernel = np.outer(discrete_gaussian_kernel(m,sigma),
+                      discrete_gaussian_kernel(n,sigma))
+
+    return signal.fftconvolve(img, kernel, mode='same')
+
+def fft_fdgk(img,sigma):
+    """
+    convolve with discrete gaussian kernel in freq. space
+    """
+    # this would be a lot better since you wouldn't have to deal
+    # with an arbitrary cutoff of size of the discrete kernel
+    # since the freq. space version is just
+    # exp{\alpha*t (cos\theta - 1)}
+    # see formula 22 of lindeberg discrete paper
+
+    pass
+
+def fft_hessian(image, sigma=1., kernel=None):
     """
     a reworking of skimage.feature.hessian_matrix that uses
     e FFT to compute gaussian, which results in a considerable speedup
@@ -98,8 +136,12 @@ def fft_hessian(image, sigma=1.):
             [ [Lxx[j][k], Lxy[j][k]],
               [Lxy[j][k], Lyy[j][k]] ]
     """
-
-    gaussian_filtered = fft_gaussian(image, sigma=sigma)
+    if kernel == 'discrete':
+        #print('using discrete kernel!')
+        gaussian_filtered = fft_dgk(image, sigma=sigma)
+    else:
+        #print('using sampled gauss kernel')
+        gaussian_filtered = fft_gaussian(image, sigma=sigma)
 
     Lx, Ly = np.gradient(gaussian_filtered)
 

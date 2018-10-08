@@ -1,0 +1,1394 @@
+ipython alpha_sweep_demo.py |& tee 181007-withdiscrete.log    
+174 samples total!
+********************************************************************************
+extracting PCSVN of T-BN0013990.png 	 (0 of 174)
+...making outputs
+TP: 10464	 TN: 572667
+FP: 4960	FN: 87066
+TP+TN+FP+FN=675157
+total pixels=675157
+MCC for T-BN0013990.png:	 0.23224240068
+********************************************************************************
+extracting PCSVN of T-BN0033885.png 	 (1 of 174)
+...making outputs
+TP: 23877	 TN: 700100
+FP: 11494	FN: 63390
+TP+TN+FP+FN=798861
+total pixels=798861
+MCC for T-BN0033885.png:	 0.390408281935
+********************************************************************************
+extracting PCSVN of T-BN0061827.png 	 (2 of 174)
+...making outputs
+TP: 18299	 TN: 407579
+FP: 6508	FN: 65911
+TP+TN+FP+FN=498297
+total pixels=498297
+MCC for T-BN0061827.png:	 0.347331640917
+********************************************************************************
+extracting PCSVN of T-BN0124393.png 	 (3 of 174)
+...making outputs
+TP: 27599	 TN: 414049
+FP: 4462	FN: 67035
+TP+TN+FP+FN=513145
+total pixels=513145
+MCC for T-BN0124393.png:	 0.450246137814
+********************************************************************************
+extracting PCSVN of T-BN0164923.png 	 (4 of 174)
+...making outputs
+TP: 41569	 TN: 513544
+FP: 6624	FN: 68134
+TP+TN+FP+FN=629871
+total pixels=629871
+MCC for T-BN0164923.png:	 0.522459655377
+********************************************************************************
+extracting PCSVN of T-BN0204423.png 	 (5 of 174)
+...making outputs
+TP: 24352	 TN: 750002
+FP: 18621	FN: 85616
+TP+TN+FP+FN=878591
+total pixels=878591
+MCC for T-BN0204423.png:	 0.30257889329
+********************************************************************************
+extracting PCSVN of T-BN0224265.png 	 (6 of 174)
+...making outputs
+TP: 28064	 TN: 536248
+FP: 14878	FN: 63293
+TP+TN+FP+FN=642483
+total pixels=642483
+MCC for T-BN0224265.png:	 0.39183741801
+********************************************************************************
+extracting PCSVN of T-BN0254914.png 	 (7 of 174)
+...making outputs
+TP: 16389	 TN: 485746
+FP: 7086	FN: 76251
+TP+TN+FP+FN=585472
+total pixels=585472
+MCC for T-BN0254914.png:	 0.302356375852
+********************************************************************************
+extracting PCSVN of T-BN0264445.png 	 (8 of 174)
+...making outputs
+TP: 14804	 TN: 519905
+FP: 8400	FN: 78520
+TP+TN+FP+FN=621629
+total pixels=621629
+MCC for T-BN0264445.png:	 0.268948263032
+********************************************************************************
+extracting PCSVN of T-BN0342010.png 	 (9 of 174)
+...making outputs
+TP: 4741	 TN: 294545
+FP: 899	FN: 46273
+TP+TN+FP+FN=346458
+total pixels=346458
+MCC for T-BN0342010.png:	 0.251712285558
+********************************************************************************
+extracting PCSVN of T-BN0392139.png 	 (10 of 174)
+...making outputs
+TP: 28147	 TN: 638512
+FP: 10017	FN: 87404
+TP+TN+FP+FN=764080
+total pixels=764080
+MCC for T-BN0392139.png:	 0.375223371852
+********************************************************************************
+extracting PCSVN of T-BN0392644.png 	 (11 of 174)
+...making outputs
+TP: 12032	 TN: 530494
+FP: 2634	FN: 70069
+TP+TN+FP+FN=615229
+total pixels=615229
+MCC for T-BN0392644.png:	 0.315682453618
+********************************************************************************
+extracting PCSVN of T-BN0404929.png 	 (12 of 174)
+...making outputs
+TP: 30688	 TN: 666896
+FP: 12415	FN: 81779
+TP+TN+FP+FN=791778
+total pixels=791778
+MCC for T-BN0404929.png:	 0.391725324382
+********************************************************************************
+extracting PCSVN of T-BN0421379.png 	 (13 of 174)
+...making outputs
+TP: 20722	 TN: 502953
+FP: 3458	FN: 75110
+TP+TN+FP+FN=602243
+total pixels=602243
+MCC for T-BN0421379.png:	 0.390190189241
+********************************************************************************
+extracting PCSVN of T-BN0426372.png 	 (14 of 174)
+...making outputs
+TP: 19127	 TN: 460670
+FP: 4994	FN: 79679
+TP+TN+FP+FN=564470
+total pixels=564470
+MCC for T-BN0426372.png:	 0.343561500842
+********************************************************************************
+extracting PCSVN of T-BN0464750.png 	 (15 of 174)
+...making outputs
+TP: 15568	 TN: 565125
+FP: 6207	FN: 62896
+TP+TN+FP+FN=649796
+total pixels=649796
+MCC for T-BN0464750.png:	 0.339562476213
+********************************************************************************
+extracting PCSVN of T-BN0491127.png 	 (16 of 174)
+...making outputs
+TP: 8986	 TN: 399995
+FP: 4028	FN: 56944
+TP+TN+FP+FN=469953
+total pixels=469953
+MCC for T-BN0491127.png:	 0.267364651829
+********************************************************************************
+extracting PCSVN of T-BN0501518.png 	 (17 of 174)
+...making outputs
+TP: 27738	 TN: 572502
+FP: 8862	FN: 55887
+TP+TN+FP+FN=664989
+total pixels=664989
+MCC for T-BN0501518.png:	 0.460091920093
+********************************************************************************
+extracting PCSVN of T-BN0516545.png 	 (18 of 174)
+...making outputs
+TP: 12740	 TN: 574518
+FP: 2967	FN: 82482
+TP+TN+FP+FN=672707
+total pixels=672707
+MCC for T-BN0516545.png:	 0.296985839301
+********************************************************************************
+extracting PCSVN of T-BN0651415.png 	 (19 of 174)
+...making outputs
+TP: 35879	 TN: 617138
+FP: 7049	FN: 67809
+TP+TN+FP+FN=727875
+total pixels=727875
+MCC for T-BN0651415.png:	 0.496620238987
+********************************************************************************
+extracting PCSVN of T-BN0657337.png 	 (20 of 174)
+...making outputs
+TP: 14382	 TN: 438014
+FP: 3320	FN: 54831
+TP+TN+FP+FN=510547
+total pixels=510547
+MCC for T-BN0657337.png:	 0.374738721484
+********************************************************************************
+extracting PCSVN of T-BN0687730.png 	 (21 of 174)
+...making outputs
+TP: 40468	 TN: 805329
+FP: 15148	FN: 71580
+TP+TN+FP+FN=932525
+total pixels=932525
+MCC for T-BN0687730.png:	 0.470519431018
+********************************************************************************
+extracting PCSVN of T-BN0723815.png 	 (22 of 174)
+...making outputs
+TP: 13930	 TN: 570154
+FP: 4304	FN: 91363
+TP+TN+FP+FN=679751
+total pixels=679751
+MCC for T-BN0723815.png:	 0.279479617442
+********************************************************************************
+extracting PCSVN of T-BN0963435.png 	 (23 of 174)
+...making outputs
+TP: 11756	 TN: 500568
+FP: 12413	FN: 42776
+TP+TN+FP+FN=567513
+total pixels=567513
+MCC for T-BN0963435.png:	 0.279325646225
+********************************************************************************
+extracting PCSVN of T-BN1051747.png 	 (24 of 174)
+...making outputs
+TP: 25794	 TN: 573022
+FP: 4910	FN: 67181
+TP+TN+FP+FN=670907
+total pixels=670907
+MCC for T-BN1051747.png:	 0.444641721216
+********************************************************************************
+extracting PCSVN of T-BN1105196.png 	 (25 of 174)
+...making outputs
+TP: 27510	 TN: 685556
+FP: 6323	FN: 62711
+TP+TN+FP+FN=782100
+total pixels=782100
+MCC for T-BN1105196.png:	 0.464448688572
+********************************************************************************
+extracting PCSVN of T-BN1145709.png 	 (26 of 174)
+...making outputs
+TP: 30644	 TN: 458083
+FP: 3620	FN: 76292
+TP+TN+FP+FN=568639
+total pixels=568639
+MCC for T-BN1145709.png:	 0.457693380379
+********************************************************************************
+extracting PCSVN of T-BN1233668.png 	 (27 of 174)
+...making outputs
+TP: 41963	 TN: 526733
+FP: 16420	FN: 61344
+TP+TN+FP+FN=646460
+total pixels=646460
+MCC for T-BN1233668.png:	 0.480633938932
+********************************************************************************
+extracting PCSVN of T-BN1273150.png 	 (28 of 174)
+...making outputs
+TP: 19402	 TN: 565803
+FP: 4715	FN: 109413
+TP+TN+FP+FN=699333
+total pixels=699333
+MCC for T-BN1273150.png:	 0.302417317473
+********************************************************************************
+extracting PCSVN of T-BN1289932.png 	 (29 of 174)
+...making outputs
+TP: 6949	 TN: 497725
+FP: 6689	FN: 57949
+TP+TN+FP+FN=569312
+total pixels=569312
+MCC for T-BN1289932.png:	 0.19498227572
+********************************************************************************
+extracting PCSVN of T-BN1328016.png 	 (30 of 174)
+...making outputs
+TP: 31669	 TN: 708843
+FP: 3356	FN: 83187
+TP+TN+FP+FN=827055
+total pixels=827055
+MCC for T-BN1328016.png:	 0.465384686659
+********************************************************************************
+extracting PCSVN of T-BN1411786.png 	 (31 of 174)
+...making outputs
+TP: 395	 TN: 543488
+FP: 1354	FN: 98687
+TP+TN+FP+FN=643924
+total pixels=643924
+MCC for T-BN1411786.png:	 0.010409468324
+********************************************************************************
+extracting PCSVN of T-BN1442472.png 	 (32 of 174)
+...making outputs
+TP: 28082	 TN: 567148
+FP: 11061	FN: 105686
+TP+TN+FP+FN=711977
+total pixels=711977
+MCC for T-BN1442472.png:	 0.326977494397
+********************************************************************************
+extracting PCSVN of T-BN1479814.png 	 (33 of 174)
+...making outputs
+TP: 35309	 TN: 907868
+FP: 11620	FN: 77236
+TP+TN+FP+FN=1032033
+total pixels=1032033
+MCC for T-BN1479814.png:	 0.450482292162
+********************************************************************************
+extracting PCSVN of T-BN1510602.png 	 (34 of 174)
+...making outputs
+TP: 20314	 TN: 596691
+FP: 14856	FN: 68144
+TP+TN+FP+FN=700005
+total pixels=700005
+MCC for T-BN1510602.png:	 0.31235025607
+********************************************************************************
+extracting PCSVN of T-BN1530431.png 	 (35 of 174)
+...making outputs
+TP: 22491	 TN: 541866
+FP: 7165	FN: 87685
+TP+TN+FP+FN=659207
+total pixels=659207
+MCC for T-BN1530431.png:	 0.34395431913
+********************************************************************************
+extracting PCSVN of T-BN1587209.png 	 (36 of 174)
+...making outputs
+TP: 21834	 TN: 569879
+FP: 2985	FN: 77061
+TP+TN+FP+FN=671759
+total pixels=671759
+MCC for T-BN1587209.png:	 0.404925386681
+********************************************************************************
+extracting PCSVN of T-BN1602443.png 	 (37 of 174)
+...making outputs
+TP: 45426	 TN: 592269
+FP: 7706	FN: 93992
+TP+TN+FP+FN=739393
+total pixels=739393
+MCC for T-BN1602443.png:	 0.474048429001
+********************************************************************************
+extracting PCSVN of T-BN1629357.png 	 (38 of 174)
+...making outputs
+TP: 38467	 TN: 868714
+FP: 23523	FN: 106456
+TP+TN+FP+FN=1037160
+total pixels=1037160
+MCC for T-BN1629357.png:	 0.349644400756
+********************************************************************************
+extracting PCSVN of T-BN1650687.png 	 (39 of 174)
+...making outputs
+TP: 29649	 TN: 527929
+FP: 7220	FN: 49475
+TP+TN+FP+FN=614273
+total pixels=614273
+MCC for T-BN1650687.png:	 0.509445324138
+********************************************************************************
+extracting PCSVN of T-BN1662406.png 	 (40 of 174)
+...making outputs
+TP: 761	 TN: 526251
+FP: 3898	FN: 28314
+TP+TN+FP+FN=559224
+total pixels=559224
+MCC for T-BN1662406.png:	 0.0459705650451
+********************************************************************************
+extracting PCSVN of T-BN1788623.png 	 (41 of 174)
+...making outputs
+TP: 30318	 TN: 662278
+FP: 7948	FN: 76604
+TP+TN+FP+FN=777148
+total pixels=777148
+MCC for T-BN1788623.png:	 0.432543548867
+********************************************************************************
+extracting PCSVN of T-BN2050224.png 	 (42 of 174)
+...making outputs
+TP: 45337	 TN: 634642
+FP: 5619	FN: 84039
+TP+TN+FP+FN=769637
+total pixels=769637
+MCC for T-BN2050224.png:	 0.513835059622
+********************************************************************************
+extracting PCSVN of T-BN2095839.png 	 (43 of 174)
+...making outputs
+TP: 20062	 TN: 558383
+FP: 585	FN: 89597
+TP+TN+FP+FN=668627
+total pixels=668627
+MCC for T-BN2095839.png:	 0.38935408485
+********************************************************************************
+extracting PCSVN of T-BN2315363.png 	 (44 of 174)
+...making outputs
+TP: 31035	 TN: 438569
+FP: 3342	FN: 72397
+TP+TN+FP+FN=545343
+total pixels=545343
+MCC for T-BN2315363.png:	 0.471818870413
+********************************************************************************
+extracting PCSVN of T-BN2330218.png 	 (45 of 174)
+...making outputs
+TP: 16534	 TN: 501254
+FP: 6257	FN: 63422
+TP+TN+FP+FN=587467
+total pixels=587467
+MCC for T-BN2330218.png:	 0.345300370907
+********************************************************************************
+extracting PCSVN of T-BN2341348.png 	 (46 of 174)
+...making outputs
+TP: 9809	 TN: 464594
+FP: 1411	FN: 75443
+TP+TN+FP+FN=551257
+total pixels=551257
+MCC for T-BN2341348.png:	 0.286865076071
+********************************************************************************
+extracting PCSVN of T-BN2408482.png 	 (47 of 174)
+...making outputs
+TP: 8983	 TN: 615929
+FP: 2412	FN: 93030
+TP+TN+FP+FN=720354
+total pixels=720354
+MCC for T-BN2408482.png:	 0.235159466502
+********************************************************************************
+extracting PCSVN of T-BN2421294.png 	 (48 of 174)
+...making outputs
+TP: 8373	 TN: 686947
+FP: 2432	FN: 126326
+TP+TN+FP+FN=824078
+total pixels=824078
+MCC for T-BN2421294.png:	 0.190599958378
+********************************************************************************
+extracting PCSVN of T-BN2432252.png 	 (49 of 174)
+...making outputs
+TP: 30218	 TN: 523339
+FP: 2907	FN: 76440
+TP+TN+FP+FN=632904
+total pixels=632904
+MCC for T-BN2432252.png:	 0.466915656843
+********************************************************************************
+extracting PCSVN of T-BN2481864.png 	 (50 of 174)
+...making outputs
+TP: 46894	 TN: 610393
+FP: 6782	FN: 99551
+TP+TN+FP+FN=763620
+total pixels=763620
+MCC for T-BN2481864.png:	 0.476229974627
+********************************************************************************
+extracting PCSVN of T-BN2583658.png 	 (51 of 174)
+...making outputs
+TP: 26483	 TN: 647146
+FP: 10985	FN: 65495
+TP+TN+FP+FN=750109
+total pixels=750109
+MCC for T-BN2583658.png:	 0.408394961549
+********************************************************************************
+extracting PCSVN of T-BN2623827.png 	 (52 of 174)
+...making outputs
+TP: 12275	 TN: 534983
+FP: 3020	FN: 111580
+TP+TN+FP+FN=661858
+total pixels=661858
+MCC for T-BN2623827.png:	 0.24269169124
+********************************************************************************
+extracting PCSVN of T-BN2641672.png 	 (53 of 174)
+...making outputs
+TP: 27014	 TN: 467753
+FP: 3898	FN: 113836
+TP+TN+FP+FN=612501
+total pixels=612501
+MCC for T-BN2641672.png:	 0.352792816837
+********************************************************************************
+extracting PCSVN of T-BN2644701.png 	 (54 of 174)
+...making outputs
+TP: 17890	 TN: 575334
+FP: 9545	FN: 67189
+TP+TN+FP+FN=669958
+total pixels=669958
+MCC for T-BN2644701.png:	 0.325873895864
+********************************************************************************
+extracting PCSVN of T-BN2679570.png 	 (55 of 174)
+...making outputs
+TP: 27043	 TN: 642046
+FP: 4579	FN: 103788
+TP+TN+FP+FN=777456
+total pixels=777456
+MCC for T-BN2679570.png:	 0.378068699324
+********************************************************************************
+extracting PCSVN of T-BN2713393.png 	 (56 of 174)
+...making outputs
+TP: 26678	 TN: 458470
+FP: 6742	FN: 75024
+TP+TN+FP+FN=566914
+total pixels=566914
+MCC for T-BN2713393.png:	 0.403704833549
+********************************************************************************
+extracting PCSVN of T-BN2721525.png 	 (57 of 174)
+...making outputs
+TP: 12311	 TN: 474437
+FP: 2074	FN: 54763
+TP+TN+FP+FN=543585
+total pixels=543585
+MCC for T-BN2721525.png:	 0.367168234462
+********************************************************************************
+extracting PCSVN of T-BN2774548.png 	 (58 of 174)
+...making outputs
+TP: 4993	 TN: 537398
+FP: 2359	FN: 105081
+TP+TN+FP+FN=649831
+total pixels=649831
+MCC for T-BN2774548.png:	 0.145373835575
+********************************************************************************
+extracting PCSVN of T-BN2810683.png 	 (59 of 174)
+...making outputs
+TP: 0	 TN: 460569
+FP: 29692	FN: 0
+TP+TN+FP+FN=490261
+total pixels=490261
+MCC for T-BN2810683.png:	 0
+********************************************************************************
+extracting PCSVN of T-BN2829989.png 	 (60 of 174)
+...making outputs
+TP: 28491	 TN: 679849
+FP: 10360	FN: 104769
+TP+TN+FP+FN=823469
+total pixels=823469
+MCC for T-BN2829989.png:	 0.345306558326
+********************************************************************************
+extracting PCSVN of T-BN2839794.png 	 (61 of 174)
+...making outputs
+TP: 35484	 TN: 475933
+FP: 7622	FN: 102421
+TP+TN+FP+FN=621460
+total pixels=621460
+MCC for T-BN2839794.png:	 0.395044041951
+********************************************************************************
+extracting PCSVN of T-BN2844756.png 	 (62 of 174)
+...making outputs
+TP: 53800	 TN: 873700
+FP: 11378	FN: 115076
+TP+TN+FP+FN=1053954
+total pixels=1053954
+MCC for T-BN2844756.png:	 0.465587553414
+********************************************************************************
+extracting PCSVN of T-BN2899857.png 	 (63 of 174)
+...making outputs
+TP: 28251	 TN: 453641
+FP: 5243	FN: 74110
+TP+TN+FP+FN=561245
+total pixels=561245
+MCC for T-BN2899857.png:	 0.431279075166
+********************************************************************************
+extracting PCSVN of T-BN2958557.png 	 (64 of 174)
+...making outputs
+TP: 30380	 TN: 703832
+FP: 8067	FN: 85358
+TP+TN+FP+FN=827637
+total pixels=827637
+MCC for T-BN2958557.png:	 0.413877435983
+********************************************************************************
+extracting PCSVN of T-BN3182394.png 	 (65 of 174)
+...making outputs
+TP: 22205	 TN: 510404
+FP: 6093	FN: 73032
+TP+TN+FP+FN=611734
+total pixels=611734
+MCC for T-BN3182394.png:	 0.382083503539
+********************************************************************************
+extracting PCSVN of T-BN3236159.png 	 (66 of 174)
+...making outputs
+TP: 24782	 TN: 475138
+FP: 8700	FN: 56972
+TP+TN+FP+FN=565592
+total pixels=565592
+MCC for T-BN3236159.png:	 0.424881595298
+********************************************************************************
+extracting PCSVN of T-BN3307587.png 	 (67 of 174)
+...making outputs
+TP: 22871	 TN: 600263
+FP: 5416	FN: 86691
+TP+TN+FP+FN=715241
+total pixels=715241
+MCC for T-BN3307587.png:	 0.369237182069
+********************************************************************************
+extracting PCSVN of T-BN3436209.png 	 (68 of 174)
+...making outputs
+TP: 23501	 TN: 651450
+FP: 19713	FN: 111806
+TP+TN+FP+FN=806470
+total pixels=806470
+MCC for T-BN3436209.png:	 0.239463081026
+********************************************************************************
+extracting PCSVN of T-BN3601547.png 	 (69 of 174)
+...making outputs
+TP: 17965	 TN: 435599
+FP: 2555	FN: 55800
+TP+TN+FP+FN=511919
+total pixels=511919
+MCC for T-BN3601547.png:	 0.425583315495
+********************************************************************************
+extracting PCSVN of T-BN3731521.png 	 (70 of 174)
+...making outputs
+TP: 20574	 TN: 647036
+FP: 3154	FN: 73711
+TP+TN+FP+FN=744475
+total pixels=744475
+MCC for T-BN3731521.png:	 0.403954232696
+********************************************************************************
+extracting PCSVN of T-BN3751005.png 	 (71 of 174)
+...making outputs
+TP: 36164	 TN: 496294
+FP: 11022	FN: 60835
+TP+TN+FP+FN=604315
+total pixels=604315
+MCC for T-BN3751005.png:	 0.480366091897
+********************************************************************************
+extracting PCSVN of T-BN3800686.png 	 (72 of 174)
+...making outputs
+TP: 0	 TN: 658628
+FP: 0	FN: 93760
+TP+TN+FP+FN=752388
+total pixels=752388
+MCC for T-BN3800686.png:	 0
+********************************************************************************
+extracting PCSVN of T-BN3817093.png 	 (73 of 174)
+...making outputs
+TP: 3761	 TN: 426362
+FP: 4898	FN: 77155
+TP+TN+FP+FN=512176
+total pixels=512176
+MCC for T-BN3817093.png:	 0.0993655881141
+********************************************************************************
+extracting PCSVN of T-BN3857011.png 	 (74 of 174)
+...making outputs
+TP: 11526	 TN: 453606
+FP: 10938	FN: 49474
+TP+TN+FP+FN=525544
+total pixels=525544
+MCC for T-BN3857011.png:	 0.261917971638
+********************************************************************************
+extracting PCSVN of T-BN3859381.png 	 (75 of 174)
+...making outputs
+TP: 12166	 TN: 509452
+FP: 13654	FN: 78101
+TP+TN+FP+FN=613373
+total pixels=613373
+MCC for T-BN3859381.png:	 0.191730835879
+********************************************************************************
+extracting PCSVN of T-BN4031846.png 	 (76 of 174)
+...making outputs
+TP: 8589	 TN: 411518
+FP: 3472	FN: 53533
+TP+TN+FP+FN=477112
+total pixels=477112
+MCC for T-BN4031846.png:	 0.278475999845
+********************************************************************************
+extracting PCSVN of T-BN4193575.png 	 (77 of 174)
+...making outputs
+TP: 16977	 TN: 497367
+FP: 1307	FN: 85486
+TP+TN+FP+FN=601137
+total pixels=601137
+MCC for T-BN4193575.png:	 0.35706382714
+********************************************************************************
+extracting PCSVN of T-BN4384182.png 	 (78 of 174)
+...making outputs
+TP: 31914	 TN: 506718
+FP: 2350	FN: 88757
+TP+TN+FP+FN=629739
+total pixels=629739
+MCC for T-BN4384182.png:	 0.450888797569
+********************************************************************************
+extracting PCSVN of T-BN4442496.png 	 (79 of 174)
+...making outputs
+TP: 6641	 TN: 527738
+FP: 2573	FN: 116599
+TP+TN+FP+FN=653551
+total pixels=653551
+MCC for T-BN4442496.png:	 0.16269170854
+********************************************************************************
+extracting PCSVN of T-BN4475126.png 	 (80 of 174)
+...making outputs
+TP: 20757	 TN: 556954
+FP: 11423	FN: 55247
+TP+TN+FP+FN=644381
+total pixels=644381
+MCC for T-BN4475126.png:	 0.37465200772
+********************************************************************************
+extracting PCSVN of T-BN4537926.png 	 (81 of 174)
+...making outputs
+TP: 12249	 TN: 515122
+FP: 5417	FN: 59836
+TP+TN+FP+FN=592624
+total pixels=592624
+MCC for T-BN4537926.png:	 0.306599376281
+********************************************************************************
+extracting PCSVN of T-BN4569506.png 	 (82 of 174)
+...making outputs
+TP: 0	 TN: 833502
+FP: 0	FN: 121780
+TP+TN+FP+FN=955282
+total pixels=955282
+MCC for T-BN4569506.png:	 0
+********************************************************************************
+extracting PCSVN of T-BN4920563.png 	 (83 of 174)
+...making outputs
+TP: 25033	 TN: 583433
+FP: 7757	FN: 70843
+TP+TN+FP+FN=687066
+total pixels=687066
+MCC for T-BN4920563.png:	 0.403067815345
+********************************************************************************
+extracting PCSVN of T-BN4979348.png 	 (84 of 174)
+...making outputs
+TP: 16761	 TN: 556278
+FP: 2359	FN: 120797
+TP+TN+FP+FN=696195
+total pixels=696195
+MCC for T-BN4979348.png:	 0.286577051843
+********************************************************************************
+extracting PCSVN of T-BN4981652.png 	 (85 of 174)
+...making outputs
+TP: 14932	 TN: 520050
+FP: 3552	FN: 72834
+TP+TN+FP+FN=611368
+total pixels=611368
+MCC for T-BN4981652.png:	 0.334503965053
+********************************************************************************
+extracting PCSVN of T-BN5065621.png 	 (86 of 174)
+...making outputs
+TP: 3964	 TN: 467456
+FP: 1304	FN: 136805
+TP+TN+FP+FN=609529
+total pixels=609529
+MCC for T-BN5065621.png:	 0.115544058754
+********************************************************************************
+extracting PCSVN of T-BN5072928.png 	 (87 of 174)
+...making outputs
+TP: 43270	 TN: 522453
+FP: 10904	FN: 63229
+TP+TN+FP+FN=639856
+total pixels=639856
+MCC for T-BN5072928.png:	 0.516267494607
+********************************************************************************
+extracting PCSVN of T-BN5179290.png 	 (88 of 174)
+...making outputs
+TP: 15976	 TN: 548370
+FP: 7243	FN: 69544
+TP+TN+FP+FN=641133
+total pixels=641133
+MCC for T-BN5179290.png:	 0.31624174455
+********************************************************************************
+extracting PCSVN of T-BN5226897.png 	 (89 of 174)
+...making outputs
+TP: 25505	 TN: 619617
+FP: 4791	FN: 91054
+TP+TN+FP+FN=740967
+total pixels=740967
+MCC for T-BN5226897.png:	 0.388201857404
+********************************************************************************
+extracting PCSVN of T-BN5260182.png 	 (90 of 174)
+...making outputs
+TP: 14322	 TN: 659656
+FP: 2087	FN: 89374
+TP+TN+FP+FN=765439
+total pixels=765439
+MCC for T-BN5260182.png:	 0.318892869739
+********************************************************************************
+extracting PCSVN of T-BN5280796.png 	 (91 of 174)
+...making outputs
+TP: 44765	 TN: 595301
+FP: 4725	FN: 71966
+TP+TN+FP+FN=716757
+total pixels=716757
+MCC for T-BN5280796.png:	 0.547030086933
+********************************************************************************
+extracting PCSVN of T-BN5569860.png 	 (92 of 174)
+...making outputs
+TP: 9890	 TN: 307342
+FP: 1326	FN: 48282
+TP+TN+FP+FN=366840
+total pixels=366840
+MCC for T-BN5569860.png:	 0.351605631726
+********************************************************************************
+extracting PCSVN of T-BN5602970.png 	 (93 of 174)
+...making outputs
+TP: 10896	 TN: 203336
+FP: 3464	FN: 28888
+TP+TN+FP+FN=246584
+total pixels=246584
+MCC for T-BN5602970.png:	 0.403876768812
+********************************************************************************
+extracting PCSVN of T-BN5701077.png 	 (94 of 174)
+...making outputs
+TP: 49816	 TN: 758885
+FP: 14807	FN: 86197
+TP+TN+FP+FN=909705
+total pixels=909705
+MCC for T-BN5701077.png:	 0.481850339193
+********************************************************************************
+extracting PCSVN of T-BN5766074.png 	 (95 of 174)
+...making outputs
+TP: 12393	 TN: 483221
+FP: 6452	FN: 53057
+TP+TN+FP+FN=555123
+total pixels=555123
+MCC for T-BN5766074.png:	 0.313731346745
+********************************************************************************
+extracting PCSVN of T-BN5852719.png 	 (96 of 174)
+...making outputs
+TP: 3493	 TN: 359779
+FP: 2153	FN: 45149
+TP+TN+FP+FN=410574
+total pixels=410574
+MCC for T-BN5852719.png:	 0.182765008742
+********************************************************************************
+extracting PCSVN of T-BN5932011.png 	 (97 of 174)
+...making outputs
+TP: 20615	 TN: 526725
+FP: 4918	FN: 59148
+TP+TN+FP+FN=611406
+total pixels=611406
+MCC for T-BN5932011.png:	 0.419576052614
+********************************************************************************
+extracting PCSVN of T-BN5934535.png 	 (98 of 174)
+...making outputs
+TP: 7037	 TN: 579429
+FP: 3581	FN: 56360
+TP+TN+FP+FN=646407
+total pixels=646407
+MCC for T-BN5934535.png:	 0.245352563013
+********************************************************************************
+extracting PCSVN of T-BN5961598.png 	 (99 of 174)
+...making outputs
+TP: 19646	 TN: 626833
+FP: 2775	FN: 65789
+TP+TN+FP+FN=715043
+total pixels=715043
+MCC for T-BN5961598.png:	 0.419769403126
+********************************************************************************
+extracting PCSVN of T-BN6028328.png 	 (100 of 174)
+...making outputs
+TP: 35026	 TN: 548990
+FP: 4962	FN: 65468
+TP+TN+FP+FN=654446
+total pixels=654446
+MCC for T-BN6028328.png:	 0.511138124133
+********************************************************************************
+extracting PCSVN of T-BN6216577.png 	 (101 of 174)
+...making outputs
+TP: 18094	 TN: 362669
+FP: 5227	FN: 55190
+TP+TN+FP+FN=441180
+total pixels=441180
+MCC for T-BN6216577.png:	 0.387048184518
+********************************************************************************
+extracting PCSVN of T-BN6238549.png 	 (102 of 174)
+...making outputs
+TP: 35657	 TN: 655989
+FP: 3111	FN: 77208
+TP+TN+FP+FN=771965
+total pixels=771965
+MCC for T-BN6238549.png:	 0.503449911813
+********************************************************************************
+extracting PCSVN of T-BN6279307.png 	 (103 of 174)
+...making outputs
+TP: 12030	 TN: 508487
+FP: 21942	FN: 54929
+TP+TN+FP+FN=597388
+total pixels=597388
+MCC for T-BN6279307.png:	 0.188387260282
+********************************************************************************
+extracting PCSVN of T-BN6469047.png 	 (104 of 174)
+...making outputs
+TP: 23160	 TN: 543348
+FP: 22170	FN: 75841
+TP+TN+FP+FN=664519
+total pixels=664519
+MCC for T-BN6469047.png:	 0.27503020563
+********************************************************************************
+extracting PCSVN of T-BN6472004.png 	 (105 of 174)
+...making outputs
+TP: 9587	 TN: 506782
+FP: 3276	FN: 101579
+TP+TN+FP+FN=621224
+total pixels=621224
+MCC for T-BN6472004.png:	 0.21485358746
+********************************************************************************
+extracting PCSVN of T-BN6483346.png 	 (106 of 174)
+...making outputs
+TP: 25986	 TN: 712208
+FP: 3926	FN: 87312
+TP+TN+FP+FN=829432
+total pixels=829432
+MCC for T-BN6483346.png:	 0.412364602168
+********************************************************************************
+extracting PCSVN of T-BN6498420.png 	 (107 of 174)
+...making outputs
+TP: 12204	 TN: 647629
+FP: 6389	FN: 56781
+TP+TN+FP+FN=723003
+total pixels=723003
+MCC for T-BN6498420.png:	 0.310215118092
+********************************************************************************
+extracting PCSVN of T-BN6535713.png 	 (108 of 174)
+...making outputs
+TP: 28895	 TN: 773384
+FP: 4050	FN: 119367
+TP+TN+FP+FN=925696
+total pixels=925696
+MCC for T-BN6535713.png:	 0.375502604359
+********************************************************************************
+extracting PCSVN of T-BN6557410.png 	 (109 of 174)
+...making outputs
+TP: 31446	 TN: 687634
+FP: 4136	FN: 97458
+TP+TN+FP+FN=820674
+total pixels=820674
+MCC for T-BN6557410.png:	 0.425168454133
+********************************************************************************
+extracting PCSVN of T-BN6577513.png 	 (110 of 174)
+...making outputs
+TP: 16713	 TN: 568825
+FP: 30630	FN: 95936
+TP+TN+FP+FN=712104
+total pixels=712104
+MCC for T-BN6577513.png:	 0.142477808144
+********************************************************************************
+extracting PCSVN of T-BN6588820.png 	 (111 of 174)
+...making outputs
+TP: 11382	 TN: 573749
+FP: 5392	FN: 51037
+TP+TN+FP+FN=641560
+total pixels=641560
+MCC for T-BN6588820.png:	 0.321372002316
+********************************************************************************
+extracting PCSVN of T-BN6616756.png 	 (112 of 174)
+...making outputs
+TP: 8061	 TN: 436411
+FP: 2814	FN: 51644
+TP+TN+FP+FN=498930
+total pixels=498930
+MCC for T-BN6616756.png:	 0.285867467845
+********************************************************************************
+extracting PCSVN of T-BN7080847.png 	 (113 of 174)
+...making outputs
+TP: 28746	 TN: 619076
+FP: 5307	FN: 92572
+TP+TN+FP+FN=745701
+total pixels=745701
+MCC for T-BN7080847.png:	 0.403891848386
+********************************************************************************
+extracting PCSVN of T-BN7302686.png 	 (114 of 174)
+...making outputs
+TP: 35038	 TN: 569633
+FP: 5716	FN: 79312
+TP+TN+FP+FN=689699
+total pixels=689699
+MCC for T-BN7302686.png:	 0.46760939049
+********************************************************************************
+extracting PCSVN of T-BN7408610.png 	 (115 of 174)
+...making outputs
+TP: 7421	 TN: 425113
+FP: 2016	FN: 105636
+TP+TN+FP+FN=540186
+total pixels=540186
+MCC for T-BN7408610.png:	 0.189157481049
+********************************************************************************
+extracting PCSVN of T-BN7436313.png 	 (116 of 174)
+...making outputs
+TP: 23626	 TN: 432162
+FP: 6436	FN: 71261
+TP+TN+FP+FN=533485
+total pixels=533485
+MCC for T-BN7436313.png:	 0.388565991439
+********************************************************************************
+extracting PCSVN of T-BN7467857.png 	 (117 of 174)
+...making outputs
+TP: 11446	 TN: 453379
+FP: 1818	FN: 124142
+TP+TN+FP+FN=590785
+total pixels=590785
+MCC for T-BN7467857.png:	 0.228282605053
+********************************************************************************
+extracting PCSVN of T-BN7476220.png 	 (118 of 174)
+...making outputs
+TP: 13513	 TN: 400434
+FP: 2310	FN: 81267
+TP+TN+FP+FN=497524
+total pixels=497524
+MCC for T-BN7476220.png:	 0.306225984387
+********************************************************************************
+extracting PCSVN of T-BN7515948.png 	 (119 of 174)
+...making outputs
+TP: 13609	 TN: 756629
+FP: 2416	FN: 87647
+TP+TN+FP+FN=860301
+total pixels=860301
+MCC for T-BN7515948.png:	 0.312751579929
+********************************************************************************
+extracting PCSVN of T-BN7531176.png 	 (120 of 174)
+...making outputs
+TP: 25019	 TN: 493147
+FP: 4388	FN: 53242
+TP+TN+FP+FN=575796
+total pixels=575796
+MCC for T-BN7531176.png:	 0.483930612087
+********************************************************************************
+extracting PCSVN of T-BN7547732.png 	 (121 of 174)
+...making outputs
+TP: 33127	 TN: 541976
+FP: 6045	FN: 95486
+TP+TN+FP+FN=676634
+total pixels=676634
+MCC for T-BN7547732.png:	 0.414204102745
+********************************************************************************
+extracting PCSVN of T-BN7644170.png 	 (122 of 174)
+...making outputs
+TP: 28456	 TN: 618189
+FP: 10151	FN: 71231
+TP+TN+FP+FN=728027
+total pixels=728027
+MCC for T-BN7644170.png:	 0.413118939579
+********************************************************************************
+extracting PCSVN of T-BN7646343.png 	 (123 of 174)
+...making outputs
+TP: 38985	 TN: 599138
+FP: 7375	FN: 64229
+TP+TN+FP+FN=709727
+total pixels=709727
+MCC for T-BN7646343.png:	 0.521540877897
+********************************************************************************
+extracting PCSVN of T-BN7680325.png 	 (124 of 174)
+...making outputs
+TP: 6643	 TN: 491827
+FP: 1490	FN: 110935
+TP+TN+FP+FN=610895
+total pixels=610895
+MCC for T-BN7680325.png:	 0.183952334827
+********************************************************************************
+extracting PCSVN of T-BN7686730.png 	 (125 of 174)
+...making outputs
+TP: 19237	 TN: 372538
+FP: 17684	FN: 32017
+TP+TN+FP+FN=441476
+total pixels=441476
+MCC for T-BN7686730.png:	 0.381873956615
+********************************************************************************
+extracting PCSVN of T-BN7687331.png 	 (126 of 174)
+...making outputs
+TP: 24843	 TN: 427854
+FP: 4865	FN: 57413
+TP+TN+FP+FN=514975
+total pixels=514975
+MCC for T-BN7687331.png:	 0.456899544368
+********************************************************************************
+extracting PCSVN of T-BN7725413.png 	 (127 of 174)
+...making outputs
+TP: 28467	 TN: 594238
+FP: 8301	FN: 74166
+TP+TN+FP+FN=705172
+total pixels=705172
+MCC for T-BN7725413.png:	 0.418129562273
+********************************************************************************
+extracting PCSVN of T-BN7726580.png 	 (128 of 174)
+...making outputs
+TP: 18812	 TN: 593555
+FP: 1278	FN: 64162
+TP+TN+FP+FN=677807
+total pixels=677807
+MCC for T-BN7726580.png:	 0.43402706711
+********************************************************************************
+extracting PCSVN of T-BN7736166.png 	 (129 of 174)
+...making outputs
+TP: 25873	 TN: 495570
+FP: 4448	FN: 80523
+TP+TN+FP+FN=606414
+total pixels=606414
+MCC for T-BN7736166.png:	 0.40885943689
+********************************************************************************
+extracting PCSVN of T-BN7753462.png 	 (130 of 174)
+...making outputs
+TP: 29217	 TN: 551390
+FP: 2874	FN: 55836
+TP+TN+FP+FN=639317
+total pixels=639317
+MCC for T-BN7753462.png:	 0.526231466615
+********************************************************************************
+extracting PCSVN of T-BN7767693.png 	 (131 of 174)
+...making outputs
+TP: 34231	 TN: 546220
+FP: 8471	FN: 54813
+TP+TN+FP+FN=643735
+total pixels=643735
+MCC for T-BN7767693.png:	 0.512112027098
+********************************************************************************
+extracting PCSVN of T-BN7804374.png 	 (132 of 174)
+...making outputs
+TP: 6794	 TN: 607232
+FP: 1812	FN: 120404
+TP+TN+FP+FN=736242
+total pixels=736242
+MCC for T-BN7804374.png:	 0.177403192367
+********************************************************************************
+extracting PCSVN of T-BN7847884.png 	 (133 of 174)
+...making outputs
+TP: 14485	 TN: 560774
+FP: 1417	FN: 89716
+TP+TN+FP+FN=666392
+total pixels=666392
+MCC for T-BN7847884.png:	 0.324811604904
+********************************************************************************
+extracting PCSVN of T-BN7871142.png 	 (134 of 174)
+...making outputs
+TP: 7976	 TN: 396571
+FP: 2597	FN: 71202
+TP+TN+FP+FN=478346
+total pixels=478346
+MCC for T-BN7871142.png:	 0.238203482382
+********************************************************************************
+extracting PCSVN of T-BN7914277.png 	 (135 of 174)
+...making outputs
+TP: 26888	 TN: 479044
+FP: 12629	FN: 50967
+TP+TN+FP+FN=569528
+total pixels=569528
+MCC for T-BN7914277.png:	 0.432169971188
+********************************************************************************
+extracting PCSVN of T-BN7957558.png 	 (136 of 174)
+...making outputs
+TP: 35632	 TN: 522426
+FP: 4591	FN: 71063
+TP+TN+FP+FN=633712
+total pixels=633712
+MCC for T-BN7957558.png:	 0.499181040172
+********************************************************************************
+extracting PCSVN of T-BN7965300.png 	 (137 of 174)
+...making outputs
+TP: 19854	 TN: 451012
+FP: 2240	FN: 88779
+TP+TN+FP+FN=561885
+total pixels=561885
+MCC for T-BN7965300.png:	 0.361311313313
+********************************************************************************
+extracting PCSVN of T-BN7971406.png 	 (138 of 174)
+...making outputs
+TP: 2192	 TN: 549032
+FP: 1855	FN: 120639
+TP+TN+FP+FN=673718
+total pixels=673718
+MCC for T-BN7971406.png:	 0.0723447985778
+********************************************************************************
+extracting PCSVN of T-BN8048789.png 	 (139 of 174)
+...making outputs
+TP: 23716	 TN: 569771
+FP: 3464	FN: 83579
+TP+TN+FP+FN=680530
+total pixels=680530
+MCC for T-BN8048789.png:	 0.400112261952
+********************************************************************************
+extracting PCSVN of T-BN8159259.png 	 (140 of 174)
+...making outputs
+TP: 20099	 TN: 396390
+FP: 7435	FN: 45610
+TP+TN+FP+FN=469534
+total pixels=469534
+MCC for T-BN8159259.png:	 0.424474894542
+********************************************************************************
+extracting PCSVN of T-BN8166392.png 	 (141 of 174)
+...making outputs
+TP: 16363	 TN: 598284
+FP: 1953	FN: 94420
+TP+TN+FP+FN=711020
+total pixels=711020
+MCC for T-BN8166392.png:	 0.330692753049
+********************************************************************************
+extracting PCSVN of T-BN8177602.png 	 (142 of 174)
+...making outputs
+TP: 24024	 TN: 423558
+FP: 3406	FN: 67060
+TP+TN+FP+FN=518048
+total pixels=518048
+MCC for T-BN8177602.png:	 0.43480786665
+********************************************************************************
+extracting PCSVN of T-BN8183465.png 	 (143 of 174)
+...making outputs
+TP: 37731	 TN: 664792
+FP: 7516	FN: 76551
+TP+TN+FP+FN=786590
+total pixels=786590
+MCC for T-BN8183465.png:	 0.482757160696
+********************************************************************************
+extracting PCSVN of T-BN8321696.png 	 (144 of 174)
+...making outputs
+TP: 25693	 TN: 548617
+FP: 5979	FN: 57621
+TP+TN+FP+FN=637910
+total pixels=637910
+MCC for T-BN8321696.png:	 0.461669069011
+********************************************************************************
+extracting PCSVN of T-BN8333878.png 	 (145 of 174)
+...making outputs
+TP: 37511	 TN: 624441
+FP: 7456	FN: 51511
+TP+TN+FP+FN=720919
+total pixels=720919
+MCC for T-BN8333878.png:	 0.557177196769
+********************************************************************************
+extracting PCSVN of T-BN8358802.png 	 (146 of 174)
+...making outputs
+TP: 9968	 TN: 595570
+FP: 1722	FN: 72029
+TP+TN+FP+FN=679289
+total pixels=679289
+MCC for T-BN8358802.png:	 0.297312793214
+********************************************************************************
+extracting PCSVN of T-BN8438124.png 	 (147 of 174)
+...making outputs
+TP: 6915	 TN: 487247
+FP: 2394	FN: 91108
+TP+TN+FP+FN=587664
+total pixels=587664
+MCC for T-BN8438124.png:	 0.196030832703
+********************************************************************************
+extracting PCSVN of T-BN8441842.png 	 (148 of 174)
+...making outputs
+TP: 8521	 TN: 453892
+FP: 1034	FN: 72596
+TP+TN+FP+FN=536043
+total pixels=536043
+MCC for T-BN8441842.png:	 0.278352643781
+********************************************************************************
+extracting PCSVN of T-BN8549337.png 	 (149 of 174)
+...making outputs
+TP: 30387	 TN: 436564
+FP: 12485	FN: 34531
+TP+TN+FP+FN=513967
+total pixels=513967
+MCC for T-BN8549337.png:	 0.528952758738
+********************************************************************************
+extracting PCSVN of T-BN8625834.png 	 (150 of 174)
+...making outputs
+TP: 20026	 TN: 564671
+FP: 3002	FN: 77613
+TP+TN+FP+FN=665312
+total pixels=665312
+MCC for T-BN8625834.png:	 0.386808043647
+********************************************************************************
+extracting PCSVN of T-BN8656271.png 	 (151 of 174)
+...making outputs
+TP: 10385	 TN: 447260
+FP: 2345	FN: 100929
+TP+TN+FP+FN=560919
+total pixels=560919
+MCC for T-BN8656271.png:	 0.23587572726
+********************************************************************************
+extracting PCSVN of T-BN8731535.png 	 (152 of 174)
+...making outputs
+TP: 21068	 TN: 622051
+FP: 7808	FN: 145669
+TP+TN+FP+FN=796596
+total pixels=796596
+MCC for T-BN8731535.png:	 0.248035304122
+********************************************************************************
+extracting PCSVN of T-BN8778711.png 	 (153 of 174)
+...making outputs
+TP: 18750	 TN: 518503
+FP: 7890	FN: 45472
+TP+TN+FP+FN=590615
+total pixels=590615
+MCC for T-BN8778711.png:	 0.415459133518
+********************************************************************************
+extracting PCSVN of T-BN8789191.png 	 (154 of 174)
+...making outputs
+TP: 0	 TN: 532893
+FP: 0	FN: 92864
+TP+TN+FP+FN=625757
+total pixels=625757
+MCC for T-BN8789191.png:	 0
+********************************************************************************
+extracting PCSVN of T-BN8801263.png 	 (155 of 174)
+...making outputs
+TP: 28511	 TN: 470773
+FP: 4918	FN: 122332
+TP+TN+FP+FN=626534
+total pixels=626534
+MCC for T-BN8801263.png:	 0.339903117251
+********************************************************************************
+extracting PCSVN of T-BN8914395.png 	 (156 of 174)
+...making outputs
+TP: 27959	 TN: 512262
+FP: 7430	FN: 50904
+TP+TN+FP+FN=598555
+total pixels=598555
+MCC for T-BN8914395.png:	 0.48789793728
+********************************************************************************
+extracting PCSVN of T-BN8949552.png 	 (157 of 174)
+...making outputs
+TP: 28435	 TN: 528678
+FP: 7612	FN: 80840
+TP+TN+FP+FN=645565
+total pixels=645565
+MCC for T-BN8949552.png:	 0.401795464761
+********************************************************************************
+extracting PCSVN of T-BN9056988.png 	 (158 of 174)
+...making outputs
+TP: 2633	 TN: 525807
+FP: 4507	FN: 84548
+TP+TN+FP+FN=617495
+total pixels=617495
+MCC for T-BN9056988.png:	 0.0706891571406
+********************************************************************************
+extracting PCSVN of T-BN9118174.png 	 (159 of 174)
+...making outputs
+TP: 27547	 TN: 462552
+FP: 7576	FN: 54942
+TP+TN+FP+FN=552617
+total pixels=552617
+MCC for T-BN9118174.png:	 0.464254718055
+********************************************************************************
+extracting PCSVN of T-BN9165109.png 	 (160 of 174)
+...making outputs
+TP: 19074	 TN: 515344
+FP: 2464	FN: 76734
+TP+TN+FP+FN=613616
+total pixels=613616
+MCC for T-BN9165109.png:	 0.383289215558
+********************************************************************************
+extracting PCSVN of T-BN9211170.png 	 (161 of 174)
+...making outputs
+TP: 13719	 TN: 508361
+FP: 1298	FN: 65956
+TP+TN+FP+FN=589334
+total pixels=589334
+MCC for T-BN9211170.png:	 0.368096982328
+********************************************************************************
+extracting PCSVN of T-BN9230531.png 	 (162 of 174)
+...making outputs
+TP: 21480	 TN: 522458
+FP: 6898	FN: 89133
+TP+TN+FP+FN=639969
+total pixels=639969
+MCC for T-BN9230531.png:	 0.33274917777
+********************************************************************************
+extracting PCSVN of T-BN9238868.png 	 (163 of 174)
+...making outputs
+TP: 16823	 TN: 502560
+FP: 5371	FN: 47372
+TP+TN+FP+FN=572126
+total pixels=572126
+MCC for T-BN9238868.png:	 0.411050885818
+********************************************************************************
+extracting PCSVN of T-BN9323718.png 	 (164 of 174)
+...making outputs
+TP: 2655	 TN: 518013
+FP: 1687	FN: 56553
+TP+TN+FP+FN=578908
+total pixels=578908
+MCC for T-BN9323718.png:	 0.146083533779
+********************************************************************************
+extracting PCSVN of T-BN9365078.png 	 (165 of 174)
+...making outputs
+TP: 17383	 TN: 701076
+FP: 6037	FN: 98746
+TP+TN+FP+FN=823242
+total pixels=823242
+MCC for T-BN9365078.png:	 0.295531540601
+********************************************************************************
+extracting PCSVN of T-BN9413603.png 	 (166 of 174)
+...making outputs
+TP: 0	 TN: 510217
+FP: 0	FN: 90073
+TP+TN+FP+FN=600290
+total pixels=600290
+MCC for T-BN9413603.png:	 0
+********************************************************************************
+extracting PCSVN of T-BN9586508.png 	 (167 of 174)
+...making outputs
+TP: 28229	 TN: 690600
+FP: 12667	FN: 78379
+TP+TN+FP+FN=809875
+total pixels=809875
+MCC for T-BN9586508.png:	 0.381038478265
+********************************************************************************
+extracting PCSVN of T-BN9597656.png 	 (168 of 174)
+...making outputs
+TP: 12606	 TN: 441407
+FP: 5007	FN: 54416
+TP+TN+FP+FN=513436
+total pixels=513436
+MCC for T-BN9597656.png:	 0.327382396175
+********************************************************************************
+extracting PCSVN of T-BN9730834.png 	 (169 of 174)
+...making outputs
+TP: 11915	 TN: 660718
+FP: 3983	FN: 121323
+TP+TN+FP+FN=797939
+total pixels=797939
+MCC for T-BN9730834.png:	 0.222682296725
+********************************************************************************
+extracting PCSVN of T-BN9801033.png 	 (170 of 174)
+...making outputs
+TP: 17393	 TN: 445027
+FP: 4359	FN: 63312
+TP+TN+FP+FN=530091
+total pixels=530091
+MCC for T-BN9801033.png:	 0.372741113735
+********************************************************************************
+extracting PCSVN of T-BN9900633.png 	 (171 of 174)
+...making outputs
+TP: 14005	 TN: 513048
+FP: 3643	FN: 56912
+TP+TN+FP+FN=587608
+total pixels=587608
+MCC for T-BN9900633.png:	 0.36346667952
+********************************************************************************
+extracting PCSVN of T-BN9922415.png 	 (172 of 174)
+...making outputs
+TP: 21236	 TN: 530568
+FP: 9186	FN: 59005
+TP+TN+FP+FN=619995
+total pixels=619995
+MCC for T-BN9922415.png:	 0.384807449238
+********************************************************************************
+extracting PCSVN of T-BN9937513.png 	 (173 of 174)
+...making outputs
+TP: 18108	 TN: 390890
+FP: 6447	FN: 41593
+TP+TN+FP+FN=457038
+total pixels=457038
+MCC for T-BN9937513.png:	 0.429069656612

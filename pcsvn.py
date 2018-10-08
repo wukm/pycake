@@ -22,7 +22,8 @@ import datetime
 from get_placenta import cropped_args
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
-                    dilate=True, dark_bg=True, VERBOSE=True):
+                    dilate=True, dark_bg=True,
+                    kernel=None, VERBOSE=True):
     """returns an ordered list of dictionaries for each scale
     multiscale.append(
         {'sigma': sigma,
@@ -55,7 +56,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             print('σ={}'.format(sigma))
 
         # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
-        hesh = fft_hessian(img, sigma)
+        hesh = fft_hessian(img, sigma, kernel=kernel)
 
         if VERBOSE:
             print('finding principal curvatures')
@@ -223,7 +224,9 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
                   log_range=None, scales=None, betas=None,
                   DARK_BG=True, dilate_per_scale=True, n_scales=20,
                   verbose=True, generate_graphs=True,
-                  generate_json=True, output_dir=None):
+                  generate_json=True, output_dir=None,
+                  kernel=None):
+
 
     raw_img = get_named_placenta(filename, maskfile=None)
 
@@ -265,6 +268,7 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
     multiscale = make_multiscale(img, scales, betas, gammas,
                                 find_principal_directions=False,
                                 dilate=dilate_per_scale,
+                                 kernel=kernel,
                                 dark_bg=DARK_BG,
                                  VERBOSE=verbose)
 
