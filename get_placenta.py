@@ -30,7 +30,7 @@ import numpy.ma as ma
 from skimage import segmentation, morphology
 import os.path
 import os
-
+import json
 from scipy.ndimage import imread
 
 def open_typefile(filename, filetype, sample_dir=None):
@@ -139,6 +139,63 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
         mask = imread(maskfile, mode='L')
 
     return ma.masked_array(raw_img, mask=mask)
+
+
+def list_by_quality(quality=0, N=None, json_file=None,
+                             return_empty=False):
+    """
+    returns a list of filenames that are of quality ``quality''
+
+    quality is either "good" or 0
+                       "OK" or 1
+                       "fair" or 2
+                       "bad" or 3
+
+    N is the number of placentas to return (will return # of placentas
+    of that quality or N, whichever is smaller)
+
+    if json_name is not None just use that filename directly
+
+    if return_empty then silenty failing is OK
+    """
+    if quality == 0:
+        quality = 'good'
+    elif quality == 1:
+        quality = 'okay'
+    elif quality == 2:
+        quality = 'fair'
+    elif quality == 3:
+        quality = 'bad'
+    else:
+        try:
+            quality = quality.lower()
+        except AttributeError:
+            if return_empty:
+                return list()
+            else:
+                print(f'unknown quality {quality}')
+                raise
+
+    # json file
+    if json_file is None:
+        json_file = f"{quality}-mccs.json"
+
+    # else the quality is irrelevant and the json_name
+    # is already provided
+
+    try:
+        with open(json_file, 'r') as f:
+            D = json.load(f)
+    except FileNotFoundError:
+        if return_empty:
+            return list()
+        else:
+            print('cannot find', json_file)
+            raise
+
+    placentas = [f'{d}.png' for d in D.keys()]
+
+    return placentas
 
 def check_filetype(filename, assert_png=True, assert_standard=False):
     """

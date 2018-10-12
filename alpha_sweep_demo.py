@@ -8,7 +8,7 @@ show how much variable alphas affect the output.
 """
 
 from get_placenta import get_named_placenta, cropped_args, cropped_view
-from get_placenta import list_placentas, open_typefile
+from get_placenta import list_placentas, open_typefile, list_by_quality
 
 from score import compare_trace
 
@@ -22,20 +22,31 @@ import matplotlib.pyplot as plt
 
 from hfft import fft_gradient
 from score import mcc
+
+import os
+
 #filename = 'T-BN0033885.png'
-placentas = list_placentas('T-BN')
+#placentas = list_placentas('T-BN')
+placentas = list_by_quality(0) # load good samples only
+#placentas.extend(list_by_quality(1))
 n_samples = len(placentas)
 
-OUTPUT_DIR = 'output/withdiscrete'
+OUTPUT_DIR = 'output/181011'
+
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+
 DARK_BG = False
-log_range = (-2, 4.5)
-n_scales = 20
+log_range = (-3, 4.5)
+n_scales = 15
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
 #alphas = scales**(2/3) / scales[-1]
-alphas = [0.1 for s in scales]
+alphas = [0.08 for s in scales]
 #betas = np.linspace(.5, .9, num=n_scales)
 betas = None
 print(n_samples, "samples total!")
+
+m_scores = list()
 for i, filename in enumerate(placentas):
     print('*'*80)
     print('extracting PCSVN of', filename,
@@ -48,13 +59,6 @@ for i, filename in enumerate(placentas):
                                            output_dir=OUTPUT_DIR,
                                   kernel='discrete')
 
-    #G = list()
-
-    #for s in scales:
-    #    g = fft_gradient(img, s)
-    #    G.append(g)
-    #G = np.dstack(G)
-    #f = F.copy()
     crop = cropped_args(img)
     print("...making outputs")
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
@@ -76,12 +80,13 @@ for i, filename in enumerate(placentas):
 
     print("MCC for {}:\t".format(filename), m_score)
 
+    m_scores.append(m_score)
 
     plt.imsave(outname('0_raw'), img[crop].filled(0), cmap=plt.cm.gray)
     plt.imsave(outname('1_confusion'), confusion[crop])
     scale_label_figure(labs, scales, crop=crop, savefilename=outname('2_labeled'),
-                       image_only=True)
+                       image_only=False)
     plt.imsave(outname('3_fmax'), F.max(axis=-1)[crop],
-               vmin=0,vmax=max(alphas),
-               cmap=plt.cm.viridis)
+               vmin=0,vmax=0.5,
+               cmap=plt.cm.nipy_spectral)
     plt.close('all') # something's leaking :(
