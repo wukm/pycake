@@ -47,7 +47,8 @@ import json
 abbreviations = dict()
 
 # need this to save new files
-try os.path.isdir('shortfiles')
+if not os.path.isdir('shortfiles'):
+    os.mkdir('shortfiles')
 
 for f in os.listdir():
     basename, ext = os.path.splitext(f)

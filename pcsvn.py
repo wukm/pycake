@@ -83,7 +83,15 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             # or actually calculate half of max hessian norm
             # using frob norm = sqrt(trace(AA^T))
             hxx, hxy, hyy = hesh
-            max_hessian_norm = np.sqrt((hxx**2 + 2*hxy**2 + hyy**2).max())
+            hessian_norm = np.sqrt((hxx**2 + 2*hxy**2 + hyy**2))
+
+            # make sure the max doesn't occur on a boundary
+            # this is rough and bad and could change a lot.
+            dilation_radius = int(max(np.ceil(sigma), 10))
+            collar = dilate_boundary(None, radius=dilation_radius,
+                                     mask=img.mask)
+            hessian_norm[collar] = 0
+            max_hessian_norm = hessian_norm.max()
             gamma = .5*max_hessian_norm
 
             #print("gamma (half of max hessian norm is)", gamma)
@@ -344,6 +352,7 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
             json.dump(logdata, f, indent=True)
 
     return F_all, img, scales, alphas
+
 
 def get_outname_lambda(filename, output_dir=None, timestring=None):
     """

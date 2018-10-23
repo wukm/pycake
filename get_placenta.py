@@ -180,9 +180,8 @@ def list_by_quality(quality=0, N=None, json_file=None,
     if json_file is None:
         json_file = f"{quality}-mccs.json"
 
-    # else the quality is irrelevant and the json_name
-    # is already provided
-
+    # else the quality is irrelevant and hopefully the jsonfile
+    # was provided
     try:
         with open(json_file, 'r') as f:
             D = json.load(f)

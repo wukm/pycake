@@ -23,15 +23,21 @@ import matplotlib.pyplot as plt
 from hfft import fft_gradient
 from score import mcc
 
+import os.path
 import os
+import json
+import datetime
 
-#filename = 'T-BN0033885.png'
-#placentas = list_placentas('T-BN')
-placentas = list_by_quality(0) # load good samples only
+#placentas = list_placentas('T-BN') # load allllll placentas
+#placentas = list_by_quality(0) # load good samples only
 #placentas.extend(list_by_quality(1))
+
+# obviously need to give this function a more descriptive name
+placentas = list_by_quality(json_file='manual_batch.json')
+
 n_samples = len(placentas)
 
-OUTPUT_DIR = 'output/181011'
+OUTPUT_DIR = 'output/manual_batch2'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -46,7 +52,8 @@ alphas = [0.08 for s in scales]
 betas = None
 print(n_samples, "samples total!")
 
-m_scores = list()
+m_scores = dict()
+
 for i, filename in enumerate(placentas):
     print('*'*80)
     print('extracting PCSVN of', filename,
@@ -80,7 +87,7 @@ for i, filename in enumerate(placentas):
 
     print("MCC for {}:\t".format(filename), m_score)
 
-    m_scores.append(m_score)
+    m_scores[filename] =  m_score
 
     plt.imsave(outname('0_raw'), img[crop].filled(0), cmap=plt.cm.gray)
     plt.imsave(outname('1_confusion'), confusion[crop])
@@ -90,3 +97,11 @@ for i, filename in enumerate(placentas):
                vmin=0,vmax=0.5,
                cmap=plt.cm.nipy_spectral)
     plt.close('all') # something's leaking :(
+
+# json file with mccs
+timestring = datetime.datetime.now()
+timestring = timestring.strftime("%y%m%d_%H%M")
+mccfile = os.path.join(OUTPUT_DIR, f"MCCS_{timestring}.json")
+
+with open(mccfile, 'w') as f:
+    json.dump(m_scores, f, indent=True)
