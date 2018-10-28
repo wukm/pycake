@@ -58,12 +58,16 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
     else:
         return targets, (R, S, gamma)
 
-def get_frangi_targets(K1,K2, beta=0.5, gamma=None, dark_bg=True, threshold=None):
+def get_frangi_targets(K1,K2, beta=0.5, gamma=None, dark_bg=True, signed=False, threshold=None):
     """
     returns results of frangi filter. eigenvalues are inputs
 
     if gamma is not supplied, use half of L2 norm of hessian
     if you want to use half of frobenius norm, calculate it outside here
+    if dark bg is None instead of a bool, then  ignore and don't filter based on
+    positive or negative curvature at all (magnitude is important only)
+    however, if signed is True, then dark_bg will be completely ignored, and you'll get
+    positive where K2 > 0 and negative where K2 < 0 (theoretically you could flip it)
     """
 
     R = anisotropy(K1,K2)
@@ -81,10 +85,27 @@ def get_frangi_targets(K1,K2, beta=0.5, gamma=None, dark_bg=True, threshold=None
     F = np.exp(-R / (2*beta**2))
     F *= 1 - np.exp( -S / (2*gamma**2))
 
-    if dark_bg:
-        F = (K2 < 0)*F
+    if not signed:
+        # calculate the regular frangi filter
+        if dark_bg is None:
+            #keep F the way it is
+            pass
+        elif dark_bg:
+            # zero responses from positive curvatures
+            F = (K2 < 0)*F
+        else:
+            # zero responses from negative curvatures
+            F = (K2 > 0)*F
     else:
-        F = (K2 > 0)*F
+        if dark_bg is None:
+            # nothing really makes sense here
+            pass
+        elif dark_bg:
+            # positive curvature spots will be made negative
+            F[K2 > 0] = -1 * F[K2 > 0]
+        else:
+            # negative curvature spots will be made positive
+            F[K2 < 0] = -1 * F[K2 < 0]
 
     if numpy.ma.is_masked(K1):
         F = numpy.ma.masked_array(F, mask=K1.mask)

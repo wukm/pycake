@@ -29,11 +29,11 @@ import json
 import datetime
 
 #placentas = list_placentas('T-BN') # load allllll placentas
-#placentas = list_by_quality(3) # load good samples only
+placentas = list_by_quality(2)
 #placentas.extend(list_by_quality(1))
 
 # obviously need to give this function a more descriptive name
-placentas = list_by_quality(json_file='manual_batch.json')
+#placentas = list_by_quality(json_file='manual_batch.json')
 
 n_samples = len(placentas)
 
@@ -78,6 +78,9 @@ for i, filename in enumerate(placentas):
 
     m_score, counts = mcc(approx, trace, img.mask, return_counts=True)
 
+    # this all just verifies that the 4 categories were added up
+    # correctly and match the total number of pixels in the reported
+    # placental plate.
     TP, TN, FP, FN = counts
 
     total = np.invert(img.mask).sum()
@@ -96,7 +99,6 @@ for i, filename in enumerate(placentas):
                vmin=0,vmax=0.5,
                cmap=plt.cm.nipy_spectral)
     plt.close('all') # something's leaking :(
-
 # json file with mccs
 timestring = datetime.datetime.now()
 timestring = timestring.strftime("%y%m%d_%H%M")
