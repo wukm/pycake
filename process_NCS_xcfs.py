@@ -19,7 +19,9 @@ def _outname(base, s=None):
     else:
         stubs = (base, s, 'png')
 
-    return '.'.join(stubs)
+    filename = '.'.join(stubs)
+
+    return os.path.join(os.getcwd(), filename)
 
 # get active image
 def process_NCS_xcf(timg,tdrawable):
@@ -44,6 +46,7 @@ def process_NCS_xcf(timg,tdrawable):
         if layer.name.lower() in ('perimeter', 'perimeters'):
             # .copy() has optional arg of "add_alpha_channel"
             mask = layer.copy()
+            ucip = layer.copy()
             break
     else:
         print("Could not find a perimeter layer.")
@@ -58,9 +61,12 @@ def process_NCS_xcf(timg,tdrawable):
         layer.visible = False
 
     mask.name = "mask" # name the new layer
+    ucip.name = "ucip"
     img.add_layer(mask,0) # add in position 0 (top)
+    img.add_layer(ucip,0) # add in position 0 (top)
 
     pdb.gimp_layer_flatten(mask) # Remove Alpha Channel.
+    pdb.gimp_layer_flatten(ucip) # Remove Alpha Channel.
 
     # remove unneeded (i hope) annotations
     # color exchange yellow & blue to black
@@ -82,6 +88,8 @@ def process_NCS_xcf(timg,tdrawable):
 
     # Export Layer as Image called "f".mask.png
     pdb.gimp_file_save(img,mask, outname(s="mask"), '')
+
+    # Export UCIP layer as "ucip" layer (will be handled separately)
 
     # invert (so exterior is now black)
     pdb.gimp_invert(mask)
