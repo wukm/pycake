@@ -7,17 +7,17 @@ with pixel widths instead of colors
 
 # T is the RGB_TRACE
 
-# the colors corresponding to each pixel width
+# the colors corresponding to each pixel width (diameter)
 COLORD = {
-    3: "#ff006f", # magenta
-    5: "#a80000", # dark red
-    7: "#a800ff", # purple
-    9: "#ff00ff", # light pink
-    11: "008aff", # blue
-    13: "8aff00", # green
-    15: "ffc800", # dark yellow
-    17: "ff8a00", # orange
-    19: "ff0015"  # bright red
+    3: "#ff006f",  # magenta
+    5: "#a80000",  # dark red
+    7: "#a800ff",  # purple
+    9: "#ff00ff",  # light pink
+    11: "#008aff",  # blue
+    13: "#8aff00",  # green
+    15: "#ffc800",  # dark yellow
+    17: "#ff8a00",  # orange
+    19: "#ff0015"   # bright red
 }
 
 def hex_to_rgb(hexstring):

@@ -55,7 +55,10 @@ def open_typefile(filename, filetype, sample_dir=None):
     typefile = os.path.join(sample_dir, typefile)
 
     try:
-        M = imread(typefile, mode='L')
+        if filetype == 'mask':
+            M = imread(typefile, mode='L')
+        else:
+            M = imread(typefile, mode='RGB')
 
     except FileNotFoundError:
         print('Could not find file', typefile)
@@ -63,20 +66,159 @@ def open_typefile(filename, filetype, sample_dir=None):
 
     return M
 
-def open_tracefile(tracefile):
+def open_tracefile(tracefile, as_binary=True,
+                   min_width=3, max_width=19,
+                   widths=None, sample_dir=None):
     """
     open up the trace matrix with filename 'tracefile'
     #TODO: expand this later to handle arterial traces and venous traces
+    INPUT:
+        tracefile:
+            the name of the file
+
+        min_width: widths below this will be excluded (default is
+                    3, the min recorded width). assuming these
+                    are ints
+        max_width: widths above this will be excluded (default is
+                    19, the max recorded width)
+        widths: an explicit list of widths that should be returned.
+                in this case the above min & max are ignored.
+                this way you could include widths = [3, 17, 19] only
     """
 
-    if sample_dir is None:
-        sample_dir = 'samples'
+    M = open_typefile(tracefile, 'trace', sample_dir=sample_dir)
 
-    tracefile = os.path.join(sample_dir, tracefile)
-    trace =  imread(tracefile, mode='L')
+    # now a 2D matrix with binned widths 3, 5, 7, ... , 19
+    T = colortrace_to_widths(M)
 
-    # return 1's and 0's (or convert to binary instead
-    return trace != 0
+    if widths is None:
+        min_width, max_width = int(min_width), int(max_width)
+        T[T < min_width] = 0
+        T[T > max_width] = 0
+    else:
+        # use numpy.isin(T, widths) but that's only in
+        # version 1.13 and up of numpy
+
+        # elements in A that can be found in
+        # need to reshape, after v.1.13 of numpy you can use np.isin
+        to_keep = np.in1d(T,x,assume_unique=True).reshape(A.shape)
+
+        T[np.invert(to_keep)] = 0
+
+    if as_binary:
+        return T != 0
+    else:
+        return T
+
+
+
+def colortrace_to_widths(T):
+    """
+    this will take an RGB trace image (MxNx3) and return a 2D (MxN)
+    "labeled" trace corresponding to the traced pixel length.
+    there is no distinguishing between arteries and vessels
+
+    it's preferrable to do this in real-time so only one tracefile
+    needs to be stored (making the sample folder less cluttered)
+
+    Input:
+        T: a MxNx3 RGB tracefile, where the colorations are assumed as
+        described in NOTES below.
+
+    Output:
+        widthtrace: a MxN array whose inputs describe the width of the
+        vessel (in pixels), see NOTES.
+
+    Notes:
+
+        The correspondence is as follows:
+        3 pixels: "#ff006f",  # magenta
+        5 pixels: "#a80000",  # dark red
+        7 pixels: "#a800ff",  # purple
+        9 pixels: "#ff00ff",  # light pink
+        11 pixels: "#008aff",  # blue
+        13 pixels: "#8aff00",  # green
+        15 pixels: "#ffc800",  # dark yellow
+        17 pixels: "#ff8a00",  # orange
+        19 pixels: "#ff0015"   # bright red
+
+    According to the original tracing protocol, the traced vessels are
+    binned into these 9 sizes. Vessels with a diameter smaller than 3px
+    are not traced (unless they're binned into 3px).
+    """
+    # lookup table for pencil colors
+    COLORD = {
+        3: "#ff006f",  # magenta
+        5: "#a80000",  # dark red
+        7: "#a800ff",  # purple
+        9: "#ff00ff",  # light pink
+        11: "#008aff",  # blue
+        13: "#8aff00",  # green
+        15: "#ffc800",  # dark yellow
+        17: "#ff8a00",  # orange
+        19: "#ff0015"   # bright red
+    }
+
+
+    # a 2D picture to fix in with the pixel widths
+    widthtrace = np.zeros_like(T[:,:,0])
+
+    for pix, color in COLORD.items():
+        # get a (rr,gg,bb) triple
+        triple = hex_to_rgb(color)
+
+        # get the 2D indices that are that color
+        idx = np.where(np.all(T == triple, axis=-1))
+        widthtrace[idx] = pix
+
+    return widthtrace
+
+def widths_to_colors(w, show_non_matches=False):
+    """
+    return an RGB matrix of ints [0,255] converting back from
+    [3,5,7, ... , 19] -> TRACE_COLORS
+
+    actually making a matplotlib colormap didn't seem worth it
+
+    this doesn't do any rounding (i.e. it ignores anything outside of
+    the default widths), but maybe you'd want to?
+    """
+    B = np.zeros((w.shape[0], w.shape[1], 3))
+
+    for px, rgb_triplet in TRACE_COLORS.items():
+        B[w == px, : ] = rgb_triplet
+
+    if show_non_matches:
+        # everything in w not found in TRACE_COLORS will be black
+        B[w == 0, : ] = (255, 255, 255)
+    else:
+        non_filled = (B == 0).all(axis=-1)
+
+        B[non_filled,:] = (255,255,255) # make everything white
+
+    # matplotlib likes the colors as [0,1], so....
+
+    return B / 255.
+
+TRACE_COLORS = {
+    3: (255, 0, 111),
+    5: (168, 0, 0),
+    7: (168, 0, 255),
+    9: (255, 0, 255),
+    11: (0, 138, 255),
+    13: (138, 255, 0),
+    15: (255, 200, 0),
+    17: (255, 138, 0),
+    19: (255, 0, 21)}
+
+def _hex_to_rgb(hexstring):
+    """
+    there's a function that does this in matplotlib.colors
+    but its scaled between 0 and 1 but not even as an
+    array so this is just as much work
+    """
+    triple = hexstring.strip("#")
+    return tuple(int(x,16) for x in (triple[:2],triple[2:4],triple[4:]))
 
 def get_named_placenta(filename, sample_dir=None, masked=True,
                        maskfile=None):
