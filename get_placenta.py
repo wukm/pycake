@@ -66,9 +66,10 @@ def open_typefile(filename, filetype, sample_dir=None):
 
     return M
 
-def open_tracefile(tracefile, as_binary=True,
+def open_tracefile(filename, as_binary=True,
                    min_width=3, max_width=19,
-                   widths=None, sample_dir=None):
+                   widths=None, sample_dir=None,
+                   parse_to_widths=True):
     """
     open up the trace matrix with filename 'tracefile'
     #TODO: expand this later to handle arterial traces and venous traces
@@ -76,6 +77,8 @@ def open_tracefile(tracefile, as_binary=True,
         tracefile:
             the name of the file
 
+        parse_to_widths: if True, return widths. If not,
+        simply return
         min_width: widths below this will be excluded (default is
                     3, the min recorded width). assuming these
                     are ints
@@ -146,29 +149,14 @@ def colortrace_to_widths(T):
     binned into these 9 sizes. Vessels with a diameter smaller than 3px
     are not traced (unless they're binned into 3px).
     """
-    # lookup table for pencil colors
-    COLORD = {
-        3: "#ff006f",  # magenta
-        5: "#a80000",  # dark red
-        7: "#a800ff",  # purple
-        9: "#ff00ff",  # light pink
-        11: "#008aff",  # blue
-        13: "#8aff00",  # green
-        15: "#ffc800",  # dark yellow
-        17: "#ff8a00",  # orange
-        19: "#ff0015"   # bright red
-    }
-
 
     # a 2D picture to fix in with the pixel widths
     widthtrace = np.zeros_like(T[:,:,0])
 
-    for pix, color in COLORD.items():
-        # get a (rr,gg,bb) triple
-        triple = hex_to_rgb(color)
+    for pix, color in TRACE_COLORS.items():
 
         # get the 2D indices that are that color
-        idx = np.where(np.all(T == triple, axis=-1))
+        idx = np.where(np.all(T == color, axis=-1))
         widthtrace[idx] = pix
 
     return widthtrace
