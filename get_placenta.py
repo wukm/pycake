@@ -1,28 +1,15 @@
 #!/usr/bin/env python3
 
-# change this module to placenta instead of get_placenta
-
+##TODO change the name of this module to something more descriptive
 """
-
 Get registered, unpreprocessed placental images.  No automatic registration
 (i.e. segmentation of placental plate) takes place here. The background,
 however, *is* masked.
 
 Again, there is no support for unregistered placental pictures.
-Any region outside of the placental plate MUST be black.
+A mask file must be provided.
 
 There is currently no support for color images.
-
-TODO:
-    - Build sample base & organize data :v)
-    - Test on many other images.
-    - Think of how the interface should really work, esp for get_named_placenta
-    - Fix logic in mask_background
-    - Catch errors better.
-    - Support for color images
-    - Show a better test
-    - Be able to grab trace files too.
-    - Cache masked samples.
 """
 
 import numpy as np
@@ -33,9 +20,15 @@ import os
 import json
 from scipy.ndimage import imread
 
-def open_typefile(filename, filetype, sample_dir=None):
+def open_typefile(filename, filetype, sample_dir=None, mode=None):
     """
     filetype is either 'mask' or 'trace'
+    mask -> 'L' mode
+    trace -> 'RGB' mode
+    use mode keyword to override this behavior (for example if you
+    want a binary trace)
+
+    typefiles that aren't the above will be treated as 'L'
     """
     # try to open what the mask *should* be named
     # this should be done less hackishly
@@ -54,159 +47,59 @@ def open_typefile(filename, filetype, sample_dir=None):
 
     typefile = os.path.join(sample_dir, typefile)
 
-    try:
+    if mode is not None:
         if filetype == 'mask':
-            M = imread(typefile, mode='L')
+            mode = 'L'
+        elif filetype == 'trace':
+            mode = 'RGB'
         else:
-            M = imread(typefile, mode='RGB')
+            # handle this if you need to?
+            mode = 'L'
+    try:
+        img = imread(typefile, mode=mode)
 
     except FileNotFoundError:
         print('Could not find file', typefile)
         raise
 
-    return M
+    return img
 
-def open_tracefile(filename, as_binary=True,
-                   min_width=3, max_width=19,
-                   widths=None, sample_dir=None,
-                   parse_to_widths=True):
+
+def open_tracefile(base_filename, as_binary=True,
+                   sample_dir=None):
+
     """
-    open up the trace matrix with filename 'tracefile'
+
+    ###width parsing is no longer done here. instead, this function
+    should handle the venous/arterial difference.
+
+    this currently only serves to open the RGB traces as binary
+    files instead of RGB, which is processed later
+
     #TODO: expand this later to handle arterial traces and venous traces
     INPUT:
-        tracefile:
-            the name of the file
-
-        parse_to_widths: if True, return widths. If not,
-        simply return
-        min_width: widths below this will be excluded (default is
-                    3, the min recorded width). assuming these
-                    are ints
-        max_width: widths above this will be excluded (default is
-                    19, the max recorded width)
-        widths: an explicit list of widths that should be returned.
-                in this case the above min & max are ignored.
-                this way you could include widths = [3, 17, 19] only
+        base_filename: the name of the base file, not the tracefile itself
+        as_binary: if True
     """
 
-    M = open_typefile(tracefile, 'trace', sample_dir=sample_dir)
-
-    # now a 2D matrix with binned widths 3, 5, 7, ... , 19
-    T = colortrace_to_widths(M)
-
-    if widths is None:
-        min_width, max_width = int(min_width), int(max_width)
-        T[T < min_width] = 0
-        T[T > max_width] = 0
+    if as_binary:
+        mode = 'L'
     else:
-        # use numpy.isin(T, widths) but that's only in
-        # version 1.13 and up of numpy
+        mode = 'RGB'
 
-        # elements in A that can be found in
-        # need to reshape, after v.1.13 of numpy you can use np.isin
-        to_keep = np.in1d(T,x,assume_unique=True).reshape(A.shape)
-
-        T[np.invert(to_keep)] = 0
+    T = open_typefile(filename, filetype, sample_dir=None, mode=mode)
 
     if as_binary:
+
         return T != 0
+
     else:
+
         return T
 
 
 
-def colortrace_to_widths(T):
-    """
-    this will take an RGB trace image (MxNx3) and return a 2D (MxN)
-    "labeled" trace corresponding to the traced pixel length.
-    there is no distinguishing between arteries and vessels
 
-    it's preferrable to do this in real-time so only one tracefile
-    needs to be stored (making the sample folder less cluttered)
-
-    Input:
-        T: a MxNx3 RGB tracefile, where the colorations are assumed as
-        described in NOTES below.
-
-    Output:
-        widthtrace: a MxN array whose inputs describe the width of the
-        vessel (in pixels), see NOTES.
-
-    Notes:
-
-        The correspondence is as follows:
-        3 pixels: "#ff006f",  # magenta
-        5 pixels: "#a80000",  # dark red
-        7 pixels: "#a800ff",  # purple
-        9 pixels: "#ff00ff",  # light pink
-        11 pixels: "#008aff",  # blue
-        13 pixels: "#8aff00",  # green
-        15 pixels: "#ffc800",  # dark yellow
-        17 pixels: "#ff8a00",  # orange
-        19 pixels: "#ff0015"   # bright red
-
-    According to the original tracing protocol, the traced vessels are
-    binned into these 9 sizes. Vessels with a diameter smaller than 3px
-    are not traced (unless they're binned into 3px).
-    """
-
-    # a 2D picture to fix in with the pixel widths
-    widthtrace = np.zeros_like(T[:,:,0])
-
-    for pix, color in TRACE_COLORS.items():
-
-        # get the 2D indices that are that color
-        idx = np.where(np.all(T == color, axis=-1))
-        widthtrace[idx] = pix
-
-    return widthtrace
-
-def widths_to_colors(w, show_non_matches=False):
-    """
-    return an RGB matrix of ints [0,255] converting back from
-    [3,5,7, ... , 19] -> TRACE_COLORS
-
-    actually making a matplotlib colormap didn't seem worth it
-
-    this doesn't do any rounding (i.e. it ignores anything outside of
-    the default widths), but maybe you'd want to?
-    """
-    B = np.zeros((w.shape[0], w.shape[1], 3))
-
-    for px, rgb_triplet in TRACE_COLORS.items():
-        B[w == px, : ] = rgb_triplet
-
-    if show_non_matches:
-        # everything in w not found in TRACE_COLORS will be black
-        B[w == 0, : ] = (255, 255, 255)
-    else:
-        non_filled = (B == 0).all(axis=-1)
-
-        B[non_filled,:] = (255,255,255) # make everything white
-
-    # matplotlib likes the colors as [0,1], so....
-
-    return B / 255.
-
-TRACE_COLORS = {
-    3: (255, 0, 111),
-    5: (168, 0, 0),
-    7: (168, 0, 255),
-    9: (255, 0, 255),
-    11: (0, 138, 255),
-    13: (138, 255, 0),
-    15: (255, 200, 0),
-    17: (255, 138, 0),
-    19: (255, 0, 21)}
-
-def _hex_to_rgb(hexstring):
-    """
-    there's a function that does this in matplotlib.colors
-    but its scaled between 0 and 1 but not even as an
-    array so this is just as much work
-    """
-    triple = hexstring.strip("#")
-    return tuple(int(x,16) for x in (triple[:2],triple[2:4],triple[4:]))
 
 def get_named_placenta(filename, sample_dir=None, masked=True,
                        maskfile=None):
@@ -389,60 +282,6 @@ def list_placentas(label=None, sample_dir=None):
 
     return sorted(placentas)
 
-def mask_background(img):
-    """
-    Warning: this function is slow and buggy and therefore deprecated
-    as "out of scope". Please fix or remove.
-
-    Masks all regions of the image outside the placental plate.
-
-    INPUT:
-        img:
-            A color or grayscale array corresponding to an image of a placenta
-            with the plate in the 'middle.' Outer regions should be black.
-
-    OUTPUT:
-        masked_img:
-            A numpy.ma.masked_array with the same dimensions.
-    """
-    print("""
-          Warning, this function is slow and buggy and therefore
-          deprecated. Please supply a mask file yourself.
-          """
-          )
-
-    if img.ndim == 3:
-
-        #mark any pixel with with content in any channel
-        bg_mask = img.any(axis=-1)
-        bg_mask = np.invert(bg_mask)
-
-        # make the mask multichannel to match dim of input
-        bg_mask = np.repeat(bg_mask[:,:,np.newaxis], 3, axis=2)
-
-    else:
-
-        # same as above
-        bg_mask = (img != 0)
-        bg_mask = np.invert(bg_mask)
-
-    # the above approach will probably work for any real image (i.e. a
-    # photgraph). it will obviously fail for any image where there is true black
-    # in the placental plane. This should work instead:
-
-    # find the outer boundary and mark outside of it.
-    # run with defaults, sufficient
-    bound = morphology.convex_hull_image(bg_mask)
-    bound = segmentation.find_boundaries(bg_mask, mode='inner', background=1)
-    bg_mask[bound] = 1
-
-    #remove any small holes found inside the plate (regions or single pixels
-    #that happen to be black).  run with defaults, sufficient
-    holes = morphology.remove_small_holes(bg_mask)
-    bg_mask[holes] = 1
-
-    return ma.masked_array(img, mask=bg_mask)
-
 def show_mask(img):
     """
     show a masked grayscale image with a dark blue masked region
@@ -466,22 +305,6 @@ def show_mask(img):
         # fill blue channel with a relatively dark value for masked elements
         mimg[img.mask, 2] = 60
         plt.imshow(mimg)
-
-if __name__ == "__main__":
-
-    """test that this works on an easy image."""
-
-    from scipy.ndimage import imread
-    import matplotlib.pyplot as plt
-    test_filename = 'barium1.png'
-    #test_maskfile = 'barium1.mask.png'
-
-    img =  get_named_placenta(test_filename, maskfile=None)
-
-    print('showing the mask of', test_filename)
-    print('run plt.show() to see masked output')
-    show_mask(img)
-
 
 def _cropped_bounds(img, mask=None):
 
@@ -522,3 +345,18 @@ def cropped_view(img, mask=None):
     x0, x1, y0,y1 = _cropped_bounds(img, mask=mask)
 
     return img[x0:x1,y0:y1]
+
+if __name__ == "__main__":
+
+    """test that this works on an easy image."""
+
+    from scipy.ndimage import imread
+    import matplotlib.pyplot as plt
+    test_filename = 'barium1.png'
+    #test_maskfile = 'barium1.mask.png'
+
+    img =  get_named_placenta(test_filename, maskfile=None)
+
+    print('showing the mask of', test_filename)
+    print('run plt.show() to see masked output')
+    show_mask(img)

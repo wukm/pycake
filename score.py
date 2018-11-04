@@ -1,54 +1,181 @@
 #!/usr/bin/env python3
+##TODO: - just one confusion function
+##      - allow to change colors for confusion (dict outside of function)
+##      - move color to width function here from get_placenta
+##      - MCCS include outside plate if keyword passed
 
 import numpy as np
 from get_placenta import open_typefile, open_tracefile
 
-def confusion(a, b, a_color=None, b_color=None):
-    """
-    create graphical confusion matrix for 2D boolean arrays of the
-    same size.
-
-    INPUTS:
-        a - first matrix a 2D boolean matrix
-        b - second matrix, a 2D boolean matrix of the same size as a
-        a_color : which color to use (default is a nice blue)
-        b_color : which color to use (default is inverse color of a)
-
-    OUTPUT:
-        a matrix of size a, where
-            pixels in a exclusively a are a_color
-            pixels in a exclusively b are b_color
-            pixels in both are white (unless b_color has been set)
-            pixels in neither are black
-
+def get_widths_from_trace(T, min_width=3, max_width=19, widths=None):
     """
 
-def confusion_4(test, truth):
+    this will take an RGB trace image (MxNx3) and return a 2D (MxN)
+    "labeled" trace corresponding to the traced pixel length.
+    there is no distinguishing between arteries and vessels
+
+    it's preferrable to do this in real-time so only one tracefile
+    needs to be stored (making the sample folder less cluttered)
+    although obviously at the expense of storing a larger image
+    which is only needed for visualization purposes.
+
+    Input:
+        T: a MxNx3 RGB (uint8) array, where the colorations are
+        assumed as described in NOTES below.
+
+        min_width: widths below this will be excluded (default is
+                    3, the min recorded width). assuming these
+                    are ints
+        max_width: widths above this will be excluded (default is
+                    19, the max recorded width)
+
+        widths: an explicit list of widths that should be returned.
+                in this case the above min & max are ignored.
+                this way you could include widths = [3, 17, 19] only
+
+    Output:
+        widthtrace: a MxN array whose inputs describe the width of the
+        vessel (in pixels), see NOTES.
+
+    Notes:
+
+        The correspondence is as follows:
+        3 pixels: "#ff006f",  # magenta
+        5 pixels: "#a80000",  # dark red
+        7 pixels: "#a800ff",  # purple
+        9 pixels: "#ff00ff",  # light pink
+        11 pixels: "#008aff",  # blue
+        13 pixels: "#8aff00",  # green
+        15 pixels: "#ffc800",  # dark yellow
+        17 pixels: "#ff8a00",  # orange
+        19 pixels: "#ff0015"   # bright red
+
+    According to the original tracing protocol, the traced vessels are
+    binned into these 9 sizes. Vessels with a diameter smaller than 3px
+    are not traced (unless they're binned into 3px).
+
+    ##TODO: expand this later to handle arterial traces and venous traces
+    """
+
+    # a 2D picture to fix in with the pixel widths
+    widthtrace = np.zeros_like(T[:,:,0])
+
+    for pix, color in TRACE_COLORS.items():
+
+        # get the 2D indices that are that color
+        idx = np.where(np.all(T == color, axis=-1))
+        widthtrace[idx] = pix
+
+    if widths is None:
+        min_width, max_width = int(min_width), int(max_width)
+        T[T < min_width] = 0
+        T[T > max_width] = 0
+    else:
+        # use numpy.isin(T, widths) but that's only in
+        # version 1.13 and up of numpy
+
+        # elements in A that can be found in
+        # need to reshape, after v.1.13 of numpy you can use np.isin
+        to_keep = np.in1d(T,x,assume_unique=True).reshape(A.shape)
+
+        T[np.invert(to_keep)] = 0
+
+    if as_binary:
+        return T != 0
+    else:
+        return T
+
+TRACE_COLORS = {
+    3: (255, 0, 111),
+    5: (168, 0, 0),
+    7: (168, 0, 255),
+    9: (255, 0, 255),
+    11: (0, 138, 255),
+    13: (138, 255, 0),
+    15: (255, 200, 0),
+    17: (255, 138, 0),
+    19: (255, 0, 21)
+}
+
+def widths_to_colors(w, show_non_matches=False):
+    """
+    FOR DISPLAY PURPOSES / convenience
+
+    return an RGB matrix of ints [0,255] converting back from
+    [3,5,7, ... , 19] -> TRACE_COLORS
+
+    actually making a matplotlib colormap didn't seem worth it
+
+    this doesn't do any rounding (i.e. it ignores anything outside of
+    the default widths), but maybe you'd want to?
+    """
+    B = np.zeros((w.shape[0], w.shape[1], 3))
+
+    for px, rgb_triplet in TRACE_COLORS.items():
+        B[w == px, : ] = rgb_triplet
+
+    if show_non_matches:
+        # everything in w not found in TRACE_COLORS will be black
+        B[w == 0, : ] = (255, 255, 255)
+    else:
+        non_filled = (B == 0).all(axis=-1)
+
+        B[non_filled,:] = (255,255,255) # make everything white
+
+    # matplotlib likes the colors as [0,1], so....
+
+    return B / 255.
+
+def _hex_to_rgb(hexstring):
+    """
+    there's a function that does this in matplotlib.colors
+    but its scaled between 0 and 1 but not even as an
+    array so this is just as much work
+
+    ##TODO rewrite everything so this is useful if it's not been
+    rewritten already.
+    """
+    triple = hexstring.strip("#")
+    return tuple(int(x,16) for x in (triple[:2],triple[2:4],triple[4:]))
+
+def confusion(test, truth, colordict=None):
     """
     distinct coloration of false positives and negatives.
-    supply HEX values
 
     colors output matrix with
     true_pos if test[-] == truth[-] == 1
     true_neg if test[-] == truth[-] == 0
     false_neg if test[-] == 0 and truth[-] == 1
     false_pos if test[-] == 1 and truth[-] == 0
+
+    if colordict is supplied: you supply a dictionary of how to
+    color the four cases. Spec given by the default below:
+
+    colordict = {
+        'TN': (247, 247, 247), # true negative
+        'TP': (0, 0, 0) # true positive
+        'FN': (241, 163, 64), # false negative
+        'FP': (153, 142, 195), # false positive
+        'mask': (247, 200, 200) # mask color (not used in MCC calculation)
+        }
     """
-    true_neg_color = np.array([247,247,247], dtype='f')/255 # 'f7f7f7'
-    true_pos_color = np.array([0, 0, 0] , dtype='f')/255  # '000000'
-    false_neg_color = np.array([241,163,64], dtype='f')/255# 'f1a340' orange
-    false_pos_color = np.array([153,142,195], dtype='f')/255 # '998ec4' purple
 
-    #    if a_color is None:
-    #        a_color = np.array([0.9, 0.6, 0.1])
-    #    if b_color is None:
-    #        b_color = 1 - a_color
-    #
+    if colordict is None:
+        colordict = {
+            'TN': (247, 247, 247), # true negative# 'f7f7f7'
+            'TP': (0, 0, 0), # true positive  # '000000'
+            'FN': (241, 163, 64), # false negative # 'f1a340' orange
+            'FP': (153, 142, 195), # false positive # '998ec4' purple
+            'mask': (247, 200, 200) # mask color (not used in MCC calculation)
+            }
 
-    #a_c = np.tile(a[:,:,np.newaxis], (1, 1, 3)) * a_color
-    #b_c = np.tile(b[:,:,np.newaxis], (1, 1, 3)) * b_color
+    # TODO: else check if mask is specified and add it as color of TN otherwise
 
-    #return a_c + b_c
+    true_neg_color = np.array(colordict['TN'], dtype='f')/255
+    true_pos_color = np.array(colordict['TP'], dtype='f')/255
+    false_neg_color = np.array(colordict['FN'], dtype='f') /255
+    false_pos_color = np.array(colordict['FP'], dtype='f')/255
+    mask_color = np.array(colordict['mask'], dtype='f') /255
 
     assert test.shape == truth.shape
 
@@ -68,6 +195,8 @@ def confusion_4(test, truth):
     output[true_neg,:] = true_neg_color
     output[false_pos,:] = false_pos_color
     output[false_neg,:] = false_neg_color
+
+    # color the mask !!
 
     return output
 
@@ -116,6 +245,16 @@ def mcc(test, truth, bg_mask=None, return_counts=False):
     -1 is total disagreement between test & truth
     0 is "no better than random guessing"
     1 is perfect prediction
+
+    bg_mask is a mask of pixels to ignore from the statistics
+    for example, things outside the placental plate will be counted
+    as "TRUE NEGATIVES" when there wasn't any chance of them not being
+    scored as negative. therefore, it's not really a measure of the
+    test's accuracy, but instead artificially pads the score higher.
+
+    setting bg_mask to None when test and truth are not masked
+    arrays should give you this artificially inflated score.
+    (Check this)
 
     """
     true_pos = np.bitwise_and(test==truth, truth)
@@ -171,6 +310,7 @@ def mean_squared_error(A,B):
         raise
 
     return mse
+
 
 if __name__ == "__main__":
 
