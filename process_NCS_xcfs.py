@@ -126,7 +126,7 @@ def process_NCS_xcf(timg,tdrawable):
     #pdb.gimp_desaturate(trace) # turn to grayscale
     #pdb.gimp_threshold(trace,255,255) # anything not 255 turns black
 
-    pdb.gimp_file_save(img, trace, outname(s='trace') ,'')
+    pdb.gimp_file_save(img, trace, outname(s='ctrace') ,'')
 
     # now extract an each type individually.
     found = 0

@@ -238,7 +238,7 @@ def compare_trace(approx, trace=None, tracefile=None, filename=None,
     return C
 
 
-def mcc(test, truth, bg_mask=None, return_counts=False):
+def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
     """
     Matthews correlation coefficient
     returns a float between -1 and 1
@@ -254,6 +254,7 @@ def mcc(test, truth, bg_mask=None, return_counts=False):
 
     setting bg_mask to None when test and truth are not masked
     arrays should give you this artificially inflated score.
+    Passing score_bg=True makes this decision explicit.
     (Check this)
 
     """
@@ -262,7 +263,7 @@ def mcc(test, truth, bg_mask=None, return_counts=False):
     false_neg = np.bitwise_and(truth, np.invert(test))
     false_pos = np.bitwise_and(test, np.invert(truth))
 
-    if bg_mask is not None:
+    if score_bg or (bg_mask is not None):
         # only get stats in the plate
         true_pos[bg_mask] = 0
         true_neg[bg_mask] = 0
@@ -325,7 +326,7 @@ if __name__ == "__main__":
     false_neg_color = np.array([241,163,64], dtype='f')# 'f1a340'
     false_pos_color = np.array([153,142,195], dtype='f') # '998ec4'
 
-    C = confusion_4(A,B)
+    C = confusion(A,B)
 
     fig, (ax0, ax1, ax2) = plt.subplots(nrows=1,
                                         ncols=3,
