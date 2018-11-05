@@ -113,9 +113,14 @@ def reorder_eigs(L1,L2):
     L = np.dstack((L1,L2))
     mag =  np.argsort(abs(L), axis=-1)
 
-    # just some slice nonsense
+    ix = np.ogrid[0:L.shape[0], 0:L.shape[1], 0:L.shape[2]]
 
-    ##### FINISH T HISSSS
+    L = L[ix[0], ix[1], mag]
+
+    # now L2 is larger in absolute value, as consistent with Frangi paper
+
+    return (L[:,:,0] , L[:,:,1])
+
 def principal_directions(img, sigma, H=None, mask=None):
     """
     will ignore calculation of principal directions of masked areas

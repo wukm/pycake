@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-##TODO: - just one confusion function
-##      - allow to change colors for confusion (dict outside of function)
-##      - move color to width function here from get_placenta
-##      - MCCS include outside plate if keyword passed
 
 import numpy as np
 from get_placenta import open_typefile, open_tracefile
@@ -76,14 +72,11 @@ def get_widths_from_trace(T, min_width=3, max_width=19, widths=None):
 
         # elements in A that can be found in
         # need to reshape, after v.1.13 of numpy you can use np.isin
-        to_keep = np.in1d(T,x,assume_unique=True).reshape(A.shape)
+        to_keep = np.in1d(T,widths,assume_unique=True).reshape(A.shape)
 
         T[np.invert(to_keep)] = 0
 
-    if as_binary:
-        return T != 0
-    else:
-        return T
+    return T
 
 TRACE_COLORS = {
     3: (255, 0, 111),
@@ -138,7 +131,7 @@ def _hex_to_rgb(hexstring):
     triple = hexstring.strip("#")
     return tuple(int(x,16) for x in (triple[:2],triple[2:4],triple[4:]))
 
-def confusion(test, truth, colordict=None):
+def confusion(test, truth, bg_mask=None, colordict=None):
     """
     distinct coloration of false positives and negatives.
 
@@ -196,19 +189,27 @@ def confusion(test, truth, colordict=None):
     output[false_pos,:] = false_pos_color
     output[false_neg,:] = false_neg_color
 
-    # color the mask !!
+    # try to find a mask
+    if bg_mask is None:
+        try:
+            bg_mask = test.mask
+        except AttributeError:
+            # no mask is specified, we're done.
+            return output
 
+    # color the mask
+    output[bg_mask,:] = mask_color
     return output
 
 def compare_trace(approx, trace=None, tracefile=None, filename=None,
-                  sample_dir=None, a_color=None, b_color=None):
+                  sample_dir=None, colordict=None):
     """
     compare approx matrix to trace matrix and output a confusion matrix.
     if trace is not supplied, open the image from the tracefile.
     if tracefile is not supplied, filename must be supplied, and
     tracefile will be opened according to the standard pattern.
 
-    a_color and b_color are parameters to pass to confusion()
+    colordict are parameters to pass to confusion()
 
     returns a matrix
     """
@@ -231,10 +232,7 @@ def compare_trace(approx, trace=None, tracefile=None, filename=None,
     # what a mess... trace should be inverted (black is BG)
     trace = np.invert(trace)
 
-    # calculate the confusion matrix
-    # assert same size and dimension?
-    #C = confusion(approx, trace, a_color, b_color)
-    C = confusion_4(approx,trace)
+    C = confusion(approx,trace, colordict=colordict)
     return C
 
 

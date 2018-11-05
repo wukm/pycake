@@ -20,7 +20,6 @@ import numpy.ma as ma
 
 import matplotlib.pyplot as plt
 
-from hfft import fft_gradient
 from score import mcc
 
 import os.path
@@ -28,16 +27,13 @@ import os
 import json
 import datetime
 
+placentas = list_by_quality(0)
 #placentas = list_placentas('T-BN') # load allllll placentas
-placentas = list_by_quality(2)
-#placentas.extend(list_by_quality(1))
-
-# obviously need to give this function a more descriptive name
 #placentas = list_by_quality(json_file='manual_batch.json')
 
 n_samples = len(placentas)
 
-OUTPUT_DIR = 'output/181023-morescales'
+OUTPUT_DIR = 'output/181104-refactoring'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -46,7 +42,6 @@ DARK_BG = False
 log_range = (-4, 4.5)
 n_scales = 30
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
-#alphas = scales**(2/3) / scales[-1]
 alphas = [0.15 for s in scales]
 betas = None
 print(n_samples, "samples total!")
@@ -58,12 +53,10 @@ for i, filename in enumerate(placentas):
     print('extracting PCSVN of', filename,
             '\t ({} of {})'.format(i,n_samples))
     F, img, _ , _ = extract_pcsvn(filename, DARK_BG=DARK_BG,
-                                alpha=.1, alphas=alphas, betas=betas,
-                                scales=scales,  log_range=log_range,
+                                alphas=alphas, betas=betas, scales=scales,
+                                kernel='discrete', dilate_per_scale=False,
                                 verbose=False, generate_graphs=False,
-                                   n_scales=n_scales, generate_json=True,
-                                           output_dir=OUTPUT_DIR,
-                                  kernel='discrete')
+                                generate_json=True, output_dir=OUTPUT_DIR)
 
     crop = cropped_args(img)
     print("...making outputs")

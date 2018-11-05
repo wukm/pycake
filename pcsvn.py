@@ -22,9 +22,9 @@ import datetime
 from get_placenta import cropped_args
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
-                    dilate=True, dark_bg=True,
-                    kernel=None, VERBOSE=True):
-    """returns an ordered list of dictionaries for each scale
+                    dilate_per_scale=True, dark_bg=True, kernel=None, VERBOSE=True):
+    """
+    returns an ordered list of dictionaries for each scale
     multiscale.append(
         {'sigma': sigma,
          'beta': beta,
@@ -44,7 +44,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
     img = img / 255.
 
     for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
-        if dilate:
+        if dilate_per_scale:
             if sigma < 2.5:
                 radius = 10
             else:
@@ -65,7 +65,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
         k1, k2 = principal_curvatures(img, sigma=sigma, H=hesh)
 
         # area of influence to zero out
-        if dilate:
+        if dilate_per_scale:
             collar = dilate_boundary(None, radius=radius, mask=img.mask)
 
             k1[collar] = 0
@@ -228,9 +228,9 @@ def apply_threshold(targets, alphas, return_labels=True):
 
     return passed, wheres
 
-def extract_pcsvn(filename, alpha=.15, alphas=None,
-                  log_range=None, scales=None, betas=None,
-                  DARK_BG=True, dilate_per_scale=True, n_scales=20,
+def extract_pcsvn(filename, scales,
+                  alphas=None, betas=None,
+                  DARK_BG=True, dilate_per_scale=True,
                   verbose=True, generate_graphs=True,
                   generate_json=True, output_dir=None,
                   kernel=None):
@@ -242,17 +242,11 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
 
     # set range of sigmas to use
 
-    log_min, log_max = log_range
 
-    if scales is None:
-        #log_min = -1 # minimum scale is 2**log_min
-        #log_max = 4.5 # maximum scale is 2**log_max
-        scales = np.logspace(log_min, log_max, n_scales, base=2)
-
-
-    #alpha = 0.15 # Threshold for vesselness measure
+    if alphas is None:
+        alphas = [.15 for s in scales] # threshold constant
     if betas is None:
-        betas = [0.5 for s in scales] #anisotropy measure
+        betas = [0.5 for s in scales] # anisotropy constant
 
     # set gammas
     # declare None here to calculate half of hessian's norm
@@ -283,6 +277,7 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
     gammas = [scale['gamma'] for scale in multiscale]
 
     border_radii = [scale['border_radius'] for scale in multiscale]
+
     ###Process Multiscale Targets############################
 
     # fix targets misreported on edge of plate
@@ -321,21 +316,17 @@ def extract_pcsvn(filename, alpha=.15, alphas=None,
         time_of_run = datetime.datetime.now()
         timestring = time_of_run.strftime("%y%m%d_%H%M")
 
-        if alphas is None:
-            alphas_out = 'None'
-        else:
-            alphas_out = list(alphas)
         logdata = {'time': timestring,
                 'filename': filename,
                 'DARK_BG': DARK_BG,
-                'fixed_alpha': alpha,
-                'VT_alphas': alphas_out,
+                #'fixed_alpha': alpha,
+                'alphas': list(alphas_out),
                 'betas': list(betas),
                 'gammas': gammas,
                 'sigmas': list(scales),
                 'log_min': log_min,
                 'log_max': log_max,
-                'n_scales': n_scales,
+                'n_scales': len(scales),
                 'border_radii': border_radii
                 }
 

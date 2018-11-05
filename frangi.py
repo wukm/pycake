@@ -27,6 +27,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
 
         THIS OVERLAPS WITH pcsvn.make_multiscale
         USE THIS THERE
+
     """
     # principal_directions() calculates the frangi filter with
     # standard convolution and takes forever. FIX THIS!

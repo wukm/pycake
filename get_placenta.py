@@ -35,9 +35,10 @@ def open_typefile(filename, filetype, sample_dir=None, mode=None):
     # for example, if filename is 'ncs.1029.jpg' then
     # this would set the maskfile as 'ncs.1029.mask.jpg'
 
-    if filetype not in ("mask", "trace"):
-        raise NotImplementedError("Can only deal with mask or trace files.")
+    #if filetype not in ("mask", "trace"):
+    #    raise NotImplementedError("Can only deal with mask or trace files.")
 
+    # get the base of filename and build the type filename
     *base, suffix = filename.split('.')
     base = ''.join(base)
     typefile = '.'.join((base, filetype ,suffix))
@@ -50,7 +51,7 @@ def open_typefile(filename, filetype, sample_dir=None, mode=None):
     if mode is not None:
         if filetype == 'mask':
             mode = 'L'
-        elif filetype == 'trace':
+        elif filetype in ('ctrace', 'veins', 'arteries'):
             mode = 'RGB'
         else:
             # handle this if you need to?
@@ -94,7 +95,6 @@ def open_tracefile(base_filename, as_binary=True,
         return T != 0
 
     else:
-
         return T
 
 
@@ -244,7 +244,7 @@ def check_filetype(filename, assert_png=True, assert_standard=False):
     if typestub == '':
         # it's just something like  'T-BN8333878.png'
         return 'base'
-    elif typestub in ('.mask','.trace', '.raw'):
+    elif typestub in ('.mask','.trace', '.raw', '.ctrace', '.arteries', '.veins'):
         # return 'mask' or 'trace' or 'raw'
         return typestub.strip('.')
     else:
