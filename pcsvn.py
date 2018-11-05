@@ -22,7 +22,8 @@ import datetime
 from get_placenta import cropped_args
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
-                    dilate_per_scale=True, dark_bg=True, kernel=None, VERBOSE=True):
+                    dilate_per_scale=True, signed_frangi=False,
+                    dark_bg=True, kernel=None, VERBOSE=True):
     """
     returns an ordered list of dictionaries for each scale
     multiscale.append(
@@ -47,6 +48,8 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
         if dilate_per_scale:
             if sigma < 2.5:
                 radius = 10
+            elif sigma >  20:
+                radius = int(sigma*2)
             else:
                 radius = int(sigma*4) # a little aggressive
         else:
@@ -100,7 +103,8 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
         # calculate frangi targets at this scale
         targets = get_frangi_targets(k1,k2,
-                    beta=beta, gamma=gamma, dark_bg=dark_bg, threshold=False)
+                    beta=beta, gamma=gamma, dark_bg=dark_bg,
+                                     signed=signed_frangi, threshold=False)
 
         #store results as a dictionary
         this_scale = {'sigma': sigma,
@@ -135,42 +139,6 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
     return multiscale
 
-def match_on_skeleton(skeleton_of, layers, VERBOSE=True):
-    """using the computed skeleton of ``skeleton_of'',
-    return a composite image where blobs layers are incrementally added to the
-    composite image if that blob coincides at some location of the skeleton
-    """
-
-    if ma.is_masked(skeleton_of):
-        skeleton_of = skeleton_of.filled(0)
-
-    skel = skeletonize(skeleton_of)
-    matched_all = np.zeros_like(skel)
-
-    # in reverse order (largest to smallest)
-    for n in range(layers.shape[-1]-1, -1, -1):
-        print('matching in layer #{}'.format(n))
-        current_layer = layers[:,:,n]
-
-        # only care about things in the current layer above the mean of that
-        # layer (AAAH)
-        current_layer = current_layer > current_layer.mean()
-        #current_layer = current_layer > 0.2
-
-        # don't match anything that's been matched already
-        current_layer[matched_all] = 0
-
-        # label each connected blob
-        el, nl = label(current_layer, return_num=True)
-        matched = np.zeros_like(current_layer)
-
-        for region in range(1, nl+1):
-            if np.logical_and(el==region, skel).any():
-                matched = np.logical_or(matched, el==region)
-
-        matched_all = np.logical_or(matched_all, matched)
-
-    return matched_all
 
 
 def apply_threshold(targets, alphas, return_labels=True):
@@ -229,11 +197,11 @@ def apply_threshold(targets, alphas, return_labels=True):
     return passed, wheres
 
 def extract_pcsvn(filename, scales,
-                  alphas=None, betas=None,
+                  alphas=None, betas=None, gammas=None,
                   DARK_BG=True, dilate_per_scale=True,
                   verbose=True, generate_graphs=True,
                   generate_json=True, output_dir=None,
-                  kernel=None):
+                  kernel=None, signed_frangi=False):
 
 
     raw_img = get_named_placenta(filename, maskfile=None)
@@ -250,7 +218,8 @@ def extract_pcsvn(filename, scales,
 
     # set gammas
     # declare None here to calculate half of hessian's norm
-    gammas = [None for s in scales] # structureness parameter
+    if gammas is None:
+        gammas = [None for s in scales] # structureness parameter
 
     ###Do preprocessing (e.g. clahe)###############
     img =  raw_img
@@ -269,8 +238,9 @@ def extract_pcsvn(filename, scales,
 
     multiscale = make_multiscale(img, scales, betas, gammas,
                                 find_principal_directions=False,
-                                dilate=dilate_per_scale,
+                                dilate_per_scale=dilate_per_scale,
                                  kernel=kernel,
+                                 signed_frangi=signed_frangi,
                                 dark_bg=DARK_BG,
                                  VERBOSE=verbose)
 
@@ -318,17 +288,13 @@ def extract_pcsvn(filename, scales,
 
         logdata = {'time': timestring,
                 'filename': filename,
-                'DARK_BG': DARK_BG,
-                #'fixed_alpha': alpha,
-                'alphas': list(alphas_out),
+                'alphas': list(alphas),
                 'betas': list(betas),
                 'gammas': gammas,
                 'sigmas': list(scales),
-                'log_min': log_min,
-                'log_max': log_max,
-                'n_scales': len(scales),
-                'border_radii': border_radii
                 }
+        if dilate_per_scale:
+            logdata['border_radii'] = border_radii
 
         if output_dir is None:
             output_dir = 'output'
@@ -511,37 +477,3 @@ def scale_label_figure(wheres, scales, savefilename=None,
             plt.savefig(savefilename, dpi=300)
 
         plt.close()
-
-
-
-
-
-
-if __name__ == "__main__":
-
-
-    from get_placenta import list_placentas
-
-    show = plt.show
-    imshow = plt.imshow
-
-    placentas = list_placentas('T-BN')[:15]
-    N_samples = len(placentas)
-
-    print(N_samples, "samples total!")
-    for i, filename in enumerate(placentas):
-        print('*'*80)
-        print('extracting PCSVN of', filename,
-              '\t ({} of {})'.format(i,N_samples))
-
-        alpha = .08
-        DARK_BG = False
-        log_range = (-2,3)
-        dilate_per_scale = False
-
-        F, img, scales = extract_pcsvn(filename, DARK_BG=DARK_BG,
-                          alpha=alpha, log_range=log_range,
-                          dilate_per_scale=dilate_per_scale,
-                            verbose=False, generate_graphs=False)
-
-        break

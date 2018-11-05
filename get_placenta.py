@@ -88,11 +88,11 @@ def open_tracefile(base_filename, as_binary=True,
     else:
         mode = 'RGB'
 
-    T = open_typefile(filename, filetype, sample_dir=None, mode=mode)
+    T = open_typefile(base_filename, 'trace', sample_dir=sample_dir, mode=mode)
 
     if as_binary:
 
-        return T != 0
+        return np.invert(T != 0)
 
     else:
         return T

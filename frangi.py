@@ -6,6 +6,7 @@ from plate_morphology import dilate_boundary
 
 def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
                       dilation_radius=None, threshold=None,
+                      signed_frangi=False,
                       return_debug_info=False):
     """
     Perform a frangi filtering on img
@@ -52,7 +53,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
             print("WARNING: gamma is close to 0. should skip this layer.")
 
     targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma,
-                                 dark_bg=dark_bg, threshold=threshold)
+                                 dark_bg=dark_bg, signed=signed_frangi, threshold=threshold)
 
     if not return_debug_info:
         return targets

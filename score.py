@@ -201,7 +201,7 @@ def confusion(test, truth, bg_mask=None, colordict=None):
     output[bg_mask,:] = mask_color
     return output
 
-def compare_trace(approx, trace=None, tracefile=None, filename=None,
+def compare_trace(approx, trace=None, filename=None,
                   sample_dir=None, colordict=None):
     """
     compare approx matrix to trace matrix and output a confusion matrix.
@@ -216,9 +216,7 @@ def compare_trace(approx, trace=None, tracefile=None, filename=None,
 
     # load the tracefile if not supplied
     if trace is None:
-        if tracefile is not None:
-            trace = open_tracefile(filename)
-        elif filename is not None:
+        if filename is not None:
             try:
                 trace = open_typefile(filename, 'trace')
             except FileNotFoundError:
@@ -230,7 +228,7 @@ def compare_trace(approx, trace=None, tracefile=None, filename=None,
             trace = np.zeros_like(approx)
 
     # what a mess... trace should be inverted (black is BG)
-    trace = np.invert(trace)
+    #trace = np.invert(trace)
 
     C = confusion(approx,trace, colordict=colordict)
     return C

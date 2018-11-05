@@ -8,7 +8,7 @@ show how much variable alphas affect the output.
 """
 
 from get_placenta import get_named_placenta, cropped_args, cropped_view
-from get_placenta import list_placentas, open_typefile, list_by_quality
+from get_placenta import list_placentas, open_typefile, list_by_quality, open_tracefile
 
 from score import compare_trace
 
@@ -39,11 +39,14 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
 DARK_BG = False
-log_range = (-4, 4.5)
-n_scales = 30
+DILATE_PER_SCALE = True
+SIGNED_FRANGI = True
+log_range = (-4, 5.5)
+n_scales = 40
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
 alphas = [0.15 for s in scales]
 betas = None
+gammas =  None
 print(n_samples, "samples total!")
 
 m_scores = dict()
@@ -54,8 +57,10 @@ for i, filename in enumerate(placentas):
             '\t ({} of {})'.format(i,n_samples))
     F, img, _ , _ = extract_pcsvn(filename, DARK_BG=DARK_BG,
                                 alphas=alphas, betas=betas, scales=scales,
-                                kernel='discrete', dilate_per_scale=False,
+                                  gammas=gammas,
+                                kernel='discrete', dilate_per_scale=True,
                                 verbose=False, generate_graphs=False,
+                                  signed_frangi=SIGNED_FRANGI,
                                 generate_json=True, output_dir=OUTPUT_DIR)
 
     crop = cropped_args(img)
@@ -65,9 +70,8 @@ for i, filename in enumerate(placentas):
 
     approx, labs = apply_threshold(F, alphas, return_labels=True)
 
-    confusion = compare_trace(approx, filename=filename)
-    trace = open_typefile(filename, 'trace').astype('bool')
-    trace = np.invert(trace)
+    trace = open_tracefile(filename, as_binary=True)
+    confusion = compare_trace(approx, trace=trace)
 
     m_score, counts = mcc(approx, trace, img.mask, return_counts=True)
 
@@ -80,7 +84,7 @@ for i, filename in enumerate(placentas):
     print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
     print('TP+TN+FP+FN={}\ntotal pixels={}'.format(TP+TN+FP+FN,total))
 
-    print("MCC for {}:\t".format(filename), m_score)
+
 
     m_scores[filename] =  m_score
 
@@ -92,10 +96,26 @@ for i, filename in enumerate(placentas):
                vmin=0,vmax=0.5,
                cmap=plt.cm.nipy_spectral)
     plt.close('all') # something's leaking :(
-# json file with mccs
+    break
+# json file with mccs and other runtime info
 timestring = datetime.datetime.now()
 timestring = timestring.strftime("%y%m%d_%H%M")
-mccfile = os.path.join(OUTPUT_DIR, f"MCCS_{timestring}.json")
+
+
+mccfile = os.path.join(OUTPUT_DIR, f"runlog_{timestring}.json")
+
+runlog = {
+    'time': timestring,
+    'DARK_BG': DARK_BG,
+    'dilate_per_scale': DILATE_PER_SCALE,
+    'log_range': log_range,
+    'n_scales': n_scales,
+    'scales': list(scales),
+    'alphas': list(alphas),
+    'betas': None,
+    'files': list(placentas),
+    'MCCS': m_scores
+}
 
 with open(mccfile, 'w') as f:
-    json.dump(m_scores, f, indent=True)
+    json.dump(runlog, f, indent=True)
