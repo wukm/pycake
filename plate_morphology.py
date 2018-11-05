@@ -7,40 +7,6 @@ from skimage.segmentation import find_boundaries
 import numpy as np
 import numpy.ma as ma
 
-def erode_plate(img, erosion_radius=20, plate_mask=None):
-    """
-    Manually remove (erode) the outside boundary of a plate.
-    The goal is remove any influence of the zeroed background
-    on reporting derivative information
-
-    NOTE: this is an old deprecated function. use dilate boundary instead.
-    """
-    if plate_mask is None:
-        # grab the mask from input image
-        try:
-            plate_mask = img.mask
-        except AttributeError:
-            raise('Need to supply mask information')
-
-    # convex_hull_image finds white pixels
-    plate_mask = np.invert(plate_mask)
-
-    # find convex hull of mask (make erosion calculation easier)
-    plate_mask = np.invert(convex_hull_image(plate_mask))
-
-    # this is much faster than a disk. a plus sign might be better even.
-    #selem = square(erosion_radius)
-    # also this correctly has erosion radius as the RADIUS!
-    # input for square() and disk() is the diameter!
-    selem = np.zeros((erosion_radius*2 + 1, erosion_radius*2 + 1),
-                        dtype='bool')
-    selem[erosion_radius,:] = 1
-    selem[:,erosion_radius] = 1
-    eroded_mask = binary_erosion(plate_mask, selem=selem)
-
-    # this is by default additive with whatever
-    return ma.masked_array(img, mask=eroded_mask)
-
 def dilate_boundary(img, radius=10, mask=None):
     """
     grows the mask by a specified radius of a masked 2D array
