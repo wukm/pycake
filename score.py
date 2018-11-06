@@ -3,9 +3,8 @@
 import numpy as np
 from get_placenta import open_typefile, open_tracefile
 
-def get_widths_from_trace(T, min_width=3, max_width=19, widths=None):
+def get_widths_from_trace(T):
     """
-
     this will take an RGB trace image (MxNx3) and return a 2D (MxN)
     "labeled" trace corresponding to the traced pixel length.
     there is no distinguishing between arteries and vessels
@@ -18,16 +17,6 @@ def get_widths_from_trace(T, min_width=3, max_width=19, widths=None):
     Input:
         T: a MxNx3 RGB (uint8) array, where the colorations are
         assumed as described in NOTES below.
-
-        min_width: widths below this will be excluded (default is
-                    3, the min recorded width). assuming these
-                    are ints
-        max_width: widths above this will be excluded (default is
-                    19, the max recorded width)
-
-        widths: an explicit list of widths that should be returned.
-                in this case the above min & max are ignored.
-                this way you could include widths = [3, 17, 19] only
 
     Output:
         widthtrace: a MxN array whose inputs describe the width of the
@@ -50,34 +39,128 @@ def get_widths_from_trace(T, min_width=3, max_width=19, widths=None):
     binned into these 9 sizes. Vessels with a diameter smaller than 3px
     are not traced (unless they're binned into 3px).
 
-    ##TODO: expand this later to handle arterial traces and venous traces
+    Note: this does *not* deal with collisions. If you pass anything
+    with addition (blended colors) as the ctraces are, you will have
+    trouble, as those will not be registered as any of the colors above
+    and will thus be ignored. If you want to handle data from both
+    arterial *and* venous layers, you should do so outside of this
+    function.
     """
 
     # a 2D picture to fix in with the pixel widths
-    widthtrace = np.zeros_like(T[:,:,0])
+    W = np.zeros_like(T[:,:,0])
 
     for pix, color in TRACE_COLORS.items():
 
+        #ignore pixelwidths outside the specified range
         # get the 2D indices that are that color
         idx = np.where(np.all(T == color, axis=-1))
-        widthtrace[idx] = pix
+        W[idx] = pix
 
+
+    return W
+
+def merge_widths(A_trace, V_trace, strategy='minimum'):
+    """
+    combine the widths from two RGB-traces A_trace and V_trace
+    and return one width matrix according to `strategy`
+
+        Input:
+        A_trace: an MxNx3 matrix, where each pixel (along the
+            last dimension) is an RGB triplet (i.e. each entry
+            is an integer between [0,256). The colors each
+            correspond to those in TRACE_COLORS, and (255,255,255)
+            signifies "no vessel". This will normally correspond to
+            the sample's arterial trace.
+
+        V_trace: an MxNx3 matrix the same shape and other
+            requirements as A_trace (see above). This will normally
+            correspond to the sample's venous trace.
+
+        strategy: when A_trace and V_trace coincide at some entry,
+            this is the merging strategy. It should be a keyword
+            of one of the following choices:
+
+            "minimum": take the minimum width of the two traces
+                (default). this is the sensible option if you
+                are filtering out larger widths.
+
+            "maximum": take the maximum width of the two traces
+
+            "artery" or "A": take the width from A_trace
+
+            "vein" or "V": take the width from V_trace
+    Output:
+
+        W: a width-matrix where each entry is a number 0 (no vessel)
+           3,5,7,...19
+
+    NOTE: No filtering out widths is done here.
+    """
+    assert A_trace.shape == V_trace.shape
+
+    A = get_widths_from_trace(A_trace)
+    V = get_widths_from_trace(V_trace)
+
+    # collisions (where are widths both reported)
+    c = np.logical_and(A!=0, V!=0)
+
+    W = np.maximum(A,V)  # get the nonzero value
+    if strategy == 'maximum':
+        pass # already done, else rewrite the collisions
+    elif strategy in ('arteries', 'A'):
+        W[c] = A[c]
+    elif strategy in ('veins', 'V'):
+        W[c] = V[c]
+    else:
+        if strategy != 'minimum':
+            print(f"Warning: unknown merge strategy: {strategy}")
+            print("Defaulting to minimum strategy")
+
+        W[c] = np.minimum(A[c], A[c])
+
+    return W
+
+def filter_widths(W, widths=None, min_width=3, max_width=19):
+    """
+    This function will take a 2D matrix of vessel widths and
+    remove any widths outside a particular range (or alternatively,
+    that are not included in a particular list)
+
+    Should be roughly as easy as doing it by hand, except that you
+    won't have to rewrite the code each time.
+
+    Inputs:
+
+    W:  a width matrix (2D matrix with elements 0,3,5,7,...19
+
+    min_width: widths below this will be excluded (default is
+                3, the min recorded width). assuming these
+                are ints
+
+    max_width: widths above this will be excluded (default is
+                19, the max recorded width)
+
+    widths: an explicit list of widths that should be returned.
+            in this case the above min & max are ignored.
+            this way you could include widths = [3, 17, 19] only
+            """
+    Wout = W.copy()
     if widths is None:
-        min_width, max_width = int(min_width), int(max_width)
-        T[T < min_width] = 0
-        T[T > max_width] = 0
+        Wout[W < min_width] = 0
+        Wout[W > max_width] = 0
+
     else:
         # use numpy.isin(T, widths) but that's only in
         # version 1.13 and up of numpy
 
         # elements in A that can be found in
         # need to reshape, after v.1.13 of numpy you can use np.isin
-        to_keep = np.in1d(T,widths,assume_unique=True).reshape(A.shape)
+        # this is basically the code for that though
+        to_keep = np.in1d(W,widths,assume_unique=True).reshape(W.shape)
 
-        T[np.invert(to_keep)] = 0
-
-    return T
-
+        Wout[np.invert(to_keep)] = 0
+    return Wout
 TRACE_COLORS = {
     3: (255, 0, 111),
     5: (168, 0, 0),
@@ -192,7 +275,7 @@ def confusion(test, truth, bg_mask=None, colordict=None):
     # try to find a mask
     if bg_mask is None:
         try:
-            bg_mask = test.mask
+            bg_mask =  test.mask
         except AttributeError:
             # no mask is specified, we're done.
             return output
@@ -250,8 +333,9 @@ def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
 
     setting bg_mask to None when test and truth are not masked
     arrays should give you this artificially inflated score.
-    Passing score_bg=True makes this decision explicit.
-    (Check this)
+    Passing score_bg=True makes this decision explicit, i.e.
+    any masks (even if supplied) will be ignored, and your count of
+    false positives will be inflated.
 
     """
     true_pos = np.bitwise_and(test==truth, truth)
@@ -259,18 +343,34 @@ def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
     false_neg = np.bitwise_and(truth, np.invert(test))
     false_pos = np.bitwise_and(test, np.invert(truth))
 
-    if score_bg or (bg_mask is not None):
+    if score_bg:
+        # take the classifications above as they are (nothing is masked)
+        pass
+    else:
+        # if no specified mask, check the test array itself?
+        if bg_mask is None:
+            try:
+                bg_mask = test.mask
+            except AttributeError:
+                # no mask is specified, we're done.
+                bg_mask = np.zeros_like(test)
+
         # only get stats in the plate
         true_pos[bg_mask] = 0
         true_neg[bg_mask] = 0
         false_pos[bg_mask] = 0
         false_neg[bg_mask] = 0
 
+    # now tally
     TP = true_pos.sum()
     TN = true_neg.sum()
     FP = false_pos.sum()
     FN = false_neg.sum()
-    total = np.invert(bg_mask).sum()
+
+    if not score_bg:
+        total = np.invert(bg_mask).sum()
+    else:
+        total = test.size
     #print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
     #print('TP+TN+FN+FP={}\ntotal pixels={}'.format(TP+TN+FP+TN,total))
     # prevent potential overflow

@@ -97,6 +97,7 @@ for i, filename in enumerate(placentas):
                cmap=plt.cm.nipy_spectral)
     plt.close('all') # something's leaking :(
     break
+
 # json file with mccs and other runtime info
 timestring = datetime.datetime.now()
 timestring = timestring.strftime("%y%m%d_%H%M")
