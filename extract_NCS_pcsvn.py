@@ -45,11 +45,11 @@ log_range = (-4, 5.5)
 n_scales = 40
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
 alphas = [0.15 for s in scales]
-betas = None
-gammas =  None
+betas = None # will be given default parameters
+gammas =  None # will be given default parameters
 print(n_samples, "samples total!")
 
-m_scores = dict()
+mccs = dict() # where to score MCC's of each sample
 
 for i, filename in enumerate(placentas):
     print('*'*80)
@@ -60,38 +60,46 @@ for i, filename in enumerate(placentas):
                                   gammas=gammas,
                                 kernel='discrete', dilate_per_scale=True,
                                 verbose=False, generate_graphs=False,
-                                  signed_frangi=SIGNED_FRANGI,
+                                signed_frangi=SIGNED_FRANGI,
                                 generate_json=True, output_dir=OUTPUT_DIR)
 
-    crop = cropped_args(img)
+    crop = cropped_args(img) # these make viewing easier
     print("...making outputs")
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
 
-
     approx, labs = apply_threshold(F, alphas, return_labels=True)
 
+
     trace = open_tracefile(filename, as_binary=True)
-    confusion = compare_trace(approx, trace=trace)
+
+    # open up RGB tracefiles and convert to widths
+    A_trace = open_typefile(filename, 'arteries')
+    V_trace = open_typefile(filename, 'veins')
+
+    # confusion matrix against default
+    confuse = compare_trace(approx, trace=trace)
 
     m_score, counts = mcc(approx, trace, img.mask, return_counts=True)
 
     # this all just verifies that the 4 categories were added up
     # correctly and match the total number of pixels in the reported
     # placental plate.
-    TP, TN, FP, FN = counts
+    TP, TN, FP, FN = counts # return these for more analysis?
 
-    total = np.invert(img.mask).sum()
-    print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
-    print('TP+TN+FP+FN={}\ntotal pixels={}'.format(TP+TN+FP+FN,total))
+    #total = np.invert(img.mask).sum()
+    #print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
+    #print('TP+TN+FP+FN={}\ntotal pixels={}'.format(TP+TN+FP+FN,total))
 
-
-
-    m_scores[filename] =  m_score
+    mccs[filename] =  m_score
 
     plt.imsave(outname('0_raw'), img[crop].filled(0), cmap=plt.cm.gray)
     plt.imsave(outname('1_confusion'), confusion[crop])
-    scale_label_figure(labs, scales, crop=crop, savefilename=outname('2_labeled'),
-                       image_only=False)
+
+    # make the graph that shows what scale the max was pulled from
+    scale_label_figure(labs, scales, crop=crop,
+                       savefilename=outname('2_labeled'), image_only=False)
+
+    # save the maximum frangi output
     plt.imsave(outname('3_fmax'), F.max(axis=-1)[crop],
                vmin=0,vmax=0.5,
                cmap=plt.cm.nipy_spectral)
@@ -115,7 +123,7 @@ runlog = {
     'alphas': list(alphas),
     'betas': None,
     'files': list(placentas),
-    'MCCS': m_scores
+    'MCCS': mccs
 }
 
 with open(mccfile, 'w') as f:

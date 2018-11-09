@@ -3,7 +3,7 @@
 import numpy as np
 from get_placenta import open_typefile, open_tracefile
 
-def get_widths_from_trace(T):
+def rgb_to_widths(T):
     """
     this will take an RGB trace image (MxNx3) and return a 2D (MxN)
     "labeled" trace corresponding to the traced pixel length.
@@ -99,8 +99,8 @@ def merge_widths(A_trace, V_trace, strategy='minimum'):
     """
     assert A_trace.shape == V_trace.shape
 
-    A = get_widths_from_trace(A_trace)
-    V = get_widths_from_trace(V_trace)
+    A = rgb_to_widths(A_trace)
+    V = rgb_to_widths(V_trace)
 
     # collisions (where are widths both reported)
     c = np.logical_and(A!=0, V!=0)
@@ -117,12 +117,14 @@ def merge_widths(A_trace, V_trace, strategy='minimum'):
             print(f"Warning: unknown merge strategy: {strategy}")
             print("Defaulting to minimum strategy")
 
-        W[c] = np.minimum(A[c], A[c])
+        W[c] = np.minimum(A[c], V[c])
 
     return W
 
 def filter_widths(W, widths=None, min_width=3, max_width=19):
     """
+    Filter a width matrix, removing widths according to rules.
+
     This function will take a 2D matrix of vessel widths and
     remove any widths outside a particular range (or alternatively,
     that are not included in a particular list)
@@ -145,6 +147,7 @@ def filter_widths(W, widths=None, min_width=3, max_width=19):
             in this case the above min & max are ignored.
             this way you could include widths = [3, 17, 19] only
             """
+
     Wout = W.copy()
     if widths is None:
         Wout[W < min_width] = 0
@@ -173,7 +176,7 @@ TRACE_COLORS = {
     19: (255, 0, 21)
 }
 
-def widths_to_colors(w, show_non_matches=False):
+def widths_to_rgb(w, show_non_matches=False):
     """
     FOR DISPLAY PURPOSES / convenience
 
@@ -310,10 +313,8 @@ def compare_trace(approx, trace=None, filename=None,
             print("no trace supplied/found. generating dummy trace.")
             trace = np.zeros_like(approx)
 
-    # what a mess... trace should be inverted (black is BG)
-    #trace = np.invert(trace)
+    C = confusion(approx, trace, colordict=colordict)
 
-    C = confusion(approx,trace, colordict=colordict)
     return C
 
 
@@ -338,10 +339,10 @@ def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
     false positives will be inflated.
 
     """
-    true_pos = np.bitwise_and(test==truth, truth)
-    true_neg = np.bitwise_and(test==truth, np.invert(truth))
-    false_neg = np.bitwise_and(truth, np.invert(test))
-    false_pos = np.bitwise_and(test, np.invert(truth))
+    true_pos = np.logical_and(test==truth, truth)
+    true_neg = np.logical_and(test==truth, np.invert(truth))
+    false_neg = np.logical_and(truth, np.invert(test))
+    false_pos = np.logical_and(test, np.invert(truth))
 
     if score_bg:
         # take the classifications above as they are (nothing is masked)
