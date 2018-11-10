@@ -28,13 +28,13 @@ import os
 import json
 import datetime
 
-#placentas = list_by_quality(0)
-placentas = list_placentas('T-BN') # load allllll placentas
+placentas = list_by_quality(0)
+#placentas = list_placentas('T-BN') # load allllll placentas
 #placentas = list_by_quality(json_file='manual_batch.json')
 
 n_samples = len(placentas)
 
-OUTPUT_DIR = 'output/181108-bigrun'
+OUTPUT_DIR = 'output/181109-test'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -114,6 +114,8 @@ for i, filename in enumerate(placentas):
                vmin=0,vmax=1.0,
                cmap=plt.cm.nipy_spectral)
     plt.close('all') # something's leaking :(
+
+    break
 
 # json file with mccs and other runtime info
 timestring = datetime.datetime.now()

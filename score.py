@@ -293,7 +293,7 @@ def compare_trace(approx, trace=None, filename=None,
     compare approx matrix to trace matrix and output a confusion matrix.
     if trace is not supplied, open the image from the tracefile.
     if tracefile is not supplied, filename must be supplied, and
-    tracefile will be opened according to the standard pattern.
+    tracefile will be opened according to the standard pattern
 
     colordict are parameters to pass to confusion()
 
@@ -387,6 +387,7 @@ def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
         return m_score, (TP,TN,FP,FN)
     else:
         return m_score
+
 
 def mean_squared_error(A,B):
     """
