@@ -8,7 +8,8 @@ show how much variable alphas affect the output.
 """
 
 from get_placenta import get_named_placenta, cropped_args, cropped_view
-from get_placenta import list_placentas, open_typefile, list_by_quality, open_tracefile
+from get_placenta import list_placentas, list_by_quality
+from get_placenta import open_typefile, open_tracefile
 
 from score import compare_trace
 
@@ -27,20 +28,20 @@ import os
 import json
 import datetime
 
-placentas = list_by_quality(0)
-#placentas = list_placentas('T-BN') # load allllll placentas
+#placentas = list_by_quality(0)
+placentas = list_placentas('T-BN') # load allllll placentas
 #placentas = list_by_quality(json_file='manual_batch.json')
 
 n_samples = len(placentas)
 
-OUTPUT_DIR = 'output/181104-refactoring'
+OUTPUT_DIR = 'output/181108-bigrun'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
 DARK_BG = False
 DILATE_PER_SCALE = True
-SIGNED_FRANGI = True
+SIGNED_FRANGI = False
 log_range = (-4, 5.5)
 n_scales = 40
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
@@ -52,6 +53,7 @@ print(n_samples, "samples total!")
 mccs = dict() # where to score MCC's of each sample
 
 for i, filename in enumerate(placentas):
+
     print('*'*80)
     print('extracting PCSVN of', filename,
             '\t ({} of {})'.format(i,n_samples))
@@ -64,9 +66,14 @@ for i, filename in enumerate(placentas):
                                 generate_json=True, output_dir=OUTPUT_DIR)
 
     crop = cropped_args(img) # these make viewing easier
-    print("...making outputs")
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
 
+    npzfile = ".".join((outname("F").rsplit('.', maxsplit=1)[0],'npz'))
+
+    print("saving frangi targets to ", npzfile)
+    np.savez_compressed(npzfile, F=F)
+
+    print("...making outputs")
     approx, labs = apply_threshold(F, alphas, return_labels=True)
 
 
@@ -86,25 +93,27 @@ for i, filename in enumerate(placentas):
     # placental plate.
     TP, TN, FP, FN = counts # return these for more analysis?
 
-    #total = np.invert(img.mask).sum()
-    #print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
-    #print('TP+TN+FP+FN={}\ntotal pixels={}'.format(TP+TN+FP+FN,total))
+    total = np.invert(img.mask).sum()
+    print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
+    print('TP+TN+FP+FN={}\ntotal pixels={}'.format(TP+TN+FP+FN,total))
 
     mccs[filename] =  m_score
 
+    print(f'mcc score of {m_score} for {filename}')
+
     plt.imsave(outname('0_raw'), img[crop].filled(0), cmap=plt.cm.gray)
-    plt.imsave(outname('1_confusion'), confusion[crop])
+    plt.imsave(outname('1_confusion'), confuse[crop])
 
     # make the graph that shows what scale the max was pulled from
     scale_label_figure(labs, scales, crop=crop,
-                       savefilename=outname('2_labeled'), image_only=False)
+                       savefilename=outname('2_labeled'), image_only=True,
+                       save_colormap_separate=True, output_dir=OUTPUT_DIR)
 
     # save the maximum frangi output
     plt.imsave(outname('3_fmax'), F.max(axis=-1)[crop],
-               vmin=0,vmax=0.5,
+               vmin=0,vmax=1.0,
                cmap=plt.cm.nipy_spectral)
     plt.close('all') # something's leaking :(
-    break
 
 # json file with mccs and other runtime info
 timestring = datetime.datetime.now()

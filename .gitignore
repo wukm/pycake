@@ -1,6 +1,7 @@
 # much too large
 *.pickle
 *.npy
+*.npz
 *.pyc
 *.swp # although these shouldn't exist anyway
 *.py.swp

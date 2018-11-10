@@ -225,14 +225,6 @@ def extract_pcsvn(filename, scales,
     img =  raw_img
     bg_mask = img.mask
 
-    ###Logging#####################################
-    if verbose:
-        print(" Running pcsvn.py on the image file", filename,
-                "with frangi parameters as follows:")
-        print("alpha (vesselness threshold): ", alpha)
-        print("scales:", scales)
-        print("betas:", betas)
-        print("gammas will be calculated as half of hessian norm")
 
     ###Multiscale Frangi Filter##############################
 
@@ -431,30 +423,61 @@ def analyze_targets(F_all, img):
     """
 
 """
+def _build_scale_colormap(N_scales, base_colormap, basecolor=(0,0,0,1)):
+    """
+    returns a mpl.colors.ListedColormap with N samples,
+    based on the colormap named "default_colormap" (a string)
+
+    the N colors are given by the default colormap, and
+    basecolor (default black) is added to map to 0.
+    (you could change this, for example, to (1,1,1,1) for white)
+
+    reversed colormaps often work better if the basecolor is black
+    you should make sure there's good contrast between the basecolor
+    and the first color in the colormap
+    """
+
+    map_range = np.linspace(0, 1, num=N_scales)
+
+    colormap = plt.get_cmap(base_colormap)
+
+    colorlist = colormap(map_range)
+
+    # add basecolor as the first entry
+    colorlist = np.vstack((basecolor, colorlist))
+
+    return mpl.colors.ListedColormap(colorlist)
+
 def scale_label_figure(wheres, scales, savefilename=None,
-                        crop=None, show_only=False, image_only=False):
+                       crop=None, show_only=False, image_only=False,
+                       save_colormap_separate=False, savecolormapfile=None,
+                       output_dir=None):
     """
     crop is a slice object.
-    if show_only, then just plt.show, not save
+    if show_only, then just plt.show (interactive).
+    if image_only, then this will *not* be printed with the colorbar
+
+    if save_colormap_separate, then the colormap will be saved as a separate
+    file
     """
     if crop is not None:
         wheres = wheres[crop]
 
     fig, ax = plt.subplots() # not sure about figsize
-    N = len(scales)+1 # number of scales / labels
+    N = len(scales) # number of scales / labels
 
-    # discrete sample of color map
-    #cmap = plt.get_cmap('nipy_spectral', N)
+    # get however many samples from the colormap [R,G,B,A] array
+    #tab = plt.cm.viridis_r(np.linspace(0,1,num=N))
+    #tabe = np.vstack(([0,0,0,1], tab)) # add black as first entry
+    #tabemap = mpl.colors.ListedColormap(tabe)
 
-    # get 20 samples from the colormap [R,G,B,A] array
-    tab = plt.cm.viridis_r(np.linspace(0,1,num=N))
-    tabe = np.vstack(([0,0,0,1], tab)) # add black as first entry
-    tabemap = mpl.colors.ListedColormap(tabe)
+    tabemap = _build_scale_colormap(N, 'viridis_r')
 
     if image_only:
-        plt.imsave(savefilename, wheres, cmap=tabemap)
+        plt.imsave(savefilename, wheres, cmap=tabemap, vmin=0, vmax=N)
+        plt.close()
     else:
-        imgplot = ax.imshow(wheres, cmap=tabemap)
+        imgplot = ax.imshow(wheres, cmap=tabemap, vmin=0, vmax=N)
         # discrete colorbar
         cbar = plt.colorbar(imgplot)
 
@@ -477,3 +500,17 @@ def scale_label_figure(wheres, scales, savefilename=None,
             plt.savefig(savefilename, dpi=300)
 
         plt.close()
+
+    if save_colormap_separate:
+        if savecolormapfile is None:
+            savecolormapfile = os.path.join(output_dir, "scale_colormap.png")
+        fig = plt.figure(figsize=(1,8))
+        ax1 = fig.add_axes([0.05, 0.05, 0.15, 0.9])
+        tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+        cbar = mpl.colorbar.ColorbarBase(ax1, cmap=tabemap,
+                                         norm=mpl.colors.Normalize(vmin=0,
+                                                                   vmax=N),
+                                         orientation='vertical',
+                                         ticks=tick_locs)
+
+        plt.savefig(savecolormapfile, dpi=300)

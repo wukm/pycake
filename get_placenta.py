@@ -244,7 +244,7 @@ def check_filetype(filename, assert_png=True, assert_standard=False):
     if typestub == '':
         # it's just something like  'T-BN8333878.png'
         return 'base'
-    elif typestub in ('.mask','.trace', '.raw', '.ctrace', '.arteries', '.veins'):
+    elif typestub in ('.mask','.trace', '.raw', '.ctrace', '.arteries', '.veins', '.ucip'):
         # return 'mask' or 'trace' or 'raw'
         return typestub.strip('.')
     else:
