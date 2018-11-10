@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from get_placenta import get_named_placenta, list_placentas, _cropped_bounds, cropped_view, cropped_args, show_mask
+from placenta import get_named_placenta, list_placentas, _cropped_bounds, cropped_view, cropped_args, show_mask
 from frangi import frangi_from_image
 
 import numpy as np

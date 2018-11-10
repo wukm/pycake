@@ -61,7 +61,7 @@ def dilate_boundary(img, radius=10, mask=None):
 
 if __name__ == "__main__":
 
-    from get_placenta import get_named_placenta
+    from placenta import get_named_placenta
     from frangi import frangi_from_image
     import matplotlib.pyplot as plt
     import numpy as np

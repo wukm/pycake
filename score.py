@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from get_placenta import open_typefile, open_tracefile
+from placenta import open_typefile, open_tracefile
 
 def rgb_to_widths(T):
     """

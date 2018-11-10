@@ -33,12 +33,12 @@ first_order_accurate = isclose(J_A_eroded, J_B_eroded, tol)
 
 """
 
-from get_placenta import get_named_placenta
+from placenta import get_named_placenta
 
 from hfft import fft_hessian, fft_gaussian
 from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
-from get_placenta import mimshow
+from placenta import mimshow
 
 from score import mean_squared_error
 import numpy as np

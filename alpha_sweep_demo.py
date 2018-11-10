@@ -7,8 +7,8 @@ show how much variable alphas affect the output.
 
 """
 
-from get_placenta import get_named_placenta, cropped_args, cropped_view
-from get_placenta import list_placentas, open_typefile, list_by_quality
+from placenta import get_named_placenta, cropped_args, cropped_view
+from placenta import list_placentas, open_typefile, list_by_quality
 
 from score import compare_trace
 

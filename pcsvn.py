@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from get_placenta import get_named_placenta
+from placenta import get_named_placenta, cropped_args
 from score import compare_trace
 from hfft import fft_hessian
 from diffgeo import principal_curvatures, principal_directions
@@ -19,7 +19,6 @@ import os.path
 import json
 import datetime
 
-from get_placenta import cropped_args
 
 def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
                     dilate_per_scale=True, signed_frangi=False,
