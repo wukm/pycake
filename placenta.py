@@ -345,29 +345,35 @@ def cropped_view(img, mask=None):
 
     return img[x0:x1,y0:y1]
 
-if __name__ == "__main__":
-
-    """test that this works on an easy image."""
-
-    from scipy.ndimage import imread
-    import matplotlib.pyplot as plt
-    test_filename = 'barium1.png'
-    #test_maskfile = 'barium1.mask.png'
-
-    img =  get_named_placenta(test_filename, maskfile=None)
-
-    print('showing the mask of', test_filename)
-    print('run plt.show() to see masked output')
-    show_mask(img)
-
 CYAN = [0,255,255]
 YELLOW = [255,255,0]
 
-def measure_ncs_markings(ucip_img):
+
+def measure_ncs_markings(ucip_img=None, filename=None, verbose=True):
     """
     find location of ucip and resolution of image based on input
     (similar to perimeter layer in original NCS data set
+
+    Parameters
+    ----------
+
+    ucip_img: an RGB ndarray or None
+        The perimeter layer of an NCS sample (colorations according to the
+        tracing protocol). if None, filename must be included. Default is None.
+    filename:
+        the filename of the SAMPLE (not the ucip image file itself)
+
+    Returns
+    -------
+    m : tuple of ints
+        the coordinates of (the center of) of the umbilical cord point
+        (depicted as a yellow dot) in the original image.
+    resolution: a float
+        measured distance between the two cyan dots
     """
+
+    if ucip_img is None:
+        ucip_img = open_typefile(filename, 'ucip')
 
     # just in case it's got an alpha channel, remove it
     img = ucip_img[:,:,0:3]
@@ -375,36 +381,48 @@ def measure_ncs_markings(ucip_img):
     # given the image img (make sure no alpha channel)
     # find all cyan pixels (there are two boxes of 3 pixels each and we
     # just want to extract the middle of each
-    print('the image size is {}x{}'.format(img.shape[0], img.shape[2]))
+    if verbose:
+        print('the image size is {}x{}'.format(img.shape[0], img.shape[1]))
+
     rulemarks = np.all(img == CYAN, axis=-1)
 
-    # turn into two pixels (these should each by shape (18,)
+    # turn into two pixels (these should each be shape (18,))
     X,Y = np.where(rulemarks)
 
     assert X.shape == Y.shape
-    assert X.size == 18
-    # the two pixels at the center of each box
-    A, B = (X[4], Y[4]) , (X[13], Y[13])
+
+    # if they followed the protocol correctly...
+    if X.size == 18:
+        # get the two pixels at the center of each box
+        A, B = (X[4], Y[4]) , (X[13], Y[13])
+    else:
+        # dots are a nonstandard size for some reason. this works too.
+        thinned = morphology.thin(rulemarks)
+        X, Y = np.where(thinned)
+        assert(thinned.sum() == 2) # there should be just two pixels now.
+        A, B = (X[0], Y[0]) , (X[1], Y[1])
 
     ruler_distance =  np.sqrt( (A[0] - B[0])**2 + (A[1] - B[1])**2 )
-    print(f'one cm equals {ruler_distance} pixels')
+    if verbose:
+        print(f'one cm equals {ruler_distance} pixels')
 
-    # the umbillical cord insertion point (UCIP) is a yellow circle
-    # of radius 19
+    # the umbillical cord insertion point (UCIP) is a yellow circle, radius 19
     ucipmarks = np.all(img == YELLOW, axis=-1)
     X,Y = np.where(ucipmarks)
 
     # find midpoint of the x & y cooridnates
-
     assert X.max() - X.min() == Y.max() - Y.min()
     radius = (X.max() - X.min()) // 2
 
     mid = (X.min() + radius, Y.min() + radius)
-    print('the middle of the UCIP location is', mid)
-    print('the radius outward is', radius)
-    print('the total measurable diameter is', radius*2 + 1)
+
+    if verbose:
+        print('the middle of the UCIP location is', mid)
+        print('the radius outward is', radius)
+        print('the total measurable diameter is', radius*2 + 1)
 
     return mid, ruler_distance
+
 
 def add_ucip_to_mask(m, radius=100, mask=None, size_like=None):
     """
@@ -418,7 +436,10 @@ def add_ucip_to_mask(m, radius=100, mask=None, size_like=None):
     Note: this behaves much faster than binary dilation on the point
     """
     if mask is None:
-        mask = np.zeros_like(size_like)
+        if size_like is not None:
+            mask = np.zeros_like(size_like)
+        else:
+            raise ValueError("No mask info supplied!")
 
     # an empty mask (since we need to merge--we don't want to copy the
     # zeros of the dilated UCIP -- just the ones!)
@@ -433,3 +454,19 @@ def add_ucip_to_mask(m, radius=100, mask=None, size_like=None):
 
     # merge with supplied mask
     return np.logical_or(mask, to_add)
+
+
+if __name__ == "__main__":
+
+    """test that this works on an easy image."""
+
+    from scipy.ndimage import imread
+    import matplotlib.pyplot as plt
+    test_filename = 'barium1.png'
+    #test_maskfile = 'barium1.mask.png'
+
+    img =  get_named_placenta(test_filename, maskfile=None)
+
+    print('showing the mask of', test_filename)
+    print('run plt.show() to see masked output')
+    show_mask(img)

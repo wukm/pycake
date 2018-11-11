@@ -60,42 +60,49 @@ def rgb_to_widths(T):
 
     return W
 
-def merge_widths(A_trace, V_trace, strategy='minimum'):
+def merge_widths_from_traces(A_trace, V_trace, strategy='minimum'):
     """
     combine the widths from two RGB-traces A_trace and V_trace
     and return one width matrix according to `strategy`
 
-        Input:
-        A_trace: an MxNx3 matrix, where each pixel (along the
-            last dimension) is an RGB triplet (i.e. each entry
-            is an integer between [0,256). The colors each
-            correspond to those in TRACE_COLORS, and (255,255,255)
-            signifies "no vessel". This will normally correspond to
-            the sample's arterial trace.
+    Parameters
+    ----------
+    A_trace: ndarray
+        an MxNx3 matrix, where each pixel (along the
+        last dimension) is an RGB triplet (i.e. each entry
+        is an integer between [0,256). The colors each
+        correspond to those in TRACE_COLORS, and (255,255,255)
+        signifies "no vessel". This will normally correspond to
+        the sample's arterial trace.
+    V_trace: ndarray
+        an MxNx3 matrix the same shape and other
+        requirements as A_trace (see above). This will normally
+        correspond to the sample's venous trace.
+    strategy: keyword string
+        when A_trace and V_trace coincide at some entry,
+        this is the merging strategy. It should be a keyword
+        of one of the following choices:
 
-        V_trace: an MxNx3 matrix the same shape and other
-            requirements as A_trace (see above). This will normally
-            correspond to the sample's venous trace.
+        "minimum": take the minimum width of the two traces
+            (default). this is the sensible option if you
+            are filtering out larger widths.
+        "maximum": take the maximum width of the two traces
+        "artery" or "A" or "top": take the width from A_trace
+        "vein" or "V" or "bottom": take the width from V_trace
 
-        strategy: when A_trace and V_trace coincide at some entry,
-            this is the merging strategy. It should be a keyword
-            of one of the following choices:
+    Returns
+    -------
+        W : ndarray
+        a width-matrix where each entry is a number 0 (no vessel), 3,5,7,...19
 
-            "minimum": take the minimum width of the two traces
-                (default). this is the sensible option if you
-                are filtering out larger widths.
+    Notes
+    -----
+    Since arteries grow over the veins on the PCSVN and are generally easier
+    to extract, it might be preferable to indicate "arteries". In reality,
+    each strategy is a compromise, and only by keeping track of both would
+    you get the complete picture.
 
-            "maximum": take the maximum width of the two traces
-
-            "artery" or "A": take the width from A_trace
-
-            "vein" or "V": take the width from V_trace
-    Output:
-
-        W: a width-matrix where each entry is a number 0 (no vessel)
-           3,5,7,...19
-
-    NOTE: No filtering out widths is done here.
+    No filtering out widths is done here.
     """
     assert A_trace.shape == V_trace.shape
 
@@ -108,9 +115,9 @@ def merge_widths(A_trace, V_trace, strategy='minimum'):
     W = np.maximum(A,V)  # get the nonzero value
     if strategy == 'maximum':
         pass # already done, else rewrite the collisions
-    elif strategy in ('arteries', 'A'):
+    elif strategy in ('arteries', 'A', 'top'):
         W[c] = A[c]
-    elif strategy in ('veins', 'V'):
+    elif strategy in ('veins', 'V', 'bottom'):
         W[c] = V[c]
     else:
         if strategy != 'minimum':
@@ -154,16 +161,13 @@ def filter_widths(W, widths=None, min_width=3, max_width=19):
         Wout[W > max_width] = 0
 
     else:
-        # use numpy.isin(T, widths) but that's only in
-        # version 1.13 and up of numpy
-
-        # elements in A that can be found in
-        # need to reshape, after v.1.13 of numpy you can use np.isin
-        # this is basically the code for that though
-        to_keep = np.in1d(W,widths,assume_unique=True).reshape(W.shape)
-
+        # use numpy.isin(T, widths) but that's only in version 1.13 and up
+        # of numpy this is basically the code for that though
+        to_keep = np.in1d(W, widths, assume_unique=True).reshape(W.shape)
         Wout[np.invert(to_keep)] = 0
     return Wout
+
+
 TRACE_COLORS = {
     3: (255, 0, 111),
     5: (168, 0, 0),
@@ -176,14 +180,12 @@ TRACE_COLORS = {
     19: (255, 0, 21)
 }
 
+
 def widths_to_rgb(w, show_non_matches=False):
-    """
-    FOR DISPLAY PURPOSES / convenience
+    """Convert width matrix back to RGB values.
 
-    return an RGB matrix of ints [0,255] converting back from
-    [3,5,7, ... , 19] -> TRACE_COLORS
-
-    actually making a matplotlib colormap didn't seem worth it
+    For display purposes/convenience. Return an RGB matrix
+    converting back from [3,5,7, ... , 19] -> TRACE_COLORS
 
     this doesn't do any rounding (i.e. it ignores anything outside of
     the default widths), but maybe you'd want to?
@@ -202,8 +204,8 @@ def widths_to_rgb(w, show_non_matches=False):
         B[non_filled,:] = (255,255,255) # make everything white
 
     # matplotlib likes the colors as [0,1], so....
-
     return B / 255.
+
 
 def _hex_to_rgb(hexstring):
     """
@@ -217,19 +219,21 @@ def _hex_to_rgb(hexstring):
     triple = hexstring.strip("#")
     return tuple(int(x,16) for x in (triple[:2],triple[2:4],triple[4:]))
 
-def confusion(test, truth, bg_mask=None, colordict=None):
+
+def confusion(test, truth, bg_mask=None, colordict=None, tint_mask=True):
     """
     distinct coloration of false positives and negatives.
 
     colors output matrix with
-    true_pos if test[-] == truth[-] == 1
-    true_neg if test[-] == truth[-] == 0
-    false_neg if test[-] == 0 and truth[-] == 1
-    false_pos if test[-] == 1 and truth[-] == 0
+        true_pos if test[-] == truth[-] == 1
+        true_neg if test[-] == truth[-] == 0
+        false_neg if test[-] == 0 and truth[-] == 1
+        false_pos if test[-] == 1 and truth[-] == 0
 
     if colordict is supplied: you supply a dictionary of how to
     color the four cases. Spec given by the default below:
 
+    if tint mask, then the mask is overlaid on the image, not replacing totally
     colordict = {
         'TN': (247, 247, 247), # true negative
         'TP': (0, 0, 0) # true positive
@@ -241,14 +245,14 @@ def confusion(test, truth, bg_mask=None, colordict=None):
 
     if colordict is None:
         colordict = {
-            'TN': (247, 247, 247), # true negative# 'f7f7f7'
-            'TP': (0, 0, 0), # true positive  # '000000'
-            'FN': (241, 163, 64), # false negative # 'f1a340' orange
-            'FP': (153, 142, 195), # false positive # '998ec4' purple
-            'mask': (247, 200, 200) # mask color (not used in MCC calculation)
+            'TN': (247, 247, 247),  # true negative# 'f7f7f7'
+            'TP': (0, 0, 0),  # true positive  # '000000'
+            'FN': (241, 163, 64),  # false negative # 'f1a340' orange
+            'FP': (153, 142, 195),  # false positive # '998ec4' purple
+            'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
             }
 
-    # TODO: else check if mask is specified and add it as color of TN otherwise
+    #TODO: else check if mask is specified and add it as color of TN otherwise
 
     true_neg_color = np.array(colordict['TN'], dtype='f')/255
     true_pos_color = np.array(colordict['TP'], dtype='f')/255
@@ -284,8 +288,14 @@ def confusion(test, truth, bg_mask=None, colordict=None):
             return output
 
     # color the mask
-    output[bg_mask,:] = mask_color
+    if tint_mask:
+        output[bg_mask,:] += mask_color
+        output[bg_mask,:] /= 2
+    else:
+        output[bg_mask,:] = mask_color
+
     return output
+
 
 def compare_trace(approx, trace=None, filename=None,
                   sample_dir=None, colordict=None):

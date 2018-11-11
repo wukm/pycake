@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 
-from placenta import get_named_placenta, cropped_args
-from score import compare_trace
+from placenta import get_named_placenta
 from hfft import fft_hessian
 from diffgeo import principal_curvatures, principal_directions
 from frangi import get_frangi_targets
 import numpy as np
-import numpy.ma as ma
-
-from skimage.morphology import label, skeletonize
 
 from plate_morphology import dilate_boundary
 
@@ -20,12 +16,13 @@ import json
 import datetime
 
 
-def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
-                    dilate_per_scale=True, signed_frangi=False,
-                    dark_bg=True, kernel=None, VERBOSE=True):
-    """
-    returns an ordered list of dictionaries for each scale
-    multiscale.append(
+def make_multiscale(img, scales, betas, gammas,
+                    find_principal_directions=False, dilate_per_scale=True,
+                    signed_frangi=False, dark_bg=True, kernel=None,
+                    VERBOSE=True):
+    """Returns an ordered list of dictionaries for each scale of Frangi info.
+
+    Each element in the output contains the following info:
         {'sigma': sigma,
          'beta': beta,
          'gamma': gamma,
@@ -33,9 +30,10 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
          'F': targets,
          'k1': k1,
          'k2': k2,
-         't1': t1,
-         't2': t2
+         't1': t1, # if find_principal_directions
+         't2': t2 # if find_principal_directions
          }
+
     """
 
     # store results of each scale (create as empty list)
@@ -43,14 +41,15 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
 
     img = img / 255.
 
-    for i, sigma, beta, gamma in zip(range(len(scales)), scales, betas, gammas):
+    for i, sigma, beta, gamma in zip(range(len(scales)), scales,
+                                     betas, gammas):
         if dilate_per_scale:
             if sigma < 2.5:
                 radius = 10
-            elif sigma >  20:
+            elif sigma > 20:
                 radius = int(sigma*2)
             else:
-                radius = int(sigma*4) # a little aggressive
+                radius = int(sigma*4)  # a little aggressive
         else:
             radius = None
 
@@ -63,7 +62,7 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
         if VERBOSE:
             print('finding principal curvatures')
 
-
+        # calculate principal curvatures with |k1| <= |k2|
         k1, k2 = principal_curvatures(img, sigma=sigma, H=hesh)
 
         # area of influence to zero out
@@ -79,16 +78,12 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             # half the max spectral radius is easier to calculate so do that
             # shouldn't be affected by mask data but should make sure the
             # mask is *well* far away from perimeter
-            #gamma_alt = .5 * np.abs(k2).max()
-            #print("half of k2 max is", gamma_alt)
-
-            # or actually calculate half of max hessian norm
+            # we actually calculate half of max hessian norm
             # using frob norm = sqrt(trace(AA^T))
             hxx, hxy, hyy = hesh
             hessian_norm = np.sqrt((hxx**2 + 2*hxy**2 + hyy**2))
 
             # make sure the max doesn't occur on a boundary
-            # this is rough and bad and could change a lot.
             dilation_radius = int(max(np.ceil(sigma), 10))
             collar = dilate_boundary(None, radius=dilation_radius,
                                      mask=img.mask)
@@ -96,16 +91,21 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
             max_hessian_norm = hessian_norm.max()
             gamma = .5*max_hessian_norm
 
-            #print("gamma (half of max hessian norm is)", gamma)
+            if VERBOSE:
+                # compare to other method of calculating gamma
+                gamma_alt = .5 * np.abs(k2).max()
+                print(f"half of k2 max is {gamma_alt}")
+
         if VERBOSE:
-            print('finding Frangi targets with β={} and γ={:.2}'.format(beta, gamma))
+            print(f"gamma (half of max hessian (frob) norm is {gamma}")
+            print(f'finding Frangi targets with β={beta} and γ={gamma:.2}')
 
         # calculate frangi targets at this scale
-        targets = get_frangi_targets(k1,k2,
-                    beta=beta, gamma=gamma, dark_bg=dark_bg,
-                                     signed=signed_frangi, threshold=False)
+        targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma,
+                                     dark_bg=dark_bg, signed=signed_frangi,
+                                     threshold=False)
 
-        #store results as a dictionary
+        # store results as a dictionary
         this_scale = {'sigma': sigma,
                       'beta': beta,
                       'gamma': gamma,
@@ -117,116 +117,154 @@ def make_multiscale(img, scales, betas, gammas, find_principal_directions=False,
                       }
 
         if find_principal_directions:
-            # principal directions will only be computed for significant regions
-            pd_mask = np.bitwise_or(targets < (targets.mean() + targets.std()),
-                                    img.mask).filled(1)
+            # principal directions should only be computed for critical regions
+            # ignore anything less than a std deviation over the mean
+            # this mask is where PD's will *NOT* be calculated
+            cutoff = targets.mean() + targets.std()
+            pd_mask = np.bitwise_or(targets < cutoff, img.mask).filled(1)
+            percent_calculated = (pd_mask.size - pd_mask.sum()) / pd_mask.size
 
             if VERBOSE:
-                percentage_calculated = (pd_mask.size - pd_mask.sum()) / pd_mask.size
-                print('finding principal directions for {:.2%} of the image'.format(percentage_calculated))
+                print(f"finding PD's for {percent_calculated:.2%} of image"
+                      f"anything above vesselness score {cutoff:.6f}"
+                      )
+            t1, t2 = principal_directions(img, sigma=sigma, H=hesh,
+                                          mask=pd_mask)
 
-            t1, t2 = principal_directions(img, sigma=sigma, H=hesh, mask=pd_mask)
-
+            # add them to this scale's output
             this_scale['t1'] = t1
             this_scale['t2'] = t2
         else:
             if VERBOSE:
                 print('skipping principal direction calculation')
 
-        # store results as a dictionary
+        # store results as a list of dictionaries
         multiscale.append(this_scale)
 
     return multiscale
 
 
-
 def apply_threshold(targets, alphas, return_labels=True):
+    """Threshold targets at each scale, then return max target over all scales.
+
+    A unique alpha can be given for each scale (see below). Return a 2D boolean
+    array, and optionally another array representing what at what scale the max
+    filter response occurred.
+
+    Parameters
+    ----------
+    targets : ndarray
+        a 3D array, where targets[:,:,k] is the result of the Frangi filter
+        at the kth scale.
+    alphas : float or array_like
+        a list / 1d array of length targets.shape[-1]. each alphas[k] is a
+        float which thresholds the Frangi response at the kth scale. Due to
+        broadcasting, this can also be a single float, which will be applied
+        to each scale.
+    return_labels : bool, optional
+        If True, return another ndarray representing the scale (see Notes
+        below). Default is True.
+
+    Returns
+    -------
+    out : ndarray, dtype=bool
+        if return labels is true, this will return both the final
+        threshold and the labels as two separate matrices. This is
+        a convenience, since you could easily find labels with
+    labels : ndarray, optional, dtype=uint8
+        The scale at which the largest filter response was found after
+        thresholding. Element is 0 if no scale passed the threshold,
+        otherwise an int between 1 and targets.shape[-1] See Notes below.
+
+    Notes / Examples
+    ----------------
+    Despite the name, this does *NOT* return the thresholded targets itself,
+    but instead the maximum value after thresholding. If you wanted the
+    thresholded filter responses alone, you should simply run
+
+    >>>(targets > alphas)*targets
+
+    The optional output `labels` is a 2D matrix indicating where the max filter
+    response occured. For example, if the label is K, the max filter response
+    will occur at targets[:,:,K-1].  In other words,
+
+    >>>passed, labels = apply_threshold(targets,alphas)
+    >>>targets.max(axis=-1) == targets[:,:,labels -1 ]
+    True
+
+    It should be noted that returning labels is really just for convenience
+    only; you could construct it as shown in the following example:
+
+    >>>manual_labels = (targets.argmax(axis=-1) + 1)*np.invert(passed)
+    >>>labels == manual_labels
+    True
+
+    Similarly, the standard boolean output could just as easily be obtained.
+    >>>passed == (labels != 0)
+    True
     """
-    if return_labels is True, return 1,..,n for scale at which
-    max target was found (or 0 if no match),
-    otherwise simply return a binary matrix
 
-    targets is a (M,N,n) shape matrix (like F_all)
-    alphas is a list / 1d array of alphas of length n
-
-
-    if alphas is a single number, then this should work just fine
-
-    for convenience,
-
-    if return labels is true, this will return both the final
-    threshold and the labels as two separate matrices
-    """
-
-    # you could make this work in 2D if you wanted to so alphas is a
-    # constant and targets is only 2D but that's a later day
-
-    # make it an array (even if it's a single element)
+    # threshold as an array (even if it's a single element) to broadcast
     alphas = np.array(alphas)
 
-    # if it's just a MxN matrix, expand it trivially so it works below
-
+    # if input's just a MxN matrix, expand it trivially so it works below
     if targets.ndim == 2:
-
-        targets = np.expand_dims(targets,2)
+        targets = np.expand_dims(targets, 2)
 
     # either there's an alpha for each channel or there's a single
     # alpha to be broadcast across all channels
     assert (targets.shape[-1] == alphas.size) or (alphas.size == 1)
 
     # pixels that passed the threshold at any level
-    passed = (targets >  alphas).any(axis=-1)
+    passed = (targets > alphas).any(axis=-1)
 
     if not return_labels:
+        return passed  # we're done already
 
-        # works by broadcasting
-        return passed
-
-    # get label of where maximum occurs
-    wheres = targets.argmax(axis=-1)
-
-    # reserve 0 label for no match
-    wheres += 1
+    wheres = targets.argmax(axis=-1)  # get label of where maximum occurs
+    wheres += 1  # increment to reserve 0 label for no match
 
     # then remove anything that didn't pass the threshold
     wheres[np.invert(passed)] = 0
 
-    assert np.all( passed == (wheres > 0) )
+    assert np.all(passed == (wheres > 0))
 
     return passed, wheres
 
-def extract_pcsvn(filename, scales,
-                  alphas=None, betas=None, gammas=None,
-                  DARK_BG=True, dilate_per_scale=True,
-                  verbose=True, generate_graphs=True,
-                  generate_json=True, output_dir=None,
-                  kernel=None, signed_frangi=False):
 
+def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
+                  DARK_BG=True, dilate_per_scale=True, verbose=True,
+                  generate_json=True, output_dir=None, kernel=None,
+                  signed_frangi=False):
+    """Run PCSVN extraction on the sample given in the file.
+
+    Despite the name, this simply returns the Frangi filter responses at
+    each provided scale without explicitly making any decisions about what
+    is or is not part of the PCSVN.
+
+    TODO:Finish docstring!
+    """
 
     raw_img = get_named_placenta(filename, maskfile=None)
 
-    ###Multiscale & Frangi Parameters######################
+    # Multiscale & Frangi Parameters######################
 
-    # set range of sigmas to use
-
-
+    # set default alphas and betas if undeclared
     if alphas is None:
-        alphas = [.15 for s in scales] # threshold constant
+        alphas = [.15 for s in scales]  # threshold constant
     if betas is None:
-        betas = [0.5 for s in scales] # anisotropy constant
+        betas = [0.5 for s in scales]  # anisotropy constant
 
-    # set gammas
     # declare None here to calculate half of hessian's norm
     if gammas is None:
-        gammas = [None for s in scales] # structureness parameter
+        gammas = [None for s in scales]  # structureness parameter
 
-    ###Do preprocessing (e.g. clahe)###############
-    img =  raw_img
-    bg_mask = img.mask
+    # Preprocessing###############
+    img = raw_img.copy()  # in case we alter the mask or something
 
+    # Multiscale Frangi Filter##############################
 
-    ###Multiscale Frangi Filter##############################
-
+    # output is a dictionary of relevant info at each scale
     multiscale = make_multiscale(img, scales, betas, gammas,
                                 find_principal_directions=False,
                                 dilate_per_scale=dilate_per_scale,
@@ -235,13 +273,13 @@ def extract_pcsvn(filename, scales,
                                 dark_bg=DARK_BG,
                                  VERBOSE=verbose)
 
+    # extract these for logging
     gammas = [scale['gamma'] for scale in multiscale]
-
     border_radii = [scale['border_radius'] for scale in multiscale]
 
     ###Process Multiscale Targets############################
 
-    # fix targets misreported on edge of plate
+    # ignore targets too close to edge of plate
     # wait are we doing this twice?
     if dilate_per_scale:
         if verbose:
@@ -254,23 +292,17 @@ def extract_pcsvn(filename, scales,
             if verbose:
                 print('dilating plate for radius={}'.format(radius))
             f = dilate_boundary(f, radius=radius, mask=img.mask)
+            # get rid of mask
             multiscale[i]['F'] = f.filled(0)
     else:
         for i in range(len(multiscale)):
-            # harden mask (best way to do this??)
+            # get rid of mask
             multiscale[i]['F'] = multiscale[i]['F'].filled(0)
-
-    ###Extract Multiscale Features############################
-
-    pass
 
     ###Make Composite#########################################
 
+    # get a M x N x n_scales array of Frangi targets at each level
     F_all = np.dstack([scale['F'] for scale in multiscale])
-
-    if generate_graphs:
-
-        analyze_targets(F_all, img)
 
     if generate_json:
 
@@ -299,7 +331,8 @@ def extract_pcsvn(filename, scales,
         with open(dumpfile, 'w') as f:
             json.dump(logdata, f, indent=True)
 
-    return F_all, img, scales, alphas
+    # this function used to returns scales and alphas too but now doesn't,
+    return F_all, img
 
 
 def get_outname_lambda(filename, output_dir=None, timestring=None):
@@ -320,108 +353,7 @@ def get_outname_lambda(filename, output_dir=None, timestring=None):
     outputstub = ''.join(base) +'_' + timestring +  '_{}.'+ suffix
     return lambda s: os.path.join(output_dir, outputstub.format(s))
 
-def analyze_targets(F_all, img):
 
-    ###The max Frangi target##################################
-    # for display purposes
-    F_max = F_all.max(axis=-1)
-    F_max = ma.masked_array(F_max, mask=img.mask)
-
-    # is the frangi vesselness measure strong enough
-    #F_cumulative = (F_max > alpha)
-
-
-    # Variable threshold
-    N = min(img.shape) // 2
-    #alphas = np.logspace(-2,0, num=len(scales))*.7
-    alphas = np.sqrt(1.2*scales / N)
-    # try a logistic curve
-    #alphas = 1 / (1+np.exp(-.2*(scales-np.sqrt(N))))
-    #alphas = scales/32
-    #alphas = np.logspace(-2.5,-1, num=len(scales))
-    #alphas = np.linspace(0.01,1,num=len(scales))
-    #alphas = np.sqrt(scales / scales.max())
-
-    #time_of_run = datetime.datetime.now()
-    #timestring = time_of_run.strftime("%y%m%d_%H%M")
-
-    # Process Composite ###############################3
-
-    # (deprecated, doesn't change much and takes forever)
-    #matched_all = match_on_skeleton(F_cumulative, F_all)
-    #wheres[np.invert(matched_all)] = 0 # first label is stuff that didn't match
-
-    FT, wheres = apply_threshold(F_all, alpha)
-    VT , wheres_VT = apply_threshold(F_all, alphas)
-
-    ########################################
-    #### THE REST IS JUST OUTPUT AND LOGGING
-
-    print('generating outputs!')
-    crop = cropped_args(img)
-    """
-    OUTPUT_DIR = 'output'
-    base = os.path.basename(filename)
-
-    *base, suffix = base.split('.')
-
-    # make this its own function and just do a partial here.
-    outputstub = ''.join(base) +'_' + timestring +  '_{}.'+ suffix
-    outname = lambda s: os.path.join(OUTPUT_DIR, outputstub.format(s))
-    """
-    outname = get_outname_lambda(filename)
-
-    # SKELETONIZED OUTPUT
-    plt.imsave(outname('skel'), skeletonize(FT[crop]),
-            cmap=plt.cm.gray)
-    plt.imsave(outname('fmax_threshholded'), FT[crop],
-            cmap=plt.cm.gray_r)
-    plt.imsave(outname('fmax_variable_threshold'), VT[crop],
-            cmap=plt.cm.gray_r)
-
-
-    # Max Frangi score
-    fig, ax = plt.subplots()
-    plt.imshow(F_max[crop], cmap=plt.cm.gist_ncar)
-    #plt.title(r'Max Frangi vesselness measure below threshold $\alpha={:.2f}$'.format(alpha))
-    plt.title('Maximum Frangi vesselness score')
-    plt.axis('off')
-    c = plt.colorbar()
-    c.set_ticks(np.linspace(0,1,num=11))
-    plt.clim(0,1)
-    plt.tight_layout()
-    plt.savefig(outname('fmax'), dpi=300)
-
-    plt.close()
-
-    scale_label_figure(wheres, scales,
-                       outname('labeled_test'),
-                       crop=crop)
-    scale_label_figure(wheres_VT, scales,
-                       outname('labeled_VT_test'),
-                       crop=crop)
-
-    confusion_matrix = compare_trace(FT, filename=filename)
-
-    plt.imsave(outname('confusion'), confusion_matrix[crop])
-
-    confusion_matrix = compare_trace(VT, filename=filename)
-
-    plt.imsave(outname('confusion_VT'), confusion_matrix[crop])
-
-
-
-    ###Make Connected Graph##########################################
-
-    pass
-
-    ###Measure#######################################################
-
-    pass
-
-    """
-
-"""
 def _build_scale_colormap(N_scales, base_colormap, basecolor=(0,0,0,1)):
     """
     returns a mpl.colors.ListedColormap with N samples,
@@ -464,11 +396,6 @@ def scale_label_figure(wheres, scales, savefilename=None,
 
     fig, ax = plt.subplots() # not sure about figsize
     N = len(scales) # number of scales / labels
-
-    # get however many samples from the colormap [R,G,B,A] array
-    #tab = plt.cm.viridis_r(np.linspace(0,1,num=N))
-    #tabe = np.vstack(([0,0,0,1], tab)) # add black as first entry
-    #tabemap = mpl.colors.ListedColormap(tabe)
 
     tabemap = _build_scale_colormap(N, 'viridis_r')
 

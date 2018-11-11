@@ -125,10 +125,9 @@ def principal_directions(img, sigma, H=None, mask=None):
     """
     will ignore calculation of principal directions of masked areas
 
-    despite the name, this function actually returns the theta corresponding to
+    mask should  be positive where the PD's should *NOT* be calculated
+    this function actually returns the theta corresponding to
     leading and trailing principal directions, i.e. angle w / x axis
-
-    FIX THE MASK BUSINESS
     """
 
     if H is None:
@@ -137,7 +136,8 @@ def principal_directions(img, sigma, H=None, mask=None):
     Hxx, Hxy, Hyy = H
 
 
-    # is no mask provided
+    # determine if we have a mask or not (and try to get one off image if
+    # possible)
     if mask is None:
         try:
             mask = img.mask
