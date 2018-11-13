@@ -216,7 +216,7 @@ def apply_threshold(targets, alphas, return_labels=True):
     assert (targets.shape[-1] == alphas.size) or (alphas.size == 1)
 
     # pixels that passed the threshold at any level
-    passed = (targets > alphas).any(axis=-1)
+    passed = (targets >= alphas).any(axis=-1)
 
     if not return_labels:
         return passed  # we're done already
