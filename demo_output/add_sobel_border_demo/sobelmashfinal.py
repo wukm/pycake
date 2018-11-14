@@ -1,232 +1,44 @@
-# coding: utf-8
-np.who()
-mccs
-m = [v[0] for v i in mccs.values()]
-m = [v[0] for v in mccs.values()]
-m1 = m
-m2 = [v[1] for v in mccs.values()]
-m2
-m1
-m1 = np.array(m1)
-m2 = np.array(m2)
-m1
-m2
-m1.mean()
-m2.mean()
-m1.max()
-m2.max()
-m2.argmax()
-placentas
-placentas[m2.argmax()]
-np.who()
-alphas
-F > alphas
-plt.imshow(F[(F > alphas)].max(axis=-1))
-((F>alphas)*F).max(axis=-1)
-plt.imshow(_)
-plt.show()
-plt.imshow((F>alphas)*F).max(axis=-1)[crop], vmin=0,vmax=1,cmap=plt.cm.nipy_spectral)
-plt.imshow(((F>alphas)*F).max(axis=-1)[crop], vmin=0,vmax=1,cmap=plt.cm.nipy_spectral)
-plt.show()
-plt.imshow(((F>alphas)*F).max(axis=-1)[crop], vmin=0,vmax=1,cmap=plt.cm.nipy_spectral)
-plt.colorbar()
-plt.show()
-plt.imshow(((F>alphas)*F).max(axis=-1)[crop], vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.colorbar()
-plt.show()
-plt.imshow(((F>alphas)*F).max(axis=-1) + sobel(img)/sobel(img).max(), vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
+#!/usr/bin/env python 3
+
+
+# run extract_NCS_pcsvn.py for just the last sample (T-BN9937513.png)
+
+import numpy as np
 from skimage.filters import sobel
-plt.imshow(((F>alphas)*F).max(axis=-1) + sobel(img)/sobel(img).max(), vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.show()
-plt.imshow(((F>alphas)*F).max(axis=-1) + sobel(img), vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.show()
-S = sobel(img) 
 from plate_morphology import dilate_boundary
+from skimage.morphology import binary_closing
+
+# get sobel image of border
+S = sobel(img)
 dilate_boundary(S, radius=10, mask=img.mask)
 S = dilate_boundary(S, radius=20, mask=img.mask)
-plt.imshow(S)
-plt.show()
-plt.imshow(S > nz_percentile(S,50))
-plt.show()
-plt.imshow(S > nz_percentile(S,90))
-plt.show()
-Sthresh = (S > nz_percentile(S,50))
-plt.imshow((F>alphas)*F).max(axis=-1) + 0.5*Sthresh), vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.imshow(((F>alphas)*F).max(axis=-1) + 0.5*Sthresh), vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.imshow(((F>alphas)*F).max(axis=-1) + 0.5*Sthresh), vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.imshow(((F>alphas)*F).max(axis=-1) + 0.5*Sthresh, vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.show()
-Sthresh
 Sthresh = (S > nz_percentile(S,90))
-plt.imshow(((F>alphas)*F).max(axis=-1) + 0.5*Sthresh, vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.show()
-plt.imshow(((F>alphas)*F).max(axis=-1) + 0.5*Sthresh.filled(0), vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.show()
-plt.imshow((((F>alphas)*F).max(axis=-1) + 0.5*Sthresh.filled(0))[crop], vmin=0,vmax=0.5,cmap=plt.cm.nipy_spectral)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),np.zeros_like(img),0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),np.zeros_like(img),0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=1)
-plt.imshow(_)
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),np.zeros_like(img),0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.imshow(_)
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),np.zeros_like(img),0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.show()
-get_ipython().magic('pinfo np.invert')
-plt.imshow(np.ones(img.shape[0],img.shape[1],3)-np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))-np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)*.2,0.2*ucip_mask,0.2*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)*.8,0.2*ucip_mask,0.8*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)*.8,0.8*ucip_mask,0.8*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.imshow(_)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)*.8,0.8*ucip_mask,0.9*Sthresh.filled(0)))[crop], vmin=0,vmax=1.0)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)f,0.8*ucip_mask,0.9*Sthresh.filled(0)))[crop], vmin=0,vmax=1.0)
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1),0.8*ucip_mask,0.9*Sthresh.filled(0)))[crop], vmin=0,vmax=1.0)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)*1.5,0.8*ucip_mask,0.9*Sthresh.filled(0)))[crop], vmin=0,vmax=1.0)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)*1.5,0.8*ucip_mask,Sthresh.filled(0)))[crop], vmin=0,vmax=1.0)
-plt.show()
-plt.imshow(np.ones((img.shape[0],img.shape[1],3))[crop]-np.dstack((((F>alphas)*F).max(axis=-1)*1.5,0.8*np.invert(ucip_mask),Sthresh.filled(0)))[crop], vmin=0,vmax=1.0)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.5)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[135:430,40:520], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[40:520,135:430], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][40:520,135:430], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][135:430,40:520], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][135:430,70:520], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][130:500,70:520], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][130:500,70:570], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][130:630,70:570], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][130:630,70:570], vmin=0,vmax=0.6)
-plt.show()
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][130:630,70:570], vmin=0,vmax=0.6)
-plt.show()
-get_ipython().magic('pinfo np.mgrid')
-get_ipython().magic('pinfo np.s_')
-np.s_[130:630,70:570]
-window = _
-plt.imshow(np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][window], vmin=0,vmax=0.6)
-plt.show()
-FandS = np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][window], vmin=0,vmax=0.6)
-np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][window], vmin=0,vmax=0.6)
-plt.imsave('sobel_border.png',np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][window], vmin=0,vmax=0.6)
-plt.imsave('sobel_border_view.png',np.dstack((((F>alphas)*F).max(axis=-1),0.2*ucip_mask,0.5*Sthresh.filled(0)))[crop][window], vmin=0,vmax=0.6)
-np.who
-np.who()
-A_trace + V_trace
-plt.imshow(_)
-plt.show()
-plt.imshow(A_trace + V_trace, vmin=0, vmax=256)
-plt.show()
-plt.imshow(A_trace)
-plt.show()
-plt.imshow(np.bitwise_or(A_trace,V_trace))
-plt.show()
-open_typefile(filename, 'ctrace')
-plt.imshow(_)
-plt.show()
+
+# focus in on this smaller region
+window = np.s_[130:630,70:570]
+
+# overlay these in different color channels (fix this in post).
+plt.imsave('sobel_border_view.png',np.dstack((((F>alphas)*F).max(axis=-1),
+                                              0.2*ucip_mask,
+                                              0.5*Sthresh.filled(0))
+                                             )[crop][window], vmin=0,vmax=0.6)
+# show what the trace looks like there
 ctrace = open_typefile(filename, 'ctrace')
-ctrace[crop][window]
-plt.show()
-plt.show()
-plt.imshow(_)
-plt.show()
 plt.imsave('ctrace_view.png', ctrace[crop][window])
+
+# and confusion matrix (of standard approximation)
 plt.imsave('confusion_view.png', confuse[crop][window])
-plt.imsave('img_view.png', img[crop][window], cmap=plt.cm.gray)
+
+# and the raw image
 plt.imsave('img_view.png', img[crop][window].filled(0), cmap=plt.cm.gray)
-np.who()
-scales
-filename
-Fneg, _ = extract_pcsvn(filename, DARK_BG=True, alphas=None, betas=betas, gammas=None, kernel='discrete', dilate_per_scale=True, generate_json=False, output_dir='.')
+
+# get negative frangi arguments
 Fneg, _ = extract_pcsvn(filename, DARK_BG=True, alphas=None, betas=betas, scales=scales, gammas=None, kernel='discrete', dilate_per_scale=True, generate_json=False, output_dir='.')
-Fneg
+# calculate percentiles and apply then
 negalphas = np.array([nz_percentile(Fneg[:,:,k],95.0) for k in range(n_scales)])
-negalphas
-negapprox = apply_threshold(Fneg, negalphas)
-plt.imshow(negapprox)
-negapprox
-negapprox, neglabels = _
-plt.imshow(negapprox)
-plt.show()
-Fneg > negalphas
-plt.imshow(_.any(axis=-1))
-plt.show()
-Fneg > negalphas
-(Fneg > negalphas)[:10].any(axis=-1)
-plt.imshow(_)
-plt.show()
-(Fneg > negalphas)[:,:,:10].any(axis=-1)
-plt.imshow(_)
-plt.show()
-plt.imshow(confusion((Fneg > negalphas)[:,:,:10].any(axis=-1),trace))
-plt.show()
-plt.imshow(confusion((Fneg > negalphas)[:,:,:20].any(axis=-1),trace))
-plt.show()
-plt.imshow(confusion((Fneg > negalphas)[:,:,:20].any(axis=-1),trace)[crop])
-plt.show()
-plt.imshow(confusion((Fneg > negalphas)[:,:,:20].any(axis=-1),trace)[crop][window])
-plt.show()
-plt.imshow(confusion((Fneg > negalphas)[:,:,:20].any(axis=-1),trace,bg_mask=ucip_mask)[crop][window])
-plt.show()
-plt.imshow('fneg_confusion_view.png',confusion((Fneg > negalphas)[:,:,:20].any(axis=-1),trace,bg_mask=ucip_mask)[crop][window])
-plt.imsave('fneg_confusion_view.png', confusion((Fneg > negalphas)[:,:,:20].any(axis=-1),trace,bg_mask=ucip_mask)[crop][window])
-from skimage.morphology import binary_closing
-negapprox = (Fneg > negalphas)[:,:,:20].any(axis=-1)
-binary_closing(negapprox,approx)
-binary_closing(approx,negapprox)
-np.who()
-del labs
-del A_trace, V_trace, ctrace
-np.who()
-del neg_labels
-del neglabels
-del confuse_LO, approx_LO
-np.who()
-del Fneg
-np.who()
-del _162
-del labs_LO
-binary_closing(approx,negapprox)
-negapprox
-plt.imshow(_)
-plt.show()
-binary_closing(np.logical_or(approx,negapprox))
-plt.imshow(_)
-plt.show()
-b = binary_closing(np.logical_or(approx,negapprox))
-plt.imshow(confusion(b,trace))
-plt.show()
-plt.imshow(confusion(b,trace)[crop][window])
-plt.show()
-plt.imshow(confusion(b,trace)[crop][window],bg_mask=ucip_mask)
-plt.imshow(confusion(b,trace,bg_mask=ucip_mask)[crop][window])
-plt.show()
-plt.imshow(confusion(np.logical_or(approx,neg_approx),trace)[crop][window],bg_mask=ucip_mask)
-plt.imshow(confusion(np.logical_or(approx,negapprox),trace)[crop][window],bg_mask=ucip_mask)
-plt.imshow(confusion(np.logical_or(approx,negapprox),trace,bg_mask=ucip_mask)[crop][window])
-plt.show()
-plt.imshow(confusion(np.logical_or(approx,negapprox),trace,bg_mask=ucip_mask)[crop][window])
-plt.imshow(_)
-get_ipython().magic('pinfo save')
-get_ipython().magic('save sobelmashfinal.py 1-231')
+negapprox, _ = apply_threshold(Fneg, negalphas)
+
+# get the largest responses from small scales only, compare to trace
+plt.imsave('fneg_confusion_view.png',
+           confusion((Fneg > negalphas)[:,:,:20].any(axis=-1), trace,
+                     bg_mask=ucip_mask)[crop][window])

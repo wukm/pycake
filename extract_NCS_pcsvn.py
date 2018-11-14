@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
 
 """
-alpha_sweep_demo.py
+This is the main program. It approximates the PCSVN
 
-show how much variable alphas affect the output.
 
 """
 
-from placenta import get_named_placenta, cropped_args, cropped_view
-from placenta import list_placentas, list_by_quality
-from placenta import open_typefile, open_tracefile
-from placenta import add_ucip_to_mask, measure_ncs_markings
+from placenta import (get_named_placenta, cropped_args, cropped_view,
+                      list_placentas, list_by_quality, open_typefile,
+                      open_tracefile, add_ucip_to_mask, measure_ncs_markings)
 
-from merging import nz_percentile
-from score import compare_trace, rgb_to_widths, merge_widths_from_traces
-from score import filter_widths, mcc, confusion
+from merging import nz_percentile, apply_threshold
+from score import (compare_trace, rgb_to_widths, merge_widths_from_traces,
+                   filter_widths, mcc, confusion)
 
-from pcsvn import extract_pcsvn, scale_label_figure, apply_threshold
-from pcsvn import get_outname_lambda
+from pcsvn import extract_pcsvn, scale_label_figure, get_outname_lambda
 
 import numpy as np
 import numpy.ma as ma
@@ -29,27 +26,44 @@ import os
 import json
 import datetime
 
-#different ways to initialize samples
+# INITIALIZE SAMPLES ________________________________________________________
+
+# initialize a list of samples (several different ways)
 #placentas = list_by_quality(0)
 placentas = list_placentas('T-BN')  # load allllll placentas
 #placentas = list_by_quality(json_file='manual_batch.json')
 #placentas = ['T-BN1662406.png'] # for a single sample, use a 1 element list.
+
 n_samples = len(placentas)
+
+# RUNTIME OPTIONS ___________________________________________________________
 
 MAKE_NPZ_FILES = True # pickle frangi targets if you can
 USE_NPZ_FILES = True  # use old npz files if you can
-NPZ_DIR = 'output/181112-bigrun'
+NPZ_DIR = 'output/181112-bigrun' # where to look for npz files
+OUTPUT_DIR = 'output/181112-bigrun' # where to save outputs
 
-OUTPUT_DIR = 'output/181112-bigrun'
 
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
+# EXTRACT_PCSVN OPTIONS _____________________________________________________
 
+# find bright curvilinear structure against a dark background -> True
+# find dark curvilinear structure against a bright background -> False
+# DARK_BG -> ignore and return signed Frangi scores
 DARK_BG = False
-DILATE_PER_SCALE = True
+
+# along with the above, this will return "opposite" signed frangi scores.
+# if this is True, then DARK_BG controls the "polarity" of the filter.
+# See frangi.get_frangi_targets for details.
 SIGNED_FRANGI = False
+
+# do not calculate hessian scores close to the boundary (this is important
+# mainly in terms of ensuring that the hessian is very large on the edge of
+# the plate (which would influence gamma calculation)
+DILATE_PER_SCALE = True
+
 log_range = (-3, 5.5)
 n_scales = 40
+
 
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
 alphas = [0.15 for s in scales]
@@ -57,6 +71,9 @@ betas = None  # will be given default parameters
 gammas =  None  # will be given default parameters
 
 mccs = dict()  # empty dict to store MCC's of each sample
+
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
 
 print(n_samples, "samples total!")
 
