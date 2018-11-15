@@ -4,7 +4,7 @@ import numpy as np
 import numpy.ma as ma
 
 
-def nz_percentile(A, q, axis=None, interpolation='linear')
+def nz_percentile(A, q, axis=None, interpolation='linear'):
     """calculate np.percentile(...,q) on an array's nonzero elements only
 
     Parameters

@@ -281,7 +281,7 @@ def list_placentas(label=None, sample_dir=None):
 
     return sorted(placentas)
 
-def show_mask(img):
+def show_mask(img, interactive=True, mask_color=None):
     """
     show a masked grayscale image with a dark blue masked region
 
@@ -289,21 +289,33 @@ def show_mask(img):
     and, if they're masked arrays, sets makes the mask a dark blue)
     a better function might make the grayscale value dark blue
     (so there's no confusion)
+
+    if interactive, this operates like "plt.imshow"
+    if interactive==False, return the RGB matrix
     """
 
     from numpy.ma import is_masked
     from skimage.color import gray2rgb
     import matplotlib.pyplot as plt
 
+    if mask_color is None:
+        mask_color = (0,0,60)
 
     if not is_masked(img):
-        plt.imshow(img, cmap=plt.cm.gray)
-    else:
+        if interactive:
+            plt.imshow(img, cmap=plt.cm.gray)
+        else:
+            return img # what are you doing here anyway
 
-        mimg = gray2rgb(img.filled(0))
-        # fill blue channel with a relatively dark value for masked elements
-        mimg[img.mask, 2] = 60
+    # otherwise, get an RGB array, black where the mask is
+    mimg = gray2rgb(img.filled(0))
+    # fill masked regions with the mask color
+    mimg[img.mask, :] = mask_color
+
+    if interactive:
         plt.imshow(mimg)
+    else:
+        return mimg
 
 def _cropped_bounds(img, mask=None):
 

@@ -30,18 +30,18 @@ import datetime
 
 # initialize a list of samples (several different ways)
 #placentas = list_by_quality(0)
-placentas = list_placentas('T-BN')  # load allllll placentas
+#placentas = list_placentas('T-BN')  # load allllll placentas
 #placentas = list_by_quality(json_file='manual_batch.json')
-#placentas = ['T-BN1662406.png'] # for a single sample, use a 1 element list.
+placentas = ['T-BN0204423.png'] # for a single sample, use a 1 element list.
 
 n_samples = len(placentas)
 
 # RUNTIME OPTIONS ___________________________________________________________
 
-MAKE_NPZ_FILES = True # pickle frangi targets if you can
-USE_NPZ_FILES = True  # use old npz files if you can
+MAKE_NPZ_FILES = False # pickle frangi targets if you can
+USE_NPZ_FILES = False  # use old npz files if you can
 NPZ_DIR = 'output/181112-bigrun' # where to look for npz files
-OUTPUT_DIR = 'output/181112-bigrun' # where to save outputs
+OUTPUT_DIR = 'output/181114-deglared' # where to save outputs
 
 
 # EXTRACT_PCSVN OPTIONS _____________________________________________________
@@ -94,6 +94,8 @@ for i, filename in enumerate(placentas):
         else:
             print(f'no npz file found for {filename}.')
             npz_filename = None
+    else:
+        npz_filename = None
 
     # set a lambda function to make output file names
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
@@ -110,7 +112,8 @@ for i, filename in enumerate(placentas):
                             betas=betas, scales=scales, gammas=gammas,
                             kernel='discrete', dilate_per_scale=True,
                             verbose=False, signed_frangi=SIGNED_FRANGI,
-                            generate_json=True, output_dir=OUTPUT_DIR)
+                            generate_json=True, output_dir=OUTPUT_DIR,
+                            remove_glare=True)
 
         if MAKE_NPZ_FILES:
             npzfile = ".".join((outname("F").rsplit('.', maxsplit=1)[0],'npz'))

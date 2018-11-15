@@ -5,6 +5,7 @@ from hfft import fft_hessian
 from diffgeo import principal_curvatures, principal_directions
 from frangi import get_frangi_targets
 import numpy as np
+from preprocessing import inpaint_glare
 
 from plate_morphology import dilate_boundary
 
@@ -102,8 +103,8 @@ def make_multiscale(img, scales, betas, gammas,
 
         # calculate frangi targets at this scale
         targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma,
-                                     dark_bg=dark_bg, signed=signed_frangi,
-                                     threshold=False)
+                                     dark_bg=dark_bg, signed=signed_frangi)
+
 
         # store results as a dictionary
         this_scale = {'sigma': sigma,
@@ -147,7 +148,7 @@ def make_multiscale(img, scales, betas, gammas,
 def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
                   DARK_BG=True, dilate_per_scale=True, verbose=True,
                   generate_json=True, output_dir=None, kernel=None,
-                  signed_frangi=False):
+                  signed_frangi=False, remove_glare=False):
     """Run PCSVN extraction on the sample given in the file.
 
     Despite the name, this simply returns the Frangi filter responses at
@@ -172,7 +173,10 @@ def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
         gammas = [None for s in scales]  # structureness parameter
 
     # Preprocessing###############
-    img = raw_img.copy()  # in case we alter the mask or something
+    if remove_glare:
+        img = inpaint_glare(raw_img)
+    else:
+        img = raw_img.copy()  # in case we alter the mask or something
 
     # Multiscale Frangi Filter##############################
 
