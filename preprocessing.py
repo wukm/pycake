@@ -114,6 +114,17 @@ def inpaint_hybrid(img, threshold=175, min_size=64, boundary_radius=10):
     # put on old image mask
     return ma.masked_array(hybrid, mask=img.mask)
 
+def inpaint_with_biharmonic(img, threshold=175):
+    """
+    use biharmonic inpainting *all* glare
+    """
+    glare = mask_glare(img, threshold=threshold, mask_only=True)
+    inpainted = inpaint_biharmonic(img_as_float(img.filled(0)), mask=glare)
+
+    if ma.is_masked(img):
+        return ma.masked_array(inpainted, mask=img.mask)
+    else:
+        return inpainted
 
 def mask_glare(img, threshold=175, mask_only=False):
     """
@@ -122,7 +133,15 @@ def mask_glare(img, threshold=175, mask_only=False):
     if mask_only, just return the mask. Otherwise return a copy of img with
     that added to the mask. If you want the original mask to be ignored,
     just pass img.filled(0) ya doofus
+
+    threshold is expected to be of the same dtype as img *unless# it assumes
+    its default value, in which case the threshold will be converted to a float
+
     """
+    # if img.dtype is floating but threshold value is still the default
+    # this could be generalized
+    if np.issubdtype(img.dtype, np.floating) and (threshold == 175):
+        threshold = 175 / 255
     # region to inpaint
     inp = (img > threshold)
 
@@ -140,6 +159,8 @@ def mask_glare(img, threshold=175, mask_only=False):
         return ma.masked_array(img, mask=inp)
 
 
+DARK_RED = np.array([103, 15, 23]) / 255.
+
 # test it on a particularly bad sample
 if __name__ == "__main__":
 
@@ -149,23 +170,42 @@ if __name__ == "__main__":
     filename = 'T-BN0204423.png'  # a particularly glary sample
     img = get_named_placenta(filename)
 
+    img = ma.masked_array(img_as_float(img), mask=img.mask)
     crop = np.s_[150:500, 150:800]  # indices to zoom in on the region
     zoom = np.s_[300:380, 300:380]  # even smaller region
-    masked = mask_glare(img)
+
+    slc = zoom  # which view to use
+
+    masked = mask_glare(img)  # for viewing
+
     inpainted = inpaint_glare(img)
     minpainted = inpaint_with_boundary_median(img)
+    hinpainted = inpaint_hybrid(img)
+    binpainted = inpaint_with_biharmonic(img)
 
     # view the closeup like this
-    # save each of these matrices using regular plt.imsave
-    minpainted_view = show_mask(minpainted[zoom], interactive=False,
-                                mask_color=(103, 15, 23))
-    inpainted_view = show_mask(inpainted[zoom], interactive=False,
-                               mask_color=(103, 15, 23))
-    masked_view = show_mask(masked[zoom], interactive=False,
-                            mask_color=(103, 15, 23))
-    img_view = show_mask(img[zoom], interactive=False,
-                         mask_color=(103, 15, 23))
+    minpainted_view = show_mask(minpainted[slc], interactive=False,
+                                mask_color=DARK_RED)
+    inpainted_view = show_mask(inpainted[slc], interactive=False,
+                               mask_color=DARK_RED)
+    masked_view = show_mask(masked[slc], interactive=False,
+                            mask_color=DARK_RED)
+    img_view = show_mask(img[slc], interactive=False,
+                         mask_color=DARK_RED)
+    hinpainted_view = show_mask(hinpainted[slc], interactive=False,
+                                mask_color=DARK_RED)
+    binpainted_view = show_mask(binpainted[slc], interactive=False,
+                                mask_color=DARK_RED)
 
     # view them all next to each other
-    plt.imshow(np.hstack((img_view, masked_view, inpainted_view,
-                          minpainted_view)))
+
+    IMGS = np.vstack((
+        np.hstack((img_view, masked_view, inpainted_view)),
+        np.hstack((minpainted_view, binpainted_view, hinpainted_view))))
+
+    # THEN IMSAVE
+
+    # plt.imsave('preprocessing_comparison_cropped.png',  IMGS)
+    # plt.imsave('preprocessing_comparison_zoomed.png',  IMGS)
+
+    # if it's zoomed, then rescale the output in GIMP to 4x
