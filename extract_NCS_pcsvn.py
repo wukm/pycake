@@ -268,7 +268,6 @@ for i, filename in enumerate(placentas):
     plt.imsave(outname('2_fmax'), F.max(axis=-1)[crop],
                vmin=0, vmax=1.0, cmap=plt.cm.nipy_spectral)
     plt.close('all')  # something's leaking :(
-    break
 
 # json file with mccs and other runtime info
 timestring = datetime.datetime.now()
