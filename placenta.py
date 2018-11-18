@@ -305,7 +305,8 @@ def show_mask(img, interactive=True, mask_color=None):
         if interactive:
             plt.imshow(img, cmap=plt.cm.gray)
         else:
-            return img # what are you doing here anyway
+            # return as an rgb image so output is uniform
+            return gray2rgb(img)
 
     # otherwise, get an RGB array, black where the mask is
     mimg = gray2rgb(img.filled(0))

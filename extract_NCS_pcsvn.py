@@ -12,7 +12,7 @@ from placenta import (get_named_placenta, cropped_args, cropped_view,
 
 from merging import nz_percentile, apply_threshold
 from score import (compare_trace, rgb_to_widths, merge_widths_from_traces,
-                   filter_widths, mcc, confusion)
+                   filter_widths, mcc, confusion, skeletonize_trace)
 
 from pcsvn import extract_pcsvn, scale_label_figure, get_outname_lambda
 
@@ -44,6 +44,7 @@ NPZ_DIR = 'output/181112-bigrun' # where to look for npz files
 OUTPUT_DIR = 'output/181114-deglared' # where to save outputs
 
 
+
 # EXTRACT_PCSVN OPTIONS _____________________________________________________
 
 # find bright curvilinear structure against a dark background -> True
@@ -61,8 +62,16 @@ SIGNED_FRANGI = False
 # the plate (which would influence gamma calculation)
 DILATE_PER_SCALE = True
 
-log_range = (-3, 5.5)
+# use preprocessing.inpaint_with_boundary_median() to replace high
+# glare regions
+REMOVE_GLARE = True
+
+log_range = (-3, 6)
 n_scales = 40
+
+# when showing "large scales only", this is where to start
+# (some index between 0 and n_scales)
+LO_offset = 24
 
 
 scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
@@ -111,9 +120,9 @@ for i, filename in enumerate(placentas):
         F, img = extract_pcsvn(filename, DARK_BG=DARK_BG, alphas=alphas,
                             betas=betas, scales=scales, gammas=gammas,
                             kernel='discrete', dilate_per_scale=True,
-                            verbose=False, signed_frangi=SIGNED_FRANGI,
+                            verbose=True, signed_frangi=SIGNED_FRANGI,
                             generate_json=True, output_dir=OUTPUT_DIR,
-                            remove_glare=True)
+                            remove_glare=REMOVE_GLARE)
 
         if MAKE_NPZ_FILES:
             npzfile = ".".join((outname("F").rsplit('.', maxsplit=1)[0],'npz'))
@@ -156,8 +165,9 @@ for i, filename in enumerate(placentas):
     #trace_smaller_only = filter_widths(min_widths, min_width=3, max_width=17)
     #trace_smaller_only != 0
     # use limited scales
-    approx_LO, labs_LO = apply_threshold(F[:,:, 24:],
-                                                           alphas[24:])
+    approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], alphas[LO_offset:])
+    # fix labels to incorporate offset
+    labs_LO = (labs_LO!=0)*(labs_LO + LO_offset)
     # confusion matrix against default trace
     confuse = confusion(approx, trace, bg_mask=ucip_mask)
     confuse_LO = confusion(approx_LO, trace,
@@ -185,14 +195,17 @@ for i, filename in enumerate(placentas):
     plt.imsave(outname('3_confusion'), confuse[crop])
     plt.imsave(outname('4_confusion_LO'), confuse_LO[crop])
 
+    # only save the colorbar the first time
+    save_colorbar = (i==0)
     # make the graph that shows what scale the max was pulled from
     scale_label_figure(labs, scales, crop=crop,
                        savefilename=outname('2_labeled'), image_only=True,
-                       save_colormap_separate=True, output_dir=OUTPUT_DIR)
+                       save_colorbar_separate=save_colorbar,
+                       output_dir=OUTPUT_DIR)
 
     scale_label_figure(labs_LO, scales, crop=crop,
                        savefilename=outname('5_labeled'), image_only=True,
-                       save_colormap_separate=False, output_dir=OUTPUT_DIR)
+                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
     # save the maximum frangi output
     plt.imsave(outname('1_fmax'), F.max(axis=-1)[crop],
                vmin=0,vmax=1.0,
@@ -208,15 +221,18 @@ mccfile = os.path.join(OUTPUT_DIR, f"runlog_{timestring}.json")
 
 runlog = {
     'time': timestring,
-    'DARK_BG': DARK_BG,
+    'dark_bg': DARK_BG,
     'dilate_per_scale': DILATE_PER_SCALE,
     'log_range': log_range,
     'n_scales': n_scales,
     'scales': list(scales),
     'alphas': list(alphas),
     'betas': None,
+    'use_npz_files': False,
+    'remove_glare': REMOVE_GLARE,
     'files': list(placentas),
     'MCCS': mccs
+
 }
 
 with open(mccfile, 'w') as f:

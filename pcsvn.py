@@ -4,13 +4,16 @@ from placenta import get_named_placenta
 from hfft import fft_hessian
 from diffgeo import principal_curvatures, principal_directions
 from frangi import get_frangi_targets
+from skimage.util import img_as_float
 import numpy as np
-from preprocessing import inpaint_glare
+from preprocessing import (inpaint_glare, inpaint_with_boundary_median,
+                           inpaint_hybrid)
 
 from plate_morphology import dilate_boundary
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy.ma as ma
 
 import os.path
 import json
@@ -40,7 +43,7 @@ def make_multiscale(img, scales, betas, gammas,
     # store results of each scale (create as empty list)
     multiscale = list()
 
-    img = img / 255.
+    img = ma.masked_array(img_as_float(img), mask=img.mask)
 
     for i, sigma, beta, gamma in zip(range(len(scales)), scales,
                                      betas, gammas):
@@ -174,7 +177,11 @@ def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
 
     # Preprocessing###############
     if remove_glare:
-        img = inpaint_glare(raw_img)
+        if verbose:
+            print('removing glare from sample')
+        # img = inpaint_glare(raw_img)
+        # img = inpaint_with_boundary_median(raw_img)
+        img = inpaint_hybrid(raw_img)
     else:
         img = raw_img.copy()  # in case we alter the mask or something
 
@@ -182,8 +189,8 @@ def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
 
     # output is a dictionary of relevant info at each scale
     multiscale = make_multiscale(img, scales, betas, gammas,
-                                find_principal_directions=False,
-                                dilate_per_scale=dilate_per_scale,
+                                 find_principal_directions=False,
+                                 dilate_per_scale=dilate_per_scale,
                                  kernel=kernel,
                                  signed_frangi=signed_frangi,
                                 dark_bg=DARK_BG,
@@ -297,7 +304,7 @@ def _build_scale_colormap(N_scales, base_colormap, basecolor=(0,0,0,1)):
 
 def scale_label_figure(wheres, scales, savefilename=None,
                        crop=None, show_only=False, image_only=False,
-                       save_colormap_separate=False, savecolormapfile=None,
+                       save_colorbar_separate=False, savecolorbarfile=None,
                        output_dir=None):
     """
     crop is a slice object.
@@ -324,7 +331,7 @@ def scale_label_figure(wheres, scales, savefilename=None,
         cbar = plt.colorbar(imgplot)
 
         # this is apparently hackish, beats me
-        tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+        tick_locs = (np.arange(N+1) + 0.5)*(N-1)/N
 
         cbar.set_ticks(tick_locs)
         # label each tick with the sigma value
@@ -343,16 +350,18 @@ def scale_label_figure(wheres, scales, savefilename=None,
 
         plt.close()
 
-    if save_colormap_separate:
-        if savecolormapfile is None:
-            savecolormapfile = os.path.join(output_dir, "scale_colormap.png")
-        fig = plt.figure(figsize=(1,8))
+    if save_colorbar_separate:
+        if savecolorbarfile is None:
+            savecolorbarfile = os.path.join(output_dir, "scale_colorbar.png")
+        fig = plt.figure(figsize=(1, 8))
         ax1 = fig.add_axes([0.05, 0.05, 0.15, 0.9])
-        tick_locs = (np.arange(N) + 0.5)*(N-1)/N
+        tick_locs = (np.arange(N+1) + 0.5)*(N-1)/N
+        scalelabels = [r"$\sigma = {:.2f}$".format(s) for s in scales]
+        scalelabels.insert(0, "n/a")
         cbar = mpl.colorbar.ColorbarBase(ax1, cmap=tabemap,
                                          norm=mpl.colors.Normalize(vmin=0,
                                                                    vmax=N),
                                          orientation='vertical',
                                          ticks=tick_locs)
-
-        plt.savefig(savecolormapfile, dpi=300)
+        cbar.set_ticklabels(scalelabels)
+        plt.savefig(savecolorbarfile, dpi=300)

@@ -2,6 +2,7 @@
 
 import numpy as np
 from placenta import open_typefile, open_tracefile
+from skimage.morphology import thin
 
 def rgb_to_widths(T):
     """
@@ -217,7 +218,33 @@ def _hex_to_rgb(hexstring):
     rewritten already.
     """
     triple = hexstring.strip("#")
-    return tuple(int(x,16) for x in (triple[:2],triple[2:4],triple[4:]))
+    return tuple(int(x, 16) for x in (triple[:2], triple[2:4], triple[4:]))
+
+
+def skeletonize_trace(T, T2=None):
+    """
+    if T is a boolean matrix representing a trace, then thin it
+
+    if T is an RGB trace, then register it according to the
+    tracing protocol then thin it
+
+    if T2 is provided, do the same thing to T2 and then merge the two
+    """
+    if T.ndim == 3:
+        trace = (rgb_to_widths(T) > 0)  # booleanize it
+
+    thinned = thin(trace)
+
+    if T2 is None:
+        return thinned
+
+    else:
+        # do the same thing to second trace and merge it
+        if T2.ndim == 3:
+            trace_2 = (rgb_to_widths(T2) > 0)  # booleanize it
+        thinned_2 = thin(trace_2)
+
+        return np.logical_or(thinned, thinned_2)
 
 
 def confusion(test, truth, bg_mask=None, colordict=None, tint_mask=True):
