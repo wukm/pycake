@@ -2,23 +2,23 @@
 TA = open_typefile(filename, 'arteries')
 TV = open_typefile(filename, 'veins')
 T = merge_widths(TA, TV, strategy='arteries')
-from score import merge_widths
+from scoring import merge_widths
 T = merge_widths(TA, TV, strategy='arteries')
 T
 plt.imshow(T)
 plt.show()
 confusion(approx, T!=0)
-from score import confusion
+from scoring import confusion
 confusion(approx, T!=0)
 plt.imshow(_[crop])
 plt.show()
 approx
-from score import mcc
+from scoring import mcc
 mcc(approx, T!=0)
 mcc(approx, T!=0, bg_mask=img.mask)
 mcc(approx, T<19), bg_mask=img.mask)
 mcc(approx, T<19, bg_mask=img.mask)
-from score import filter_widths
+from scoring import filter_widths
 mcc(approx, filter_widths(T,max_width=17), bg_mask=img.mask)
 mcc(approx, filter_widths(T,max_width=17)!=0, bg_mask=img.mask)
 plt.imshow(filter_widths(T,max_width=17)!=0)
@@ -121,7 +121,7 @@ plt.imshow(TT)
 plt.show()
 TA
 TA
-from score import get_widths_from_trace
+from scoring import get_widths_from_trace
 get_widths_from_trace(WA)
 get_widths_from_trace(TA)
 skeletonize(get_widths_from_trace(TA)!=0)

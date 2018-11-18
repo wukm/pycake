@@ -11,10 +11,11 @@ from placenta import (get_named_placenta, cropped_args, cropped_view,
                       open_tracefile, add_ucip_to_mask, measure_ncs_markings)
 
 from merging import nz_percentile, apply_threshold
-from score import (compare_trace, rgb_to_widths, merge_widths_from_traces,
+from scoring import (compare_trace, rgb_to_widths, merge_widths_from_traces,
                    filter_widths, mcc, confusion, skeletonize_trace)
 
 from pcsvn import extract_pcsvn, scale_label_figure, get_outname_lambda
+from preprocessing import inpaint_hybrid
 
 import numpy as np
 import numpy.ma as ma
@@ -26,22 +27,31 @@ import os
 import json
 import datetime
 
+# for some post_processing, this needs to be moved elsewhere
+from skimage.filters import sobel
+from frangi import frangi_from_image
+from plate_morphology import dilate_boundary
+from skimage.morphology import remove_small_holes, remove_small_objects
+from skimage.segmentation import random_walker
+
+
+
 # INITIALIZE SAMPLES ________________________________________________________
 
 # initialize a list of samples (several different ways)
 #placentas = list_by_quality(0)
-#placentas = list_placentas('T-BN')  # load allllll placentas
+placentas = list_placentas('T-BN')  # load allllll placentas
 #placentas = list_by_quality(json_file='manual_batch.json')
-placentas = ['T-BN0204423.png'] # for a single sample, use a 1 element list.
+#placentas = ['T-BN0204423.png'] # for a single sample, use a 1 element list.
 
 n_samples = len(placentas)
 
 # RUNTIME OPTIONS ___________________________________________________________
 
-MAKE_NPZ_FILES = False # pickle frangi targets if you can
-USE_NPZ_FILES = False  # use old npz files if you can
-NPZ_DIR = 'output/181112-bigrun' # where to look for npz files
-OUTPUT_DIR = 'output/181114-deglared' # where to save outputs
+MAKE_NPZ_FILES = True # pickle frangi targets if you can
+USE_NPZ_FILES = True  # use old npz files if you can
+NPZ_DIR = 'output/181117-deglared' # where to look for npz files
+OUTPUT_DIR = 'output/181117-deglared' # where to save outputs
 
 
 
@@ -80,6 +90,7 @@ betas = None  # will be given default parameters
 gammas =  None  # will be given default parameters
 
 mccs = dict()  # empty dict to store MCC's of each sample
+pncs = dict() # empty dict to store percent network covered for each sample
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -109,9 +120,13 @@ for i, filename in enumerate(placentas):
     # set a lambda function to make output file names
     outname = get_outname_lambda(filename, output_dir=OUTPUT_DIR)
 
+    raw_img = get_named_placenta(filename, maskfile=None)
     if npz_filename is not None:
         F = np.load(npz_filename)['F']
-        img = get_named_placenta(filename, maskfile=None)
+        if REMOVE_GLARE:
+            img = inpaint_hybrid(raw_img)
+        else:
+            img = raw_img
         print('successfully loaded the frangi targets!')
 
     else:
@@ -120,7 +135,7 @@ for i, filename in enumerate(placentas):
         F, img = extract_pcsvn(filename, DARK_BG=DARK_BG, alphas=alphas,
                             betas=betas, scales=scales, gammas=gammas,
                             kernel='discrete', dilate_per_scale=True,
-                            verbose=True, signed_frangi=SIGNED_FRANGI,
+                            verbose=False, signed_frangi=SIGNED_FRANGI,
                             generate_json=True, output_dir=OUTPUT_DIR,
                             remove_glare=REMOVE_GLARE)
 
@@ -146,8 +161,10 @@ for i, filename in enumerate(placentas):
 
     ucip_midpoint, resolution = measure_ncs_markings(filename=filename)
 
-    #print(f"The umbilicial cord insertion point is at {ucip_midpoint}")
-    #print(f"The resolution of the image is {resolution} pixels per cm.")
+    Fmax = F.max(axis=-1)
+
+    # print(f"The umbilicial cord insertion point is at {ucip_midpoint}")
+    # print(f"The resolution of the image is {resolution} pixels per cm.")
 
     # mask anywhere close to (within 90px L2 distance of) the UCIP
     # this is imperically how the it is, although could be bigger
@@ -157,25 +174,30 @@ for i, filename in enumerate(placentas):
     A_trace = open_typefile(filename, 'arteries')
     V_trace = open_typefile(filename, 'veins')
 
+    skeltrace = skeletonize_trace(A_trace, V_trace)
+
     # matrix of widths of traced image
     widths = merge_widths_from_traces(A_trace, V_trace, strategy='arteries')
-    #min_widths = merge_widths_from_traces(A_trace, V_trace, strategy='minimum')
+    # min_widths = merge_widths_from_traces(A_trace, V_trace,
+    #                                       strategy='minimum')
 
     # trace ignoring largest vessels (19 pixels wide)
-    #trace_smaller_only = filter_widths(min_widths, min_width=3, max_width=17)
-    #trace_smaller_only != 0
+    # trace_smaller_only = filter_widths(min_widths, min_width=3, max_width=17)
+    # trace_smaller_only != 0
     # use limited scales
     approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], alphas[LO_offset:])
+
     # fix labels to incorporate offset
-    labs_LO = (labs_LO!=0)*(labs_LO + LO_offset)
+    labs_LO = (labs_LO != 0)*(labs_LO + LO_offset)
+
     # confusion matrix against default trace
     confuse = confusion(approx, trace, bg_mask=ucip_mask)
     confuse_LO = confusion(approx_LO, trace,
                                     bg_mask=ucip_mask)
 
     m_score, counts = mcc(approx, trace, ucip_mask, return_counts=True)
-    m_score_LO, counts_LO = mcc(approx_LO, trace,
-                                                  ucip_mask, return_counts=True)
+    m_score_LO, counts_LO = mcc(approx_LO, trace, ucip_mask,
+                                return_counts=True)
 
     # this all just verifies that the 4 categories were added up
     # correctly and match the total number of pixels in the reported
@@ -186,31 +208,67 @@ for i, filename in enumerate(placentas):
     print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
     print('TP+TN+FP+FN={}\ttotal pixels={}'.format(TP+TN+FP+FN,total))
 
-    mccs[filename] =  (m_score, m_score_LO)
+    # MOVE THIS ELSEWHERE
+    s = sobel(img)
+    s = dilate_boundary(s, mask=img.mask, radius=20)
+    finv = frangi_from_image(s, sigma=0.8, dark_bg=True)
+    finv_thresh = nz_percentile(finv, 80)
+    margins = remove_small_objects((finv > finv_thresh).filled(0), min_size=32)
+    margins_added = np.logical_or(margins, approx)
+    margins_added = remove_small_holes(margins_added, min_size=100,
+                                       connectivity=2)
+    # random walker markers
+    markers = np.zeros(img.shape, dtype=np.uint8)
+    markers[Fmax < .1] = 1
+    markers[margins_added] = 2
+    rw = random_walker(img, markers, beta=1000)
+    approx_rw = (rw==2)
+    confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
+    m_score_rw = mcc(approx_rw, trace, ucip_mask)
+    pnc_rw = np.logical_and(skeltrace, approx_rw).sum() / skeltrace.sum()
 
-    print(f'mcc score of {m_score} for {filename}')
-    print(f'mcc score of {m_score_LO} with larger sigmas only')
+    mccs[filename] =  (m_score, m_score_LO, m_score_rw)
 
-    plt.imsave(outname('6_raw'), img[crop].filled(0), cmap=plt.cm.gray)
-    plt.imsave(outname('3_confusion'), confuse[crop])
-    plt.imsave(outname('4_confusion_LO'), confuse_LO[crop])
+    print(f'mcc score of {m_score:.3} for {filename}')
+    print(f'mcc score of {m_score_LO:.3} with larger sigmas only')
+    print(f'mcc score of {m_score_rw:.3} after random walker')
+
+    plt.imsave(outname('0_raw'), raw_img[crop].filled(0), cmap=plt.cm.gray)
+    plt.imsave(outname('1_img'), img[crop].filled(0), cmap=plt.cm.gray)
+    plt.imsave(outname('4_confusion'), confuse[crop])
+    plt.imsave(outname('7_confusion_LO'), confuse_LO[crop])
+    plt.imsave(outname('9_confusion_rw'), confuse_rw[crop])
+
+    percent_covered = np.logical_and(skeltrace, approx).sum() / skeltrace.sum()
+    percent_covered_LO = np.logical_and(skeltrace, approx_LO).sum() / skeltrace.sum()
+
+    pncs[filename] = (percent_covered, percent_covered_LO, pnc_rw)
+
+    print('percentage of skeltrace covered:', f'{percent_covered:.2%}')
+    print('percentage of skeltrace covered (larger sigmas only):',
+          f'{percent_covered_LO:.2%}')
+    print('percentage of skeltrace covered (random_walker):',
+          f'{pnc_rw:.2%}')
+    plt.imsave(outname('5_coverage'), confusion(approx, skeltrace)[crop])
+    plt.imsave(outname('8_coverage_LO'), confusion(approx_LO, skeltrace)[crop])
+    plt.imsave(outname('9_coverage_rw'), confusion(approx_rw, skeltrace)[crop])
 
     # only save the colorbar the first time
     save_colorbar = (i==0)
     # make the graph that shows what scale the max was pulled from
     scale_label_figure(labs, scales, crop=crop,
-                       savefilename=outname('2_labeled'), image_only=True,
+                       savefilename=outname('3_labeled'), image_only=True,
                        save_colorbar_separate=save_colorbar,
                        output_dir=OUTPUT_DIR)
 
     scale_label_figure(labs_LO, scales, crop=crop,
-                       savefilename=outname('5_labeled'), image_only=True,
+                       savefilename=outname('4_labeled'), image_only=True,
                        save_colorbar_separate=False, output_dir=OUTPUT_DIR)
     # save the maximum frangi output
-    plt.imsave(outname('1_fmax'), F.max(axis=-1)[crop],
-               vmin=0,vmax=1.0,
-               cmap=plt.cm.nipy_spectral)
-    plt.close('all') # something's leaking :(
+    plt.imsave(outname('2_fmax'), F.max(axis=-1)[crop],
+               vmin=0, vmax=1.0, cmap=plt.cm.nipy_spectral)
+    plt.close('all')  # something's leaking :(
+    break
 
 # json file with mccs and other runtime info
 timestring = datetime.datetime.now()
@@ -231,8 +289,8 @@ runlog = {
     'use_npz_files': False,
     'remove_glare': REMOVE_GLARE,
     'files': list(placentas),
-    'MCCS': mccs
-
+    'MCCS': mccs,
+    'PNC': pncs
 }
 
 with open(mccfile, 'w') as f:
