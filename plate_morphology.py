@@ -56,61 +56,52 @@ def dilate_boundary(img, radius=10, mask=None):
         # replace the original mask or create a new masked array
         return ma.masked_array(img, mask=new_mask)
 
-#############
-# DEMO FOR SHOWING OFF DILATE_BOUNDARY EFFECT
+
 
 if __name__ == "__main__":
+
+    # DEMO FOR SHOWING OFF DILATE_BOUNDARY EFFECT
 
     from placenta import get_named_placenta
     from frangi import frangi_from_image
     import matplotlib.pyplot as plt
-    import numpy as np
-    from skimage.exposure import rescale_intensity
 
     import os.path
 
     dest_dir = 'demo_output'
     img = get_named_placenta('T-BN0164923.png')
 
-    #radius = 30
     sigma = 3
-    radius = 80
-    # IMG WITHOUT DILATING, THEN IMAGE WITH DILATING
-    #sigma = radius/4
+    radius = 25
 
-    #inset = np.s_[:,:]
-    inset = np.s_[800:1000,500:890]
-    #inset = np.s_[100:300,300:500]
+    inset = np.s_[800:1000, 500:890]
 
     D = dilate_boundary(img, radius=radius)
 
-
-    # SAVE IT IN THE RIGHT DIRECTORY, ETC plt.savefig(
-
-    # NOW SHOW FRANGI ON THESE IMAGES
-
-    # NOW SHOW THE SAME PICTURE
-
     Fimg = frangi_from_image(img, sigma, dark_bg=False, dilation_radius=None)
-    #FD = frangi_from_image(img, sigma, dark_bg=False, dilation_radius=radius)
     FD = frangi_from_image(D, sigma, dark_bg=False)
+    FDinv = frangi_from_image(D, sigma, dark_bg=True)
+    Finv = frangi_from_image(img, sigma, dark_bg=True, dilation_radius=None)
 
-    #Fimg = rescale_intensity(Fimg)
-    #FD = rescale_intensity(FD)
-
-    fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(14, 7))
+    fig, axes = plt.subplots(ncols=2, nrows=3)
 
     axes[0,0].imshow(img[inset].filled(0), cmap=plt.cm.gray)
     axes[0,1].imshow(D[inset].filled(0), cmap=plt.cm.gray)
-
+    axes[1,0].imshow(Fimg[inset].filled(0), cmap=plt.cm.nipy_spectral)
+    axes[1,1].imshow(FD[inset].filled(0), cmap=plt.cm.nipy_spectral,)
     axes[1,0].imshow(Fimg[inset].filled(0), cmap=plt.cm.nipy_spectral)
     axes[1,1].imshow(FD[inset].filled(0), cmap=plt.cm.nipy_spectral)
+    axes[2,0].imshow(Finv[inset].filled(0), cmap=plt.cm.nipy_spectral)
+    axes[2,1].imshow(FDinv[inset].filled(0), cmap=plt.cm.nipy_spectral)
 
-    # this is a hack directly from matplotlib, that's why it's so ugly.
-    plt.setp([a.get_xticklabels() for a in axes[0, :]], visible=False)
-    plt.setp([a.get_yticklabels() for a in axes[:, 1]], visible=False)
+    for a in axes.ravel():
+        # get rid of all the labels
+        plt.setp(a.get_xticklabels(), visible=False)
+        plt.setp(a.get_yticklabels(), visible=False)
 
-    fig.tight_layout()
+    # lol matlab
+    for i in range(5):
+        fig.tight_layout()
 
     plt.savefig(os.path.join(dest_dir, "boundary_dilation_demo.png"), dpi=300)
 
