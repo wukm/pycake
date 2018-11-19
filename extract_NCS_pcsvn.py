@@ -40,7 +40,8 @@ from skimage.segmentation import random_walker
 
 # initialize a list of samples (several different ways)
 #placentas = list_by_quality(0)
-placentas = list_placentas('T-BN')  # load allllll placentas
+#placentas = list_placentas('T-BN')  # load allllll placentas
+placentas = list_by_quality(0, N=1)
 #placentas = list_by_quality(json_file='manual_batch.json')
 #placentas = ['T-BN0204423.png'] # for a single sample, use a 1 element list.
 
@@ -50,8 +51,8 @@ n_samples = len(placentas)
 
 MAKE_NPZ_FILES = True # pickle frangi targets if you can
 USE_NPZ_FILES = True  # use old npz files if you can
-NPZ_DIR = 'output/181117-deglared' # where to look for npz files
-OUTPUT_DIR = 'output/181117-deglared' # where to save outputs
+NPZ_DIR = 'output/181118-deglared' # where to look for npz files
+OUTPUT_DIR = 'output/181118-deglared' # where to save outputs
 
 
 
@@ -137,7 +138,8 @@ for i, filename in enumerate(placentas):
                             kernel='discrete', dilate_per_scale=True,
                             verbose=False, signed_frangi=SIGNED_FRANGI,
                             generate_json=True, output_dir=OUTPUT_DIR,
-                            remove_glare=REMOVE_GLARE)
+                            remove_glare=REMOVE_GLARE,
+                            green_channel=GREEN_CHANNEL)
 
         if MAKE_NPZ_FILES:
             npzfile = ".".join((outname("F").rsplit('.', maxsplit=1)[0],'npz'))

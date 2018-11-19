@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#TODO: refactor this sto inpaint glare is the main function that takes
+#TODO: refactor this so inpaint glare is the main function that takes
 #      a keyword argument strategy='hybrid' or whatever
 #      then you can run
 #   for s in ['mean_window', 'median_boundary', 'biharmonic', 'hybrid']:
@@ -151,7 +151,7 @@ def mask_glare(img, threshold=175, mask_only=False):
     inp = (img > threshold)
 
     # get a larger area around the specks
-    inp = binary_dilation(inp, selem=disk(1))
+    inp = binary_dilation(inp, selem=disk(2))
 
     # remove anything large
     #inp = white_tophat(inp, selem=disk(3))
