@@ -88,8 +88,6 @@ if __name__ == "__main__":
     axes[0,0].imshow(img[inset].filled(0), cmap=plt.cm.gray)
     axes[0,1].imshow(D[inset].filled(0), cmap=plt.cm.gray)
     axes[1,0].imshow(Fimg[inset].filled(0), cmap=plt.cm.nipy_spectral)
-    axes[1,1].imshow(FD[inset].filled(0), cmap=plt.cm.nipy_spectral,)
-    axes[1,0].imshow(Fimg[inset].filled(0), cmap=plt.cm.nipy_spectral)
     axes[1,1].imshow(FD[inset].filled(0), cmap=plt.cm.nipy_spectral)
     axes[2,0].imshow(Finv[inset].filled(0), cmap=plt.cm.nipy_spectral)
     axes[2,1].imshow(FDinv[inset].filled(0), cmap=plt.cm.nipy_spectral)

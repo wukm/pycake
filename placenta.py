@@ -162,7 +162,6 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
 
     return ma.masked_array(raw_img, mask=mask)
 
-
 def list_by_quality(quality=0, N=None, json_file=None,
                              return_empty=False):
     """
@@ -171,7 +170,7 @@ def list_by_quality(quality=0, N=None, json_file=None,
     quality is either "good" or 0
                        "OK" or 1
                        "fair" or 2
-                       "bad" or 3
+                       "poor" or 3
 
     N is the number of placentas to return (will return # of placentas
     of that quality or N, whichever is smaller)
@@ -180,14 +179,13 @@ def list_by_quality(quality=0, N=None, json_file=None,
 
     if return_empty then silenty failing is OK
     """
-    if quality == 0:
-        quality = 'good'
-    elif quality == 1:
-        quality = 'okay'
-    elif quality == 2:
-        quality = 'fair'
-    elif quality == 3:
-        quality = 'bad'
+
+    quality_keys = ('good', 'okay', 'fair', 'poor')
+
+    if quality in quality_keys:
+        pass
+    elif quality in (0, 1, 2, 3):
+        quality = quality_keys[quality]
     else:
         try:
             quality = quality.lower()
@@ -197,13 +195,16 @@ def list_by_quality(quality=0, N=None, json_file=None,
             else:
                 print(f'unknown quality {quality}')
                 raise
+        else:
+            # if no json file is provided, and quality is a string,
+            # just assume it follows a template format
+            if json_file is None:
+                json_file = f"{quality}-mccs.json"
 
-    # json file
+    # if it's still not provided in the main file, it's in the main file
     if json_file is None:
-        json_file = f"{quality}-mccs.json"
+        json_file = 'sample-qualities.json'
 
-    # else the quality is irrelevant and hopefully the jsonfile
-    # was provided
     try:
         with open(json_file, 'r') as f:
             D = json.load(f)
@@ -212,11 +213,18 @@ def list_by_quality(quality=0, N=None, json_file=None,
             return list()
         else:
             print('cannot find', json_file)
-            raise
+            raise FileNotFoundError
 
-    placentas = [f'{d}.png' for d in D.keys()]
+    if json_file == 'sample-qualities.json':
+        # go one level deep
+        placentas = [k for k in D[quality].keys()]
+    else:
+        placentas = [k for k in D.keys()]
 
-    return placentas
+    if N is not None:
+        return placentas[:N]
+    else:
+        return placentas
 
 def check_filetype(filename, assert_png=True, assert_standard=False):
     """

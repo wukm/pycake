@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+#TODO: refactor this sto inpaint glare is the main function that takes
+#      a keyword argument strategy='hybrid' or whatever
+#      then you can run
+#   for s in ['mean_window', 'median_boundary', 'biharmonic', 'hybrid']:
+#      timeit.timeit('inpaint_glare(img, strategy=s))', globals=globals())
+
 from skimage.morphology import binary_dilation, disk, remove_small_objects
 from skimage.restoration import inpaint_biharmonic
 import numpy as np
@@ -74,7 +80,6 @@ def inpaint_with_boundary_median(img, threshold=175, mask=None):
     new_img[glared] = fill_vals[glared]
 
     return new_img
-
 
 def nz_median(A):
 
@@ -174,30 +179,47 @@ if __name__ == "__main__":
     crop = np.s_[150:500, 150:800]  # indices to zoom in on the region
     zoom = np.s_[300:380, 300:380]  # even smaller region
 
-    slc = zoom  # which view to use
+    inset = zoom  # which view to use
 
     masked = mask_glare(img)  # for viewing
-
     inpainted = inpaint_glare(img)
     minpainted = inpaint_with_boundary_median(img)
     hinpainted = inpaint_hybrid(img)
     binpainted = inpaint_with_biharmonic(img)
 
     # view the closeup like this
-    minpainted_view = show_mask(minpainted[slc], interactive=False,
+    minpainted_view = show_mask(minpainted, interactive=False,
                                 mask_color=DARK_RED)
-    inpainted_view = show_mask(inpainted[slc], interactive=False,
+    inpainted_view = show_mask(inpainted, interactive=False,
                                mask_color=DARK_RED)
-    masked_view = show_mask(masked[slc], interactive=False,
+    masked_view = show_mask(masked, interactive=False,
                             mask_color=DARK_RED)
-    img_view = show_mask(img[slc], interactive=False,
+    img_view = show_mask(img, interactive=False,
                          mask_color=DARK_RED)
-    hinpainted_view = show_mask(hinpainted[slc], interactive=False,
+    hinpainted_view = show_mask(hinpainted, interactive=False,
                                 mask_color=DARK_RED)
-    binpainted_view = show_mask(binpainted[slc], interactive=False,
+    binpainted_view = show_mask(binpainted, interactive=False,
                                 mask_color=DARK_RED)
 
     # view them all next to each other
+
+    fig, axes = plt.subplots(ncols=3, nrows=2)
+
+    axes[0,0].imshow(img_view[inset])
+    axes[0,1].imshow(masked_view[inset])
+    axes[0,2].imshow(inpainted_view[inset])
+    axes[1,0].imshow(minpainted_view[inset])
+    axes[1,1].imshow(binpainted_view[inset])
+    axes[1,2].imshow(hinpainted_view[inset])
+
+    for a in axes.ravel():
+        # get rid of all the labels
+        plt.setp(a.get_xticklabels(), visible=False)
+        plt.setp(a.get_yticklabels(), visible=False)
+
+    # lol matlab
+    for i in range(5):
+        fig.tight_layout()
 
     IMGS = np.vstack((
         np.hstack((img_view, masked_view, inpainted_view)),
