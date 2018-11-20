@@ -112,7 +112,7 @@ img = get_named_placenta(filename)
 # so that scipy.ndimage.gaussian_filter doesn't use uint8 precision (jesus)
 img = ma.masked_array(img_as_float(img), mask=img.mask)
 
-test_sigmas = [0.12, 1.0, 5.0, 15, 30, 60, 90]
+test_sigmas = [0.12, .3, .6, 1.0, 5.0, 15, 30, 60, 90]
 
 for sigma in test_sigmas:
 
@@ -206,6 +206,6 @@ for sigma in test_sigmas:
     plt.show()
 
     print('comparing gaussians (mean squared error)')
-    print(multiway_comparison((FA,FB,FC), mean_squared_error))
+    print(multiway_comparison((A,B,C), mean_squared_error))
     print('comparing frangi response (mean squared error)')
     print(multiway_comparison((FA,FB,FC), mean_squared_error))

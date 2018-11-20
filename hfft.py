@@ -77,8 +77,8 @@ def fft_gaussian(img,sigma,A=None):
     """
     #create a 2D gaussian kernel to take the FFT of
 
-    # scale factor!
-    A = 1 / (2*np.pi*sigma**2)
+    A = 1 / (2*np.pi*sigma**2) # scale factor for 2D
+
     kernel = A*np.outer(signal.gaussian(img.shape[0], sigma),
                         signal.gaussian(img.shape[1], sigma))
 
@@ -93,16 +93,7 @@ def discrete_gaussian_kernel(n_samples, t):
     note! to make this work similarly to fft_gaussian, you should pass
     sigma**2 into t here. Figure out why?
 
-    unfortunately, this breaks down for large values (i.e. t=900, or when
-    sigma=30). np.exp(-t) is 0 and iv(dom,t) has infinite values
-
-    apparently 1189 in a 1595 long array
-
-    https://stackoverflow.com/questions/40663597/implementing-discrete-gaussian-kernel-in-python
-    you can look at the source code for special.iv to maybe figure out how to
-    fix this?
-
-    https://github.com/scipy/scipy/blob/8dba340293fe20e62e173bdf2c10ae208286692f/scipy/special/cephes/scipy_iv.c
+    by using scipy.special.ive instead we prevent blowups
     """
     dom = np.arange(-n_samples//2, n_samples // 2 + 1)
     #there should be a scaling parameter alpha but whatever
@@ -167,6 +158,7 @@ def fft_hessian(image, sigma=1., kernel=None):
 
     return H_elems
 
+
 def fft_gradient(image, sigma=1.):
     """ returns gradient norm """
 
@@ -175,6 +167,8 @@ def fft_gradient(image, sigma=1.):
     Lx, Ly = np.gradient(gaussian_filtered)
 
     return np.sqrt(Lx**2 + Ly**2)
+
+
 def _old_test():
     """
     old main function for testing.
