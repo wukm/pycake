@@ -5,7 +5,7 @@ from skimage.data import camera
 from skimage.io import imread
 
 import matplotlib.pyplot as plt
-from hfft import gauss_freq, blur, fft_gaussian, fft_hessian
+from hfft import gauss_freq, blur, fft_gaussian, fft_hessian, fft_dgk
 from scipy.ndimage import gaussian_filter
 
 from scipy.linalg import norm

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """
 here you want to show  the accuracy of hfft.py
 
@@ -57,6 +58,42 @@ from diffgeo import principal_curvatures
 from frangi import structureness, anisotropy, get_frangi_targets
 
 from skimage.util import img_as_float
+
+def plot_image_slices(arrs, fixed_axis=0, fixed_index=None, labels=None,
+                      formats=None):
+    """
+    arrs needs to be the same shape and dimension
+    could pass it to np.stack and check for a value error?
+
+    fixed axis is 0, who cares. it's annoying to get the other
+    """
+    # hopefully the fixed axis is 0 or 1. this gets the other one
+    it_axis = 1 if fixed_axis==0 else 0
+
+    # if it's a tuple, make it an array, etc. etc.
+    arrs = np.stack(arrs)
+
+    # make sure we can iterate over it if there's just as single image
+    if arrs.ndim < 3:
+        arrs = np.expand_dims(arrs,0)
+
+    if labels is None:
+        labels = [None for a in arrs]
+    if formats is None:
+        formats = ['' for a in arrs]
+
+    if fixed_index is None:
+        # find halfway point of the appropriate dimension from the first array
+        fixed_index = arrs[0].shape[fixed_axis] // 2
+
+    for a, lab, fmt in zip(arrs, labels, formats):
+        plt.plot(np.arange(a.shape[it_axis]),
+                 np.moveaxis(a, fixed_axis, 0)[fixed_index, :],
+                 fmt, label=lab)
+
+    # can this be at least a little object-oriented? :(
+    plt.legend()
+
 
 filename = list_by_quality(0,N=1)[0]
 
@@ -144,44 +181,11 @@ FC = get_frangi_targets(ck1,ck2, dark_bg=False).filled(0)
 # the results are even more fitting when you scale B to coincide with A's max
 # (which obviously isn't feasible in practice)
 
-def plot_image_slices(arrs, fixed_axis=0, fixed_index=None, labels=None,
-                      formats=None):
-    """
-    arrs needs to be the same shape and dimension
-    could pass it to np.stack and check for a value error?
-
-    fixed axis is 0, who cares. it's annoying to get the other
-    """
-    # hopefully the fixed axis is 0 or 1. this gets the other one
-    it_axis = 1 if fixed_axis==0 else 0
-
-    arrs = np.stack(arrs)
-
-    # make sure we can iterate over it if there's just as single image
-    if arrs.ndim < 3:
-        arrs = np.expand_dims(arrs,0)
-
-    if labels is None:
-        labels = [None for a in arrs]
-    if formats is None:
-        formats = ['' for a in arrs]
-
-    if fixed_index is None:
-        # find halfway point of the appropriate dimension from the first array
-        fixed_index = arrs[0].shape[fixed_axis] // 2
-        print(fixed_index)
-
-    for a, lab, fmt in zip(arrs, labels, formats):
-        plt.plot(np.arange(a.shape[it_axis]),
-                 np.moveaxis(a,fixed_axis,0)[fixed_index,:],
-                 fmt, label=lab)
-
-    plt.legend()
 
 # FIXEDISH AFTER SCALING!
 
 Bs = rescale_intensity(B, out_range=(0, A.max()))
-plot_image_slices((A,Bs,C), labels=('scipy.ndimage,gaussian_filter',
+plot_image_slices((A,B,C), labels=('scipy.ndimage,gaussian_filter',
                                     'fft_gaussian', 'fft_dgk'))
 plt.show()
 plot_image_slices((FA,FB,FC), labels=('scipy.ndimage,gaussian_filter',

@@ -33,7 +33,8 @@ def gauss_freq(shape, σ=1.):
     """
 
     M,  N = shape
-    fgauss = np.fromfunction(lambda μ,ν: ((μ+M+1)/2)**2 + ((ν+N+1)/2)**2, shape=shape)
+    fgauss = np.fromfunction(lambda μ,ν: ((μ+M+1)/2)**2 + ((ν+N+1)/2)**2,
+                             shape=shape)
 
     # is this used?
     coeff = (1 / (2*np.pi * σ**2))
@@ -78,8 +79,8 @@ def fft_gaussian(img,sigma,A=None):
 
     # scale factor!
     A = 1 / (2*np.pi*sigma**2)
-    kernel = np.outer(A*signal.gaussian(img.shape[0], sigma),
-                        A*signal.gaussian(img.shape[1],sigma))
+    kernel = A*np.outer(signal.gaussian(img.shape[0], sigma),
+                        signal.gaussian(img.shape[1], sigma))
 
     return signal.fftconvolve(img, kernel, mode='same')
 
