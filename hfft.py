@@ -3,7 +3,7 @@
 import numpy as np
 from scipy import signal
 import scipy.fftpack as fftpack
-from scipy.special import iv
+from scipy.special import iv, ive
 from itertools import combinations_with_replacement
 
 """
@@ -92,10 +92,22 @@ def discrete_gaussian_kernel(n_samples, t):
 
     note! to make this work similarly to fft_gaussian, you should pass
     sigma**2 into t here. Figure out why?
+
+    unfortunately, this breaks down for large values (i.e. t=900, or when
+    sigma=30). np.exp(-t) is 0 and iv(dom,t) has infinite values
+
+    apparently 1189 in a 1595 long array
+
+    https://stackoverflow.com/questions/40663597/implementing-discrete-gaussian-kernel-in-python
+    you can look at the source code for special.iv to maybe figure out how to
+    fix this?
+
+    https://github.com/scipy/scipy/blob/8dba340293fe20e62e173bdf2c10ae208286692f/scipy/special/cephes/scipy_iv.c
     """
     dom = np.arange(-n_samples//2, n_samples // 2 + 1)
     #there should be a scaling parameter alpha but whatever
-    return np.exp(-t) * iv(dom,t)
+    #return np.exp(-t) * iv(dom,t)
+    return ive(dom,t)
 
 def fft_dgk(img,sigma,order=0,A=None):
     """

@@ -45,6 +45,7 @@ import matplotlib.pyplot as plt
 from placenta import show_mask, list_by_quality
 
 from scoring import mean_squared_error
+from itertools import combinations
 import numpy as np
 from scipy.ndimage import laplace
 import numpy.ma as ma
@@ -94,101 +95,117 @@ def plot_image_slices(arrs, fixed_axis=0, fixed_index=None, labels=None,
     # can this be at least a little object-oriented? :(
     plt.legend()
 
+def multiway_comparison(arrs, scorefunc):
 
-filename = list_by_quality(0,N=1)[0]
+    scores = np.zeros((len(arrs), len(arrs)))
+
+    for j in range(len(arrs)):
+        for k in range(j+1,len(arrs)):
+            scores[j,k] = scorefunc(arrs[j], arrs[k])
+
+    return scores
+
+filename = list_by_quality(0)[5]
 
 img = get_named_placenta(filename)
 
 # so that scipy.ndimage.gaussian_filter doesn't use uint8 precision (jesus)
 img = ma.masked_array(img_as_float(img), mask=img.mask)
 
-sigma = 5.
+test_sigmas = [0.12, 1.0, 5.0, 15, 30, 60, 90]
 
-print('applying standard gauss blur')
+for sigma in test_sigmas:
 
-# this is exactly how it's passed to skimage.feature.hessian_matrix(...)
-A = gaussian_filter(img.filled(0), sigma, mode='constant', cval=0)
+    print("*"*80, '\n\n', f"σ={sigma}")
+    print('applying standard gauss blur')
 
-print('applying fft gauss blur')
-#B = fft_gaussian(img, sigma)
-B = fft_gaussian(img, sigma)
-C = fft_dgk(img, sigma)
+    # this is exactly how it's passed to skimage.feature.hessian_matrix(...)
+    A = gaussian_filter(img.filled(0), sigma, mode='constant', cval=0)
 
-# figure out what is supposed to happen here
-#B_unnormalized = B.copy()
-#B = B / (2*(sigma**2)*np.pi)
+    print('applying fft gauss blur')
+    #B = fft_gaussian(img, sigma)
+    B = fft_gaussian(img, sigma)
+    C = fft_dgk(img, sigma)
 
-print('calculating first derivatives')
-# zero the masks before calculating derivates if they're masked
-Agrad = np.gradient(A)
-Bgrad = np.gradient(B)
-Cgrad = np.gradient(C)
+    # figure out what is supposed to happen here
+    #B_unnormalized = B.copy()
+    #B = B / (2*(sigma**2)*np.pi)
 
-
-axes = range(img.ndim)
-
-print('calculating second derivatives')
-# this is the same way it's done in skimage.feature.hessian_matrix(...)
-H_A = [np.gradient(Agrad[ax0], axis=ax1)
-       for ax0, ax1 in combinations_with_replacement(axes, 2)]
-H_B = [np.gradient(Bgrad[ax0], axis=ax1)
-       for ax0, ax1 in combinations_with_replacement(axes, 2)]
-H_C = [np.gradient(Cgrad[ax0], axis=ax1)
-       for ax0, ax1 in combinations_with_replacement(axes, 2)]
-
-print('calculating eigenvalues of hessian')
-ak1, ak2 = principal_curvatures(img, sigma=sigma, H=H_A)
-bk1, bk2 = principal_curvatures(img, sigma=sigma, H=H_B)
-ck1, ck2 = principal_curvatures(img, sigma=sigma, H=H_C)
+    print('calculating first derivatives')
+    # zero the masks before calculating derivates if they're masked
+    Agrad = np.gradient(A)
+    Bgrad = np.gradient(B)
+    Cgrad = np.gradient(C)
 
 
-RA = anisotropy(ak1,ak2)
-RB = anisotropy(bk1,bk2)
-RC = anisotropy(ck1,ck2)
+    axes = range(img.ndim)
 
-SA = structureness(ak1, ak2)
-SB = structureness(bk1, bk2)
-SC = structureness(ck1, ck2)
+    print('calculating second derivatives')
+    # this is the same way it's done in skimage.feature.hessian_matrix(...)
+    H_A = [np.gradient(Agrad[ax0], axis=ax1)
+        for ax0, ax1 in combinations_with_replacement(axes, 2)]
+    H_B = [np.gradient(Bgrad[ax0], axis=ax1)
+        for ax0, ax1 in combinations_with_replacement(axes, 2)]
+    H_C = [np.gradient(Cgrad[ax0], axis=ax1)
+        for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-## ugh, apply masks here. too large to be conservative?
-## otherwise structureness only shows up for small sizes
-new_mask = dilate_boundary(None, radius=int(3*sigma), mask=img.mask)
-
-ak1 = ma.masked_array(ak1,new_mask)
-ak2 = ma.masked_array(ak2,new_mask)
-bk1 = ma.masked_array(bk1,new_mask)
-bk2 = ma.masked_array(bk2,new_mask)
-ck1 = ma.masked_array(ck1,new_mask)
-ck2 = ma.masked_array(ck2,new_mask)
-
-FA = get_frangi_targets(ak1,ak2, dark_bg=False).filled(0)
-FB = get_frangi_targets(bk1,bk2, dark_bg=False).filled(0)
-FC = get_frangi_targets(ck1,ck2, dark_bg=False).filled(0)
-
-# even without scaling (which occurs below) the second derivates should be
-# close. normalize matrices using frobenius norm of the hessian?
-# note: A & B are off but have the same shape
+    print('calculating eigenvalues of hessian')
+    ak1, ak2 = principal_curvatures(img, sigma=sigma, H=H_A)
+    bk1, bk2 = principal_curvatures(img, sigma=sigma, H=H_B)
+    ck1, ck2 = principal_curvatures(img, sigma=sigma, H=H_C)
 
 
-# rescale to [0,255] (actually should keep as 0,1? )
-#A_unscaled = A.copy()
-#B_unscaled = B.copy()
+    #RA = anisotropy(ak1,ak2)
+    #RB = anisotropy(bk1,bk2)
+    #RC = anisotropy(ck1,ck2)
 
-#Ascaled = (A-A.min())/(A.max()-A.min())
-#Bscaled = (B-B.min())/(B.max()-B.min())
+    #SA = structureness(ak1, ak2)
+    #SB = structureness(bk1, bk2)
+    #SC = structureness(ck1, ck2)
 
-# the following shows a random vertical slice of A & B (when scaled)
-# the results are even more fitting when you scale B to coincide with A's max
-# (which obviously isn't feasible in practice)
+    ## ugh, apply masks here. too large to be conservative?
+    ## otherwise structureness only shows up for small sizes
+    new_mask = dilate_boundary(None, radius=int(3*sigma), mask=img.mask)
+
+    ak1 = ma.masked_array(ak1,new_mask)
+    ak2 = ma.masked_array(ak2,new_mask)
+    bk1 = ma.masked_array(bk1,new_mask)
+    bk2 = ma.masked_array(bk2,new_mask)
+    ck1 = ma.masked_array(ck1,new_mask)
+    ck2 = ma.masked_array(ck2,new_mask)
+
+    FA = get_frangi_targets(ak1,ak2, dark_bg=False).filled(0)
+    FB = get_frangi_targets(bk1,bk2, dark_bg=False).filled(0)
+    FC = get_frangi_targets(ck1,ck2, dark_bg=False).filled(0)
+
+    # even without scaling (which occurs below) the second derivates should be
+    # close. normalize matrices using frobenius norm of the hessian?
+    # note: A & B are off but have the same shape
 
 
-# FIXEDISH AFTER SCALING!
+    # rescale to [0,255] (actually should keep as 0,1? )
+    #A_unscaled = A.copy()
+    #B_unscaled = B.copy()
 
-Bs = rescale_intensity(B, out_range=(0, A.max()))
-plot_image_slices((A,B,C), labels=('scipy.ndimage,gaussian_filter',
-                                    'fft_gaussian', 'fft_dgk'))
-plt.show()
-plot_image_slices((FA,FB,FC), labels=('scipy.ndimage,gaussian_filter',
-                                    'fft_gaussian', 'fft_dgk'))
-#MSE = ((A-B)**2).sum() / A.size
-MSE = mean_squared_error(A,B)
+    #Ascaled = (A-A.min())/(A.max()-A.min())
+    #Bscaled = (B-B.min())/(B.max()-B.min())
+
+    # the following shows a random vertical slice of A & B (when scaled)
+    # the results are even more fitting when you scale B to coincide with A's max
+    # (which obviously isn't feasible in practice)
+
+
+    # FIXEDISH AFTER SCALING!
+
+    Bs = rescale_intensity(B, out_range=(0, A.max()))
+    plot_image_slices((A,B,C), labels=('scipy.ndimage,gaussian_filter',
+                                        'fft_gaussian', 'fft_dgk'))
+    plt.show()
+    plot_image_slices((FA,FB,FC), labels=('scipy.ndimage,gaussian_filter',
+                                        'fft_gaussian', 'fft_dgk'))
+    plt.show()
+
+    print('comparing gaussians (mean squared error)')
+    print(multiway_comparison((FA,FB,FC), mean_squared_error))
+    print('comparing frangi response (mean squared error)')
+    print(multiway_comparison((FA,FB,FC), mean_squared_error))
