@@ -4,6 +4,7 @@ import numpy as np
 from scipy import signal
 import scipy.fftpack as fftpack
 from scipy.special import iv
+from itertools import combinations_with_replacement
 
 """
 hfft.py is the implementation of calculating the hessian of a real
@@ -88,7 +89,8 @@ def discrete_gaussian_kernel(n_samples, t):
     will return a window centered a zero
     i.e. arange(-n_samples//2, n_samples//2+1)
 
-    this is UNnormalized, oops
+    note! to make this work similarly to fft_gaussian, you should pass
+    sigma**2 into t here. Figure out why?
     """
     dom = np.arange(-n_samples//2, n_samples // 2 + 1)
     #there should be a scaling parameter alpha but whatever
@@ -102,8 +104,8 @@ def fft_dgk(img,sigma,order=0,A=None):
     """
     m,n = img.shape
     # i don't know if this will suck if there are odd dimensions
-    kernel = np.outer(discrete_gaussian_kernel(m,sigma),
-                      discrete_gaussian_kernel(n,sigma))
+    kernel = np.outer(discrete_gaussian_kernel(m,sigma**2),
+                      discrete_gaussian_kernel(n,sigma**2))
 
     return signal.fftconvolve(img, kernel, mode='same')
 
@@ -143,12 +145,14 @@ def fft_hessian(image, sigma=1., kernel=None):
         #print('using sampled gauss kernel')
         gaussian_filtered = fft_gaussian(image, sigma=sigma)
 
-    Lx, Ly = np.gradient(gaussian_filtered)
+    gradients = np.gradient(gaussian_filtered)
 
-    Lxx, Lxy = np.gradient(Lx)
-    Lxy, Lyy = np.gradient(Ly)
+    axes = range(image.ndim)
 
-    return (Lxx, Lxy, Lyy)
+    H_elems = [np.gradient(gradients[ax0], axis=ax1)
+               for ax0, ax1 in combinations_with_replacement(axes, 2)]
+
+    return H_elems
 
 def fft_gradient(image, sigma=1.):
     """ returns gradient norm """

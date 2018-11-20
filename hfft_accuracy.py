@@ -1,5 +1,5 @@
+#!/usr/bin/env python3
 """
-
 here you want to show  the accuracy of hfft.py
 
 BOILERPLATE
@@ -13,7 +13,7 @@ or if they're off by a scaling factor, show that the derivates
 pseudocode
 
 A = gaussian_blur(image, sigma, method='convential')
-B = gaussian_blue(image, sigma, method='fourier')
+B = gaussian_blur(image, sigma, method='fourier')
 
 zero_order_accurate = isclose(A, B, tol)
 
@@ -35,10 +35,13 @@ first_order_accurate = isclose(J_A_eroded, J_B_eroded, tol)
 
 from placenta import get_named_placenta
 
-from hfft import fft_hessian, fft_gaussian
+from itertools import combinations_with_replacement
+from skimage.exposure import rescale_intensity
+
+from hfft import fft_hessian, fft_gaussian, fft_dgk
 from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
-from placenta import mimshow
+from placenta import show_mask, list_by_quality
 
 from scoring import mean_squared_error
 import numpy as np
@@ -48,113 +51,82 @@ import numpy.ma as ma
 from skimage.segmentation import find_boundaries
 from skimage.morphology import disk, binary_dilation
 
+from plate_morphology import dilate_boundary
+
 from diffgeo import principal_curvatures
 from frangi import structureness, anisotropy, get_frangi_targets
 
-def erode_plate(img, sigma, mask=None):
-    """
-    Apply an eroded mask to an image
-    assume (if helpful) that the boundary of the placenta is a connected loop
-    that is, there is a single inside and outside of the shape, and that
-    the placenta is more or less convex
+from skimage.util import img_as_float
 
-    alternatively, if img is None, simply erode the mask
-    this function should probably be renamed "dilate mask"
-    and erode plate should be one that just acts on masked inputs
-    """
+filename = list_by_quality(0,N=1)[0]
 
-    if mask is None:
-        mask = img.mask
-
-    # get a boolean array that is 1 along the border of the mask, zero elsewhere
-    # default mode is 'thick' which is fine
-    bounds = find_boundaries(mask)
-
-    # structure element to dilate by is a disk of diameter sigma
-    # rounded up to the nearest integer. this may be too conservative.
-    selem = disk(np.ceil(sigma))
-    dilated_border = binary_dilation(bounds, selem=selem)
-
-    new_mask = np.logical_or(mask, dilated_border)
-
-    # see comment in docstring. alternatively, the behavior here
-    # could be handled by an "apply mask" parameter
-    if img is None:
-        return new_mask
-    else:
-        return ma.masked_array(img, mask=new_mask)
-
-
-# FIX SOME ISSUES, BINARY DILATION IS TAKING HELLA LONG AND ALSO
-# THERE ARE RANDOM BLIPS INSIDE THE MASK!!!
-# FIX IN GIMP!:
-
-imgfile = 'barium1.png'
-maskfile = 'barium1.mask.png'
-
-img_raw = get_named_placenta(imgfile, maskfile=maskfile)
+img = get_named_placenta(filename)
 
 # so that scipy.ndimage.gaussian_filter doesn't use uint8 precision (jesus)
-img = img_raw / 255.
+img = ma.masked_array(img_as_float(img), mask=img.mask)
 
-# convenience function to show a matrix with img.mask mask
-ms = lambda x: mimshow(ma.masked_array(x, img.mask))
-
-sigma = 5
+sigma = 5.
 
 print('applying standard gauss blur')
-# THIS USES THE SAME DTYPE AS THE INPUT SO DEAR LORD MAKE SURE IT'S A FLOAT
-A = gaussian_filter(img.astype('f'), sigma, mode='constant') #zero padding
+
+# this is exactly how it's passed to skimage.feature.hessian_matrix(...)
+A = gaussian_filter(img.filled(0), sigma, mode='constant', cval=0)
+
 print('applying fft gauss blur')
+#B = fft_gaussian(img, sigma)
 B = fft_gaussian(img, sigma)
-B_unnormalized = B.copy()
-B = B / (2*(sigma**2)*np.pi)
+C = fft_dgk(img, sigma)
 
-#A = erode_plate(A, sigma, mask=img.mask)
-#B = erode_plate(B, sigma, mask=img.mask)
+# figure out what is supposed to happen here
+#B_unnormalized = B.copy()
+#B = B / (2*(sigma**2)*np.pi)
+
 print('calculating first derivatives')
-
 # zero the masks before calculating derivates if they're masked
-Ax, Ay = np.gradient(A)
-Bx, By = np.gradient(B)
+Agrad = np.gradient(A)
+Bgrad = np.gradient(B)
+Cgrad = np.gradient(C)
 
+
+axes = range(img.ndim)
 
 print('calculating second derivatives')
-
-# you can verify np.isclose(Axy,Ayx) && np.isclose(Bxy,Byx) -> True
-Axx, Axy = np.gradient(Ax)
-Ayx, Ayy = np.gradient(Ay)
-
-Bxx, Bxy = np.gradient(Bx)
-Byx, Byy = np.gradient(By)
-
-
+# this is the same way it's done in skimage.feature.hessian_matrix(...)
+H_A = [np.gradient(Agrad[ax0], axis=ax1)
+       for ax0, ax1 in combinations_with_replacement(axes, 2)]
+H_B = [np.gradient(Bgrad[ax0], axis=ax1)
+       for ax0, ax1 in combinations_with_replacement(axes, 2)]
+H_C = [np.gradient(Cgrad[ax0], axis=ax1)
+       for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
 print('calculating eigenvalues of hessian')
-ak1, ak2 = principal_curvatures(A, sigma=sigma, H=(Axx,Axy,Ayy))
-bk1, bk2 = principal_curvatures(B, sigma=sigma, H=(Bxx,Bxy,Byy))
+ak1, ak2 = principal_curvatures(img, sigma=sigma, H=H_A)
+bk1, bk2 = principal_curvatures(img, sigma=sigma, H=H_B)
+ck1, ck2 = principal_curvatures(img, sigma=sigma, H=H_C)
 
 
-##R1 = anisotropy(ak1,ak2)
-#R2 = anisotropy(bk1,bk2)
-#
-#S1 = structureness(ak1, ak2)
-#S2 = structureness(bk1, bk2)
-#print('done.')
-#
+RA = anisotropy(ak1,ak2)
+RB = anisotropy(bk1,bk2)
+RC = anisotropy(ck1,ck2)
+
+SA = structureness(ak1, ak2)
+SB = structureness(bk1, bk2)
+SC = structureness(ck1, ck2)
+
 ## ugh, apply masks here. too large to be conservative?
 ## otherwise structureness only shows up for small sizes
-new_mask = erode_plate(None, 3*sigma, mask=img.mask)
-#R1[new_mask] = 0
-#R2[new_mask] = 0
-#S1[new_mask] = 0
-#S2[new_mask] = 0
+new_mask = dilate_boundary(None, radius=int(3*sigma), mask=img.mask)
 
-FA = get_frangi_targets(ak1,ak2)
-FB = get_frangi_targets(bk1,bk2)
+ak1 = ma.masked_array(ak1,new_mask)
+ak2 = ma.masked_array(ak2,new_mask)
+bk1 = ma.masked_array(bk1,new_mask)
+bk2 = ma.masked_array(bk2,new_mask)
+ck1 = ma.masked_array(ck1,new_mask)
+ck2 = ma.masked_array(ck2,new_mask)
 
-FA[new_mask] = 0
-FB[new_mask] = 0
+FA = get_frangi_targets(ak1,ak2, dark_bg=False).filled(0)
+FB = get_frangi_targets(bk1,bk2, dark_bg=False).filled(0)
+FC = get_frangi_targets(ck1,ck2, dark_bg=False).filled(0)
 
 # even without scaling (which occurs below) the second derivates should be
 # close. normalize matrices using frobenius norm of the hessian?
@@ -172,13 +144,47 @@ FB[new_mask] = 0
 # the results are even more fitting when you scale B to coincide with A's max
 # (which obviously isn't feasible in practice)
 
+def plot_image_slices(arrs, fixed_axis=0, fixed_index=None, labels=None,
+                      formats=None):
+    """
+    arrs needs to be the same shape and dimension
+    could pass it to np.stack and check for a value error?
+
+    fixed axis is 0, who cares. it's annoying to get the other
+    """
+    # hopefully the fixed axis is 0 or 1. this gets the other one
+    it_axis = 1 if fixed_axis==0 else 0
+
+    arrs = np.stack(arrs)
+
+    # make sure we can iterate over it if there's just as single image
+    if arrs.ndim < 3:
+        arrs = np.expand_dims(arrs,0)
+
+    if labels is None:
+        labels = [None for a in arrs]
+    if formats is None:
+        formats = ['' for a in arrs]
+
+    if fixed_index is None:
+        # find halfway point of the appropriate dimension from the first array
+        fixed_index = arrs[0].shape[fixed_axis] // 2
+        print(fixed_index)
+
+    for a, lab, fmt in zip(arrs, labels, formats):
+        plt.plot(np.arange(a.shape[it_axis]),
+                 np.moveaxis(a,fixed_axis,0)[fixed_index,:],
+                 fmt, label=lab)
+
+    plt.legend()
+
 # FIXEDISH AFTER SCALING!
 
-plt.plot(np.arange(A.shape[1]),A[A.shape[0]//2,:],
-         label='scipy.ndimage,gaussian_filter')
-plt.plot(np.arange(B.shape[1]), B[B.shape[0]//2,:],
-         label='fft_gaussian')
-plt.legend()
-
+Bs = rescale_intensity(B, out_range=(0, A.max()))
+plot_image_slices((A,Bs,C), labels=('scipy.ndimage,gaussian_filter',
+                                    'fft_gaussian', 'fft_dgk'))
+plt.show()
+plot_image_slices((FA,FB,FC), labels=('scipy.ndimage,gaussian_filter',
+                                    'fft_gaussian', 'fft_dgk'))
 #MSE = ((A-B)**2).sum() / A.size
 MSE = mean_squared_error(A,B)
