@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-#TODO: refactor this so inpaint glare is the main function that takes
-#      a keyword argument strategy='hybrid' or whatever
-#      then you can run
-#   for s in ['mean_window', 'median_boundary', 'biharmonic', 'hybrid']:
-#      timeit.timeit('inpaint_glare(img, strategy=s))', globals=globals())
+# TODO: refactor this so inpaint glare is the main function that takes
+#       a keyword argument strategy='hybrid' or whatever then you can run
+#       >>>for s in ['mean_window', 'median_boundary', 'biharmonic', 'hybrid']:
+#           timeit.timeit('inpaint_glare(img, strategy=s))', globals=globals())
+#
+#       ... but it's annoying since you'll need a way to pass args to the
+#           particular strategy
 
 from skimage.morphology import binary_dilation, disk, remove_small_objects
 from skimage.restoration import inpaint_biharmonic
