@@ -142,7 +142,7 @@ def fft_hessian(image, sigma=1., kernel=None):
             [ [Lxx[j][k], Lxy[j][k]],
               [Lxy[j][k], Lyy[j][k]] ]
     """
-    if kernel == 'discrete':
+    if kernel in (None, 'discrete'):
         #print('using discrete kernel!')
         gaussian_filtered = fft_dgk(image, sigma=sigma)
     else:

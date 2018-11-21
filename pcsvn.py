@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 from placenta import get_named_placenta
-from hfft import fft_hessian
-from diffgeo import principal_curvatures, principal_directions
-from frangi import get_frangi_targets
+from diffgeo import principal_directions
+from frangi import frangi_from_image
 from skimage.util import img_as_float
 import numpy as np
-from preprocessing import (inpaint_glare, inpaint_with_boundary_median,
-                           inpaint_hybrid)
+from preprocessing import inpaint_hybrid
 
 from plate_morphology import dilate_boundary
 
@@ -20,10 +18,9 @@ import json
 import datetime
 
 
-def make_multiscale(img, scales, betas, gammas,
+def make_multiscale(img, scales, betas, gammas, dark_bg=True,
                     find_principal_directions=False, dilate_per_scale=True,
-                    signed_frangi=False, dark_bg=True, kernel=None,
-                    VERBOSE=True):
+                    signed_frangi=False, kernel=None, verbose=True):
     """Returns an ordered list of dictionaries for each scale of Frangi info.
 
     Each element in the output contains the following info:
@@ -38,6 +35,7 @@ def make_multiscale(img, scales, betas, gammas,
          't2': t2 # if find_principal_directions
          }
 
+    is it necessary to lug all this shit around?
     """
 
     # store results of each scale (create as empty list)
@@ -45,8 +43,8 @@ def make_multiscale(img, scales, betas, gammas,
 
     img = ma.masked_array(img_as_float(img), mask=img.mask)
 
-    for i, sigma, beta, gamma in zip(range(len(scales)), scales,
-                                     betas, gammas):
+    for i, (sigma, beta, gamma) in enumerate(zip(scales, betas, gammas)):
+
         if dilate_per_scale:
             if sigma < 2.5:
                 radius = 10
@@ -57,68 +55,15 @@ def make_multiscale(img, scales, betas, gammas,
         else:
             radius = None
 
-        if VERBOSE:
-            print('σ={}'.format(sigma))
+        if verbose:
+            print(f'σ={sigma}\t, dilation radius ={radius}')
 
-        # get hessian components at each pixel as a triplet (Lxx, Lxy, Lyy)
-        hesh = fft_hessian(img, sigma, kernel=kernel)
-
-        if VERBOSE:
-            print('finding principal curvatures')
-
-        # calculate principal curvatures with |k1| <= |k2|
-        k1, k2 = principal_curvatures(img, sigma=sigma, H=hesh)
-
-        # area of influence to zero out
-        if dilate_per_scale:
-            collar = dilate_boundary(None, radius=radius, mask=img.mask)
-
-            k1[collar] = 0
-            k2[collar] = 0
-
-        # set anisotropy parameter if not specified
-        if gamma is None:
-            # Frangi suggested 'half the max Hessian norm' as an empirical
-            # half the max spectral radius is easier to calculate so do that
-            # shouldn't be affected by mask data but should make sure the
-            # mask is *well* far away from perimeter
-            # we actually calculate half of max hessian norm
-            # using frob norm = sqrt(trace(AA^T))
-            hxx, hxy, hyy = hesh
-            hessian_norm = np.sqrt((hxx**2 + 2*hxy**2 + hyy**2))
-
-            # make sure the max doesn't occur on a boundary
-            dilation_radius = int(max(np.ceil(sigma), 10))
-            collar = dilate_boundary(None, radius=dilation_radius,
-                                     mask=img.mask)
-            hessian_norm[collar] = 0
-            max_hessian_norm = hessian_norm.max()
-            gamma = .5*max_hessian_norm
-
-            if VERBOSE:
-                # compare to other method of calculating gamma
-                gamma_alt = .5 * np.abs(k2).max()
-                print(f"half of k2 max is {gamma_alt}")
-
-        if VERBOSE:
-            print(f"gamma (half of max hessian (frob) norm is {gamma}")
-            print(f'finding Frangi targets with β={beta} and γ={gamma:.2}')
-
-        # calculate frangi targets at this scale
-        targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma,
-                                     dark_bg=dark_bg, signed=signed_frangi)
-
-
-        # store results as a dictionary
-        this_scale = {'sigma': sigma,
-                      'beta': beta,
-                      'gamma': gamma,
-                      'H': hesh,
-                      'F': targets,
-                      'k1': k1,
-                      'k2': k2,
-                      'border_radius': radius
-                      }
+        targets, this_scale = frangi_from_image(img, sigma, beta=beta,
+                                                gamma=gamma, dark_bg=dark_bg,
+                                                dilation_radius=radius,
+                                                kernel=kernel,
+                                                signed_frangi=signed_frangi,
+                                                return_debug_info=True)
 
         if find_principal_directions:
             # principal directions should only be computed for critical regions
@@ -128,18 +73,19 @@ def make_multiscale(img, scales, betas, gammas,
             pd_mask = np.bitwise_or(targets < cutoff, img.mask).filled(1)
             percent_calculated = (pd_mask.size - pd_mask.sum()) / pd_mask.size
 
-            if VERBOSE:
+            if verbose:
                 print(f"finding PD's for {percent_calculated:.2%} of image"
                       f"anything above vesselness score {cutoff:.6f}"
                       )
-            t1, t2 = principal_directions(img, sigma=sigma, H=hesh,
+            t1, t2 = principal_directions(img, sigma=sigma, H=this_scale['H'],
                                           mask=pd_mask)
 
             # add them to this scale's output
             this_scale['t1'] = t1
             this_scale['t2'] = t2
+
         else:
-            if VERBOSE:
+            if verbose:
                 print('skipping principal direction calculation')
 
         # store results as a list of dictionaries
@@ -148,26 +94,24 @@ def make_multiscale(img, scales, betas, gammas,
     return multiscale
 
 
-def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
-                  DARK_BG=True, dilate_per_scale=True, verbose=True,
-                  generate_json=True, output_dir=None, kernel=None,
-                  signed_frangi=False, remove_glare=False):
+def extract_pcsvn(img, filename, scales, betas=None, gammas=None, dark_bg=True,
+                  dilate_per_scale=True, verbose=True, generate_json=True,
+                  output_dir=None, kernel=None, signed_frangi=False):
     """Run PCSVN extraction on the sample given in the file.
 
     Despite the name, this simply returns the Frangi filter responses at
     each provided scale without explicitly making any decisions about what
     is or is not part of the PCSVN.
 
-    TODO:Finish docstring!
+    The original main use of this function has kind of bled into
+    extract_NCS_pcsvn.py. that needs fixing. You should load the image
+    outside of this function, do post processing there, pass it inside here
+    with a dictionary of things to add to the json file
     """
 
-    raw_img = get_named_placenta(filename, maskfile=None)
+    # Multiscale & Frangi Parameters #########################################
 
-    # Multiscale & Frangi Parameters######################
-
-    # set default alphas and betas if undeclared
-    if alphas is None:
-        alphas = [.15 for s in scales]  # threshold constant
+    # set default betas if undeclared
     if betas is None:
         betas = [0.5 for s in scales]  # anisotropy constant
 
@@ -175,35 +119,24 @@ def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
     if gammas is None:
         gammas = [None for s in scales]  # structureness parameter
 
-    # Preprocessing###############
-    if remove_glare:
-        if verbose:
-            print('removing glare from sample')
-        # img = inpaint_glare(raw_img)
-        # img = inpaint_with_boundary_median(raw_img)
-        img = inpaint_hybrid(raw_img)
-    else:
-        img = raw_img.copy()  # in case we alter the mask or something
-
-    # Multiscale Frangi Filter##############################
+    # Multiscale Frangi Filter###############################################
 
     # output is a dictionary of relevant info at each scale
     multiscale = make_multiscale(img, scales, betas, gammas,
                                  find_principal_directions=False,
                                  dilate_per_scale=dilate_per_scale,
-                                 kernel=kernel,
-                                 signed_frangi=signed_frangi,
-                                dark_bg=DARK_BG,
-                                 VERBOSE=verbose)
+                                 kernel=kernel, signed_frangi=signed_frangi,
+                                 dark_bg=dark_bg, verbose=verbose)
 
     # extract these for logging
     gammas = [scale['gamma'] for scale in multiscale]
     border_radii = [scale['border_radius'] for scale in multiscale]
 
-    ###Process Multiscale Targets############################
+    # removed another bordering round. i don't think it did anything but
+    # i should have checked :/
 
     # ignore targets too close to edge of plate
-    # wait are we doing this twice?
+     # wait are we doing this twice?
     if dilate_per_scale:
         if verbose:
             print('trimming collars of plates (per scale)')
@@ -221,8 +154,7 @@ def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
         for i in range(len(multiscale)):
             # get rid of mask
             multiscale[i]['F'] = multiscale[i]['F'].filled(0)
-
-    ###Make Composite#########################################
+    # Make Composite#########################################
 
     # get a M x N x n_scales array of Frangi targets at each level
     F_all = np.dstack([scale['F'] for scale in multiscale])
@@ -233,12 +165,12 @@ def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
         timestring = time_of_run.strftime("%y%m%d_%H%M")
 
         logdata = {'time': timestring,
-                'filename': filename,
-                'alphas': list(alphas),
-                'betas': list(betas),
-                'gammas': gammas,
-                'sigmas': list(scales),
-                }
+                   'filename': filename,
+                   'betas': list(betas),
+                   'gammas': gammas,
+                   'sigmas': list(scales),
+                   }
+
         if dilate_per_scale:
             logdata['border_radii'] = border_radii
 
@@ -254,8 +186,7 @@ def extract_pcsvn(filename, scales, alphas=None, betas=None, gammas=None,
         with open(dumpfile, 'w') as f:
             json.dump(logdata, f, indent=True)
 
-    # this function used to returns scales and alphas too but now doesn't,
-    return F_all, img
+    return F_all
 
 
 def get_outname_lambda(filename, output_dir=None, timestring=None):
@@ -302,6 +233,7 @@ def _build_scale_colormap(N_scales, base_colormap, basecolor=(0,0,0,1)):
 
     return mpl.colors.ListedColormap(colorlist)
 
+
 def scale_label_figure(wheres, scales, savefilename=None,
                        crop=None, show_only=False, image_only=False,
                        save_colorbar_separate=False, savecolorbarfile=None,
@@ -317,8 +249,8 @@ def scale_label_figure(wheres, scales, savefilename=None,
     if crop is not None:
         wheres = wheres[crop]
 
-    fig, ax = plt.subplots() # not sure about figsize
-    N = len(scales) # number of scales / labels
+    fig, ax = plt.subplots()  # not sure about figsize
+    N = len(scales)  # number of scales / labels
 
     tabemap = _build_scale_colormap(N, 'viridis_r')
 
@@ -339,10 +271,10 @@ def scale_label_figure(wheres, scales, savefilename=None,
         scalelabels.insert(0, "(no match)")
         # label with their sigma value
         cbar.set_ticklabels(scalelabels)
-        #ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
+        # ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
         plt.tight_layout()
 
-        #plt.savefig(outname('labeled'), dpi=300)
+        # plt.savefig(outname('labeled'), dpi=300)
         if show_only or (savefilename is None):
             plt.show()
         else:

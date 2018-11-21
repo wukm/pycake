@@ -6,51 +6,92 @@ from plate_morphology import dilate_boundary
 
 
 def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
-                      dilation_radius=None, kernel='discrete',
-                      signed_frangi=False, return_debug_info=False):
+                      dilation_radius=None, kernel=None,
+                      signed_frangi=False, return_debug_info=False,
+                      verbose=False):
+    """Calculate the (uniscale) Frangi vesselness measure on a grayscale image
+
+    Parameters
+    ----------
+    img: ndarray or ma.MaskedArray
+        a one-channel image. If this is a masked array (preferred), ignore the
+        masked regions of the image
+    sigma: float
+        Standard deviation of the gaussian, used to calculate derivatives.
+    beta: float, optional
+        The anisotropy parameter of the Frangi filter (default is 0.5)
+    gamma: float or None, optional
+        The structureness parameter of the Frangi filter. If None, gamma
+        returns half of Frobenius norm of the calculated hessian (Default is
+        None).
+    dilation_radius: int or None
+        If dilation radius is supplied, then areas within that amount of pixels
+        will not be calculated. This is preferable in certain contexts,
+        especially when there is a dark background and dark_bg=True. This is
+        especially recommended for small sigmas and when gamma is not provided.
+        None to forgo this procedure (default).  A mask must be supplied for
+        this to make sense.
+    dark_bg: boolean or None
+        if True, then frangi will select only for bright curvilinear
+        features; if False, then Frangi will select only for dark
+        curvilinear structures. if None instead of a bool, then curvilinear
+        structures of either type will be reported.
+    signed_frangi: bool, optional
+        if signed is True, the result will be the same as if dark_bg is set
+        to None, except that the sign will change to match the desired
+        features. See example below.
+    return_debug info: bool, optional
+        will return a large dict consisting of several large matrices,
+        calculated hessian, etc.
+
+        scale_dict = {'sigma': sigma,
+                      'beta': beta,
+                      'gamma': gamma,
+                      'H': hesh,
+                      'F': targets,
+                      'k1': k1,
+                      'k2': k2,
+                      'border_radius': dilation_radius
+                      }
+
     """
-    Perform a frangi filtering on img
-    if None, gamma returns half of Frobenius norm on the image
-    if dilation radius is specified, that amount is dilated from the
-    boundary of the image (mask must be specified)
-
-    input image *must* be a masked array. To implement: supply mask
-    or create a dummy mask if not specified so this can work out of the
-    box on arbitrary images.
-
-    return_debug info will return anisotropy, structureness measures, as
-    well as the calculated gamma. will return a tuple of
-    (R, S, gamma) where R and S are matrices of shape img.shape
-    and gamma is a float.
-
-
-    BIGGER TODO:
-
-        THIS OVERLAPS WITH pcsvn.make_multiscale
-        USE THIS THERE
-
-    """
-    # principal_directions() calculates the frangi filter with
-    # standard convolution and takes forever. FIX THIS!
     hesh = fft_hessian(img, sigma, kernel=kernel)  # the triple (Hxx,Hxy,Hyy)
+    # calculate principal curvatures with |k1| <= |k2|
 
     k1, k2 = principal_curvatures(img, sigma, H=hesh)
 
     if dilation_radius is not None:
-
         # pass None to just get the mask back
-        collar = dilate_boundary(None, radius=dilation_radius,
-                                 mask=img.mask)
+        collar = dilate_boundary(None, radius=dilation_radius, mask=img.mask)
 
         # get rid of "bad" K values before you calculate gamma
         k1[collar] = 0
         k2[collar] = 0
 
-    # set default gamma value if not supplies
+    # set default gamma value if not supplied
     if gamma is None:
-        gamma = .5 * max_hessian_norm(hesh)
+        # Frangi suggested 'half the max Hessian norm' as an empirical
+        # half the max spectral radius is easier to calculate so do that
+        # shouldn't be affected by mask data but should make sure the
+        # mask is *well* far away from perimeter
+        # we actually calculate half of max hessian norm
+        # using frob norm = sqrt(trace(AA^T))
+        # alternatively you could use gamma = .5 * np.abs(k2).max()
+        hdilation = int(max(np.ceil(sigma),10))
+        hcollar = dilate_boundary(None, radius=hdilation, mask=img.mask)
+        gamma = .5 * max_hessian_norm(hesh, mask=hcollar)
+        #gamma = .5*np.abs(k2).max()
+        print(f'gamma was none. setting to: {gamma}')
+
+        if verbose:
+            print(f"gamma (half of max hessian (frob) norm is {gamma}")
+
+        # make a better test?
         if np.isclose(gamma, 0):
             print("WARNING: gamma is close to 0. should skip this layer.")
+
+    if verbose:
+        print(f'finding Frangi targets with β={beta} and γ={gamma:.2}')
 
     targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma,
                                  dark_bg=dark_bg, signed=signed_frangi)
@@ -58,7 +99,18 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
     if not return_debug_info:
         return targets
     else:
-        return targets, (R, S, gamma)
+        scale_dict = {'sigma': sigma,
+                      'beta': beta,
+                      'gamma': gamma,
+                      'H': hesh,
+                      'F': targets,
+                      'k1': k1,
+                      'k2': k2,
+                      'border_radius': dilation_radius
+                      }
+
+        return targets, scale_dict
+
 
 def get_frangi_targets(K1, K2, beta=0.5, gamma=None, dark_bg=True,
                        signed=False):
@@ -97,21 +149,22 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=None, dark_bg=True,
     True
 
     """
-    R = anisotropy(K1,K2)
-    S = structureness(K1,K2)
 
     if gamma is None:
         # half of max hessian norm (using L2 norm)
         gamma = .5 * np.abs(K2).max()
-        if np.isclose(gamma,0):
+        if np.isclose(gamma, 0):
             print("warning! gamma is very close to zero."
                   "maybe this layer isn't worth it...")
-            print("sigma={:.3f}, gamma={}".format(sigma,gamma))
             print("returning an empty array")
-            return np.zeros_like(img)
 
-    F = np.exp(-R / (2*beta**2))
-    F *= 1 - np.exp( -S / (2*gamma**2))
+            return np.zeros_like(K1)
+
+    R = anisotropy(K1, K2, beta=beta)
+    S = structureness(K1, K2, gamma=gamma)
+
+    F = np.exp(-R)
+    F *= 1 - np.exp(-S)
 
     # now just filter/ change sign as appropriate.
     if not signed:
@@ -142,9 +195,10 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=None, dark_bg=True,
 
     return F
 
-def max_hessian_norm(hesh):
-    """Calculate max norm of Hessian.
-    calculates the maximal value (over all pixels of the image) of the
+def max_hessian_norm(hesh, mask=None):
+    """Calculate max Frobenius norm of Hessian.
+
+    Calculates the maximal value (over all pixels of the image) of the
     Frobenius norm of the Hessian.
 
     Parameters
@@ -156,24 +210,41 @@ def max_hessian_norm(hesh):
 
     Returns
     -------
-
+    float
     """
+
     hxx, hxy, hyy = hesh
 
     # frob norm is just sqrt(trace(AA^T)) which is easy for a 2x2
-    max_norm = np.sqrt((hxx**2 + 2*hxy*2 + hyy**2).max())
+    hnorm = (hxx**2 + 2*hxy**2 + hyy**2)
 
-    return max_norm
+    if mask is not None:
+        hnorm[mask] = 0
 
-def anisotropy(K1,K2):
-    """
-    according to Frangi (1998) this is technically A**2
+    hnorm = np.sqrt(hnorm)
+    return hnorm.max()
+
+
+def anisotropy(K1,K2, beta=None):
+    """Convenience function for Anisotropy measure.
+
+    According to Frangi (1998) this is technically A**2
     """
 
-    return (K1/K2) **2
+    A = (K1/K2) **2
 
-def structureness(K1,K2):
+    if beta is None:
+        return A
+    else:
+        return A / (2*beta**2)
+
+def structureness(K1,K2, gamma=None):
+    """Convenience function for Structureness measure.
+    According to Frangi (1998) this is technically S**2
     """
-    according to Frangi (1998) this is technically S**2
-    """
-    return K1**2 + K2**2
+    S = K1**2 + K2**2
+
+    if gamma is None:
+        return S
+    else:
+        return S / (2*gamma**2)
