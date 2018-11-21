@@ -271,9 +271,26 @@ for i, filename in enumerate(placentas):
 
     # --- Generating Visual Outputs--------------------------------------------
     crop = cropped_args(img)  # these indices crop out the mask significantly
+
+    # save the raw, unaltered image
     plt.imsave(outname('0_raw'), raw_img[crop].filled(0), cmap=plt.cm.gray)
+
+    # save the preprocessed image
     plt.imsave(outname('1_img'), img[crop].filled(0), cmap=plt.cm.gray)
+
+    # save the maximum frangi output over all scales
+    plt.imsave(outname('2_fmax'), Fmax[crop], vmin=0, vmax=1.0,
+               cmap=plt.cm.nipy_spectral)
+
+    # only save the colorbar the first time
+    save_colorbar = (i==0)
+    scale_label_figure(labs, scales, crop=crop,
+                       savefilename=outname('3_labeled'), image_only=True,
+                       save_colorbar_separate=save_colorbar,
+                       output_dir=OUTPUT_DIR)
+
     plt.imsave(outname('4_confusion'), confuse[crop])
+
     plt.imsave(outname('7_confusion_LO'), confuse_LO[crop])
     plt.imsave(outname('9_confusion_rw'), confuse_rw[crop])
 
@@ -292,20 +309,11 @@ for i, filename in enumerate(placentas):
     plt.imsave(outname('8_coverage_LO'), confusion(approx_LO, skeltrace)[crop])
     plt.imsave(outname('9_coverage_rw'), confusion(approx_rw, skeltrace)[crop])
 
-    # only save the colorbar the first time
-    save_colorbar = (i==0)
     # make the graph that shows what scale the max was pulled from
-    scale_label_figure(labs, scales, crop=crop,
-                       savefilename=outname('3_labeled'), image_only=True,
-                       save_colorbar_separate=save_colorbar,
-                       output_dir=OUTPUT_DIR)
 
     scale_label_figure(labs_LO, scales, crop=crop,
-                       savefilename=outname('4_labeled'), image_only=True,
+                       savefilename=outname('4_labeled_LO'), image_only=True,
                        save_colorbar_separate=False, output_dir=OUTPUT_DIR)
-    # save the maximum frangi output
-    plt.imsave(outname('2_fmax'), Fmax[crop], vmin=0, vmax=1.0,
-               cmap=plt.cm.nipy_spectral)
     plt.close('all')  # something's leaking :(
     break
 # Post-run Meta-Output and Logging ____________________________________________

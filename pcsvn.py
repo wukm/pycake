@@ -7,6 +7,8 @@ from skimage.util import img_as_float
 import numpy as np
 from preprocessing import inpaint_hybrid
 
+from scoring import nz_percentile
+
 from plate_morphology import dilate_boundary
 
 import matplotlib.pyplot as plt
@@ -46,12 +48,10 @@ def make_multiscale(img, scales, betas, gammas, dark_bg=True,
     for i, (sigma, beta, gamma) in enumerate(zip(scales, betas, gammas)):
 
         if dilate_per_scale:
-            if sigma < 2.5:
-                radius = 10
-            elif sigma > 20:
-                radius = int(sigma*2)
+            if sigma > 20:
+                radius = int(2*sigma)
             else:
-                radius = int(sigma*4)  # a little aggressive
+                radius = int(4*sigma)
         else:
             radius = None
 
@@ -67,9 +67,9 @@ def make_multiscale(img, scales, betas, gammas, dark_bg=True,
 
         if find_principal_directions:
             # principal directions should only be computed for critical regions
-            # ignore anything less than a std deviation over the mean
             # this mask is where PD's will *NOT* be calculated
-            cutoff = targets.mean() + targets.std()
+            # is targets a masked array?
+            cutoff = nz_percentile(targets, 80)
             pd_mask = np.bitwise_or(targets < cutoff, img.mask).filled(1)
             percent_calculated = (pd_mask.size - pd_mask.sum()) / pd_mask.size
 
@@ -103,10 +103,13 @@ def extract_pcsvn(img, filename, scales, betas=None, gammas=None, dark_bg=True,
     each provided scale without explicitly making any decisions about what
     is or is not part of the PCSVN.
 
+    As a matter of fact, this function currently just is a wrapper for
+    make_multiscale that logs some output
     The original main use of this function has kind of bled into
     extract_NCS_pcsvn.py. that needs fixing. You should load the image
     outside of this function, do post processing there, pass it inside here
     with a dictionary of things to add to the json file
+
     """
 
     # Multiscale & Frangi Parameters #########################################
