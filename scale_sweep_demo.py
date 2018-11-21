@@ -1,46 +1,54 @@
 #!/usr/bin/env python3
 
-from placenta import get_named_placenta, list_placentas, _cropped_bounds, cropped_view, cropped_args, show_mask
+from placenta import (get_named_placenta, list_placentas, _cropped_bounds,
+                      cropped_view, cropped_args, show_mask)
 from frangi import frangi_from_image
 
 import numpy as np
 import numpy.ma as ma
+
 from plate_morphology import dilate_boundary
 
 import os.path
 import matplotlib.pyplot as plt
 
-#imgfile = list_placentas('T-BN')[32]
 
-img = get_named_placenta('T-BN2315363.png')
+sample_name, inset_slice = 'BN2315363', np.s_[370:660, 530:900]
+sample_name, inset_slice = 'BN5280796', np.s_[370:660, 530:900]
 
-img = dilate_boundary(img,radius=5)
-F = list()
-fi = list()
+img = get_named_placenta(f'T-{sample_name}.png')
 
-#scales = np.logspace(-3,3,base=2,num=8)
-#scales = np.linspace(.25,8,num=8)
 
-scales = np.linspace(.25,4,num=6)
-for n, sigma in enumerate(scales, 1):
-    target = frangi_from_image(img, sigma, dark_bg=False)
+F, fi = list(), list() # make some empty lists to store for inspection
+
+# struggling with this now. sigma=1.23
+#scales = np.logspace(-3, 4, num=8, base=2)
+scales = [0.2, 0.8, 1.0, 2.0, 4.0, 6.0, 8.0, 16.0]
+#CMAP = plt.cm.nipy_spectral_r
+#CMAP = plt.cm.nipy_spectral
+CMAP = plt.cm.viridis
+cmin, cmax = (0, 0.4)
+
+for n, sigma in enumerate(scales):
+    target = frangi_from_image(img, sigma, dark_bg=False, dilation_radius=10)
     plate = cropped_view(target).filled(0)
-    inset = target[370:660,530:900]
+    inset = target[inset_slice]
     F.append(plate)
     fi.append(inset)
-    for label in ['plate','inset']:
+    for label in ['plate', 'inset']:
         if label == 'inset':
             printable = inset
         else:
             printable = plate
 
-        plt.imshow(printable, cmap=plt.cm.gist_earth)
+        plt.imshow(printable, cmap=CMAP)
         plt.title(r'$\sigma={:.2f}$'.format(sigma))
         plt.tight_layout()
         c = plt.colorbar()
-        c.set_ticks = np.linspace(0,0.6, num=7)
-        plt.clim(0,0.6)
-        outname = 'demo_output/scalesweep_{}_{}.png'.format(n,label)
+        c.set_ticks = np.linspace(cmin, cmax, num=len(scales)+1)
+        plt.clim(cmin, cmax)
+        plt.axis('off')
+        outname = f'demo_output/scalesweep_{sample_name}_{label}_{n}.png'
         plt.savefig(outname, dpi=300, bbox_inches='tight')
         print('saved', outname)
         plt.close()
@@ -51,12 +59,12 @@ for label in ['plate', 'inset']:
         L = fi
     else:
         L = F
-    top = np.concatenate(L[:3],axis=1)
-    bottom = np.concatenate(L[3:],axis=1)
+    #adjust this manually depending on how many scales you end up using!
+    top = np.concatenate(L[:4],axis=1)
+    bottom = np.concatenate(L[4:],axis=1)
     stitched = np.concatenate((top,bottom),axis=0)
-    imga = plt.imshow(stitched, cmap=plt.cm.gist_earth)
-    plt.imsave('demo_output/sweep_stitched_{}.png'.format(label),
-               stitched, cmap=plt.cm.gist_earth)
-    #plt.colorbar(); plt.clim(0,0.3)
+    imga = plt.imshow(stitched, cmap=CMAP)
+    plt.imsave(f'demo_output/scalesweep_stitched_{sample_name}_{label}.png',
+               stitched, cmap=CMAP, vmin=cmin, vmax=cmax)
 
 

@@ -19,6 +19,11 @@ import os
 import json
 from scipy.ndimage import imread
 
+from numpy.ma import is_masked
+from skimage.color import gray2rgb
+import matplotlib.pyplot as plt
+
+
 def open_typefile(filename, filetype, sample_dir=None, mode=None):
     """
     filetype is either 'mask' or 'trace'
@@ -40,7 +45,7 @@ def open_typefile(filename, filetype, sample_dir=None, mode=None):
     # get the base of filename and build the type filename
     *base, suffix = filename.split('.')
     base = ''.join(base)
-    typefile = '.'.join((base, filetype ,suffix))
+    typefile = '.'.join((base, filetype, suffix))
 
     if sample_dir is None:
         sample_dir = 'samples'
@@ -97,9 +102,6 @@ def open_tracefile(base_filename, as_binary=True,
         return T
 
 
-
-
-
 def get_named_placenta(filename, sample_dir=None, masked=True,
                        maskfile=None):
     """
@@ -107,24 +109,26 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
     way of accessing a database of unregistered and/or registered
     placental samples.
 
-    INPUT:
-        filename: name of file (including suffix?) but NOT directory
-        masked: return it masked.
-        maskfile: if supplied, this use the file will use a supplied 1-channel
-                mask (where 1 represents an invalid/masked pixel, and 0
-                represents a valid/unmasked pixel. the supplied image must be
-                the same shape as the image. if not provided, the mask is
-                calculated (unless masked=False)
-                the file must be located within the sample directory
+    Parameters
+    ----------
 
-                If maskfile is 'None' then this function will look for
-                a default maskname with the following  pattern:
+    filename: name of file (including suffix?) but NOT directory
+    masked: return it masked.
+    maskfile: if supplied, this use the file will use a supplied 1-channel
+            mask (where 1 represents an invalid/masked pixel, and 0
+            represents a valid/unmasked pixel. the supplied image must be
+            the same shape as the image. if not provided, the mask is
+            calculated (unless masked=False)
+            the file must be located within the sample directory
 
-                    test.jpg -> test.mask.jpg
-                    ncs.1029.jpg  -> ncs.1029.mask.jpg
+            If maskfile is 'None' then this function will look for
+            a default maskname with the following  pattern:
 
-        sample_directory: Relative path where sample (and mask file) is located.
-                defaults to './samples'
+                test.jpg -> test.mask.jpg
+                ncs.1029.jpg  -> ncs.1029.mask.jpg
+
+    sample_directory: Relative path where sample (and mask file) is located.
+            defaults to './samples'
 
     if masked is true (default), this returns a masked array.
 
@@ -162,8 +166,8 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
 
     return ma.masked_array(raw_img, mask=mask)
 
-def list_by_quality(quality=0, N=None, json_file=None,
-                             return_empty=False):
+
+def list_by_quality(quality=0, N=None, json_file=None, return_empty=False):
     """
     returns a list of filenames that are of quality ``quality''
 
@@ -226,6 +230,7 @@ def list_by_quality(quality=0, N=None, json_file=None,
     else:
         return placentas
 
+
 def check_filetype(filename, assert_png=True, assert_standard=False):
     """
     'T-BN8333878.raw.png' returns 'raw'
@@ -276,7 +281,7 @@ def list_placentas(label=None, sample_dir=None):
         sample_dir = 'samples'
 
     if label is None:
-        label = '' # str.startswith('') is always True
+        label = ''  # str.startswith('') is always True
 
     placentas = list()
 
@@ -289,42 +294,54 @@ def list_placentas(label=None, sample_dir=None):
 
     return sorted(placentas)
 
-def show_mask(img, interactive=True, mask_color=None):
+
+def show_mask(img, mask=None, interactive=False, mask_color=None):
     """
+    rename this color_mask since showing the mask is just a secondary feature
     show a masked grayscale image with a dark blue masked region
 
-    custom version of imshow that shows grayscale images with the right colormap
-    and, if they're masked arrays, sets makes the mask a dark blue)
-    a better function might make the grayscale value dark blue
-    (so there's no confusion)
+    custom version of imshow that shows grayscale images with the right
+    colormap and, if they're masked arrays, sets makes the mask a dark blue) a
+    better function might make the grayscale value dark blue (so there's no
+    confusion)
 
     if interactive, this operates like "plt.imshow"
     if interactive==False, return the RGB matrix
+
+    if mask provided, add it to the image. (pass img.data instead if you don't
+    want to use the original mask)
     """
 
-    from numpy.ma import is_masked
-    from skimage.color import gray2rgb
-    import matplotlib.pyplot as plt
-
     if mask_color is None:
-        mask_color = (0,0,60)
+        mask_color = (0, 0, 60)
 
-    if not is_masked(img):
+    # if there's no mask at all
+    if (mask is None) and (not is_masked(img)):
         if interactive:
             plt.imshow(img, cmap=plt.cm.gray)
+            return  # we're done
         else:
             # return as an rgb image so output is uniform
             return gray2rgb(img)
 
+    elif not is_masked(img):
+        # add mask to the image / add to existing mask
+        # if i just rewrite img will it change outside this function?
+        new_img = ma.masked_array(img, mask=mask)
+    else:
+        new_img = img.copy()
+
     # otherwise, get an RGB array, black where the mask is
-    mimg = gray2rgb(img.filled(0))
+    mimg = gray2rgb(new_img.filled(0))
+
     # fill masked regions with the mask color
-    mimg[img.mask, :] = mask_color
+    mimg[new_img.mask, :] = mask_color
 
     if interactive:
         plt.imshow(mimg)
     else:
         return mimg
+
 
 def _cropped_bounds(img, mask=None):
 
@@ -332,14 +349,17 @@ def _cropped_bounds(img, mask=None):
 
         img = ma.masked_array(img, mask=mask)
 
-    X,Y = (np.argwhere(np.invert(img.mask).any(axis=k)).squeeze() for k in (0,1))
+    X, Y = (np.argwhere(np.invert(img.mask).any(axis=k)).squeeze()
+            for k in (0, 1)
+            )
 
     if X.size == 0:
-        X = [None,None] # these will slice correctly
+        X = [None, None]  # these will slice correctly
     if Y.size == 0:
-        Y = [None,None]
+        Y = [None, None]
 
-    return Y[0],Y[-1],X[0],X[-1]
+    return Y[0], Y[-1], X[0], X[-1]
+
 
 def cropped_args(img, mask=None):
     """
@@ -347,9 +367,10 @@ def cropped_args(img, mask=None):
     i.e. img[cropped_args(img)] would be a cropped view
     """
 
-    x0, x1, y0,y1 = _cropped_bounds(img, mask=None)
+    x0, x1, y0, y1 = _cropped_bounds(img, mask=None)
 
-    return np.s_[x0:x1,y0:y1]
+    return np.s_[x0:x1, y0:y1]
+
 
 def cropped_view(img, mask=None):
     """
@@ -362,12 +383,13 @@ def cropped_view(img, mask=None):
     """
 
     # find first and last row with content
-    x0, x1, y0,y1 = _cropped_bounds(img, mask=mask)
+    x0, x1, y0, y1 = _cropped_bounds(img, mask=mask)
 
-    return img[x0:x1,y0:y1]
+    return img[x0:x1, y0:y1]
 
-CYAN = [0,255,255]
-YELLOW = [255,255,0]
+
+CYAN = [0, 255, 255]
+YELLOW = [255, 255, 0]
 
 
 def measure_ncs_markings(ucip_img=None, filename=None, verbose=True):
@@ -397,7 +419,7 @@ def measure_ncs_markings(ucip_img=None, filename=None, verbose=True):
         ucip_img = open_typefile(filename, 'ucip')
 
     # just in case it's got an alpha channel, remove it
-    img = ucip_img[:,:,0:3]
+    img = ucip_img[:, :, 0:3]
 
     # given the image img (make sure no alpha channel)
     # find all cyan pixels (there are two boxes of 3 pixels each and we
@@ -408,28 +430,28 @@ def measure_ncs_markings(ucip_img=None, filename=None, verbose=True):
     rulemarks = np.all(img == CYAN, axis=-1)
 
     # turn into two pixels (these should each be shape (18,))
-    X,Y = np.where(rulemarks)
+    X, Y = np.where(rulemarks)
 
     assert X.shape == Y.shape
 
     # if they followed the protocol correctly...
     if X.size == 18:
         # get the two pixels at the center of each box
-        A, B = (X[4], Y[4]) , (X[13], Y[13])
+        A, B = (X[4], Y[4]), (X[13], Y[13])
     else:
         # dots are a nonstandard size for some reason. this works too.
         thinned = morphology.thin(rulemarks)
         X, Y = np.where(thinned)
-        assert(thinned.sum() == 2) # there should be just two pixels now.
-        A, B = (X[0], Y[0]) , (X[1], Y[1])
+        assert(thinned.sum() == 2)  # there should be just two pixels now.
+        A, B = (X[0], Y[0]), (X[1], Y[1])
 
-    ruler_distance =  np.sqrt( (A[0] - B[0])**2 + (A[1] - B[1])**2 )
+    ruler_distance = np.sqrt((A[0] - B[0])**2 + (A[1] - B[1])**2)
     if verbose:
         print(f'one cm equals {ruler_distance} pixels')
 
     # the umbillical cord insertion point (UCIP) is a yellow circle, radius 19
     ucipmarks = np.all(img == YELLOW, axis=-1)
-    X,Y = np.where(ucipmarks)
+    X, Y = np.where(ucipmarks)
 
     # find midpoint of the x & y cooridnates
     assert X.max() - X.min() == Y.max() - Y.min()
@@ -471,7 +493,7 @@ def add_ucip_to_mask(m, radius=100, mask=None, size_like=None):
 
     # doesn't check for out of bounds stuff. use at your own peril
     D = morphology.disk(radius)
-    to_add[m[0]-radius:m[0]+radius+1 , m[1]-radius:m[1]+radius+1] = D
+    to_add[m[0]-radius:m[0]+radius+1, m[1]-radius:m[1]+radius+1] = D
 
     # merge with supplied mask
     return np.logical_or(mask, to_add)
@@ -481,13 +503,11 @@ if __name__ == "__main__":
 
     """test that this works on an easy image."""
 
-    from scipy.ndimage import imread
-    import matplotlib.pyplot as plt
     test_filename = 'barium1.png'
-    #test_maskfile = 'barium1.mask.png'
 
-    img =  get_named_placenta(test_filename, maskfile=None)
+    img = get_named_placenta(test_filename, maskfile=None)
 
     print('showing the mask of', test_filename)
     print('run plt.show() to see masked output')
-    show_mask(img)
+
+    show_mask(img, interactive=True)

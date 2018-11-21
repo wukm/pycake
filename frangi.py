@@ -6,8 +6,8 @@ from plate_morphology import dilate_boundary
 
 
 def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
-                      dilation_radius=None, signed_frangi=False,
-                      return_debug_info=False):
+                      dilation_radius=None, kernel='discrete',
+                      signed_frangi=False, return_debug_info=False):
     """
     Perform a frangi filtering on img
     if None, gamma returns half of Frobenius norm on the image
@@ -32,7 +32,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
     """
     # principal_directions() calculates the frangi filter with
     # standard convolution and takes forever. FIX THIS!
-    hesh = fft_hessian(img, sigma)  # the triple (Hxx,Hxy,Hyy)
+    hesh = fft_hessian(img, sigma, kernel=kernel)  # the triple (Hxx,Hxy,Hyy)
 
     k1, k2 = principal_curvatures(img, sigma, H=hesh)
 
