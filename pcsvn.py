@@ -7,7 +7,7 @@ from skimage.util import img_as_float
 import numpy as np
 from preprocessing import inpaint_hybrid
 
-from scoring import nz_percentile
+from merging import nz_percentile
 
 from plate_morphology import dilate_boundary
 

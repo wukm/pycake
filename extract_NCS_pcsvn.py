@@ -39,9 +39,12 @@ from skimage.segmentation import random_walker
 #   There are several ways to initialize samples. Uncomment one.
 
 # load all 201 samples
-placentas = list_placentas('T-BN')
+#placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
-# placentas = list_by_quality(0)
+placentas = list_by_quality(0, N=2)
+placentas.extend(list_by_quality(1, N=1))
+placentas.extend(list_by_quality(2, N=1))
+placentas.extend(list_by_quality(3, N=1))
 
 # load from a file (sample names are keys of the json file)
 # placentas = list_by_quality(json_file='manual_batch.json')
@@ -57,7 +60,7 @@ n_samples = len(placentas)
 MAKE_NPZ_FILES = False  # pickle frangi targets if you can
 USE_NPZ_FILES = False   # use old npz files if you can
 NPZ_DIR = 'output/181121-refactoring'  # where to look for npz files
-OUTPUT_DIR = 'output/181121-refactoring'  # where to save outputs
+OUTPUT_DIR = 'output/181121-hessian'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
@@ -247,7 +250,7 @@ for i, filename in enumerate(placentas):
     # MOVE THIS ELSEWHERE
     s = sobel(img)
     s = dilate_boundary(s, mask=img.mask, radius=20)
-    finv = frangi_from_image(s, sigma=0.8, dark_bg=True)
+    finv = frangi_from_image(s, sigma=0.8, dark_bg=True, dilation_radius=10)
     finv_thresh = nz_percentile(finv, 80)
     margins = remove_small_objects((finv > finv_thresh).filled(0), min_size=32)
     margins_added = np.logical_or(margins, approx)
@@ -266,7 +269,7 @@ for i, filename in enumerate(placentas):
     mccs[filename] =  (m_score, m_score_LO, m_score_rw)
 
     print(f'mcc score of {m_score:.3} for {filename}')
-    print(f'mcc score of {m_score_LO:.3} with larger sigmas only')
+    #print(f'mcc score of {m_score_LO:.3} with larger sigmas only')
     print(f'mcc score of {m_score_rw:.3} after random walker')
 
     # --- Generating Visual Outputs--------------------------------------------
@@ -291,7 +294,7 @@ for i, filename in enumerate(placentas):
 
     plt.imsave(outname('4_confusion'), confuse[crop])
 
-    plt.imsave(outname('7_confusion_LO'), confuse_LO[crop])
+    #plt.imsave(outname('7_confusion_LO'), confuse_LO[crop])
     plt.imsave(outname('9_confusion_rw'), confuse_rw[crop])
 
     percent_covered = np.logical_and(skeltrace, approx).sum() / skeltrace.sum()
@@ -299,6 +302,7 @@ for i, filename in enumerate(placentas):
                                         approx_LO).sum() / skeltrace.sum()
 
     pncs[filename] = (percent_covered, percent_covered_LO, pnc_rw)
+    #pncs[filename] = (percent_covered, pnc_rw)
 
     print('percentage of skeltrace covered:', f'{percent_covered:.2%}')
     print('percentage of skeltrace covered (larger sigmas only):',
@@ -306,16 +310,17 @@ for i, filename in enumerate(placentas):
     print('percentage of skeltrace covered (random_walker):',
           f'{pnc_rw:.2%}')
     plt.imsave(outname('5_coverage'), confusion(approx, skeltrace)[crop])
-    plt.imsave(outname('8_coverage_LO'), confusion(approx_LO, skeltrace)[crop])
+    #plt.imsave(outname('8_coverage_LO'), confusion(approx_LO, skeltrace)[crop])
     plt.imsave(outname('9_coverage_rw'), confusion(approx_rw, skeltrace)[crop])
 
     # make the graph that shows what scale the max was pulled from
 
-    scale_label_figure(labs_LO, scales, crop=crop,
-                       savefilename=outname('4_labeled_LO'), image_only=True,
-                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
+    #scale_label_figure(labs_LO, scales, crop=crop,
+    #                   savefilename=outname('4_labeled_LO'), image_only=True,
+    #                   save_colorbar_separate=False, output_dir=OUTPUT_DIR)
     plt.close('all')  # something's leaking :(
-    break
+
+
 # Post-run Meta-Output and Logging ____________________________________________
 
 timestring = datetime.datetime.now()
