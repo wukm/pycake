@@ -26,6 +26,7 @@ import os.path
 import os
 import json
 import datetime
+import pandas
 
 # for some post_processing, this needs to be moved elsewhere
 from skimage.filters import sobel
@@ -97,6 +98,7 @@ LO_offset = 8
 betas = None  # None -> use default parameters (0.5)
 gammas = None # None -> use default parameters (calculate half of hessian norm)
 alphas = None # none to set later
+fixed_alpha = .15
 
 
 # Scoring Decisions (don't need to touch these)
@@ -163,11 +165,11 @@ for i, filename in enumerate(placentas):
         print('finding multiscale frangi targets')
 
         # F is an array of frangi scores of shape (*img.shape, n_scales)
-        F = extract_pcsvn(img, filename, dark_bg=DARK_BG, betas=betas,
-                          scales=scales, gammas=gammas, kernel='discrete',
-                          dilate_per_scale=True, verbose=False,
-                          signed_frangi=SIGNED_FRANGI, generate_json=True,
-                          output_dir=OUTPUT_DIR)
+        F, jfile = extract_pcsvn(img, filename, dark_bg=DARK_BG, betas=betas,
+                                 scales=scales, gammas=gammas,
+                                 kernel='discrete', dilate_per_scale=True,
+                                 verbose=False, signed_frangi=SIGNED_FRANGI,
+                                 generate_json=True, output_dir=OUTPUT_DIR)
 
         if MAKE_NPZ_FILES:
             npzfile = ".".join((outname("F").rsplit('.', maxsplit=1)[0], 'npz')
@@ -187,7 +189,13 @@ for i, filename in enumerate(placentas):
         alphas = np.array([nz_percentile(F[:, :, k], 95.0)
                            for k in range(n_scales)]
                           )
+    scale_maxes = np.array([F[...,i].max() for i in range(F.shape[-1])])
+    #print('percentile alphas:', alphas)
+    #print('max at each scale:', scale_maxes)
+    table = pandas.DataFrame(np.dstack((scales, alphas, scale_maxes)).squeeze(),
+                                columns=('σ', 'α_p', 'max(F_σ)'))
 
+    print(table)
     # threshold the responses at each of these values and get labels of max
     approx, labs = apply_threshold(F, alphas, return_labels=True)
 
@@ -224,17 +232,19 @@ for i, filename in enumerate(placentas):
     # trace_smaller_only != 0
 
     # use only some scales
-    approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], alphas[LO_offset:])
+    #approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], alphas[LO_offset:])
+    approx_FA, labs_FA = apply_threshold(F, fixed_alpha)
 
     # fix labels to incorporate offset
-    labs_LO = (labs_LO != 0)*(labs_LO + LO_offset)
+    #labs_LO = (labs_LO != 0)*(labs_LO + LO_offset)
 
     # confusion matrix against default trace
     confuse = confusion(approx, trace, bg_mask=ucip_mask)
-    confuse_LO = confusion(approx_LO, trace, bg_mask=ucip_mask)
+    #confuse_LO = confusion(approx_LO, trace, bg_mask=ucip_mask)
+    confuse_FA = confusion(approx_FA, trace, bg_mask=ucip_mask)
 
     m_score, counts = mcc(approx, trace, ucip_mask, return_counts=True)
-    m_score_LO, counts_LO = mcc(approx_LO, trace, ucip_mask,
+    m_score_FA, counts_FA = mcc(approx_FA, trace, ucip_mask,
                                 return_counts=True)
 
     # this all just verifies that the 4 categories were added up
@@ -254,8 +264,11 @@ for i, filename in enumerate(placentas):
     finv_thresh = nz_percentile(finv, 80)
     margins = remove_small_objects((finv > finv_thresh).filled(0), min_size=32)
     margins_added = np.logical_or(margins, approx)
-    margins_added = remove_small_holes(margins_added, min_size=100,
+    margins_added = remove_small_holes(margins_added, area_threshold=100,
                                        connectivity=2)
+
+    confuse_margins = confusion(margins_added, trace, bg_mask=ucip_mask)
+
     # random walker markers
     markers = np.zeros(img.shape, dtype=np.uint8)
     markers[Fmax < .1] = 1
@@ -263,15 +276,15 @@ for i, filename in enumerate(placentas):
     rw = random_walker(img, markers, beta=1000)
     approx_rw = (rw == 2)
     confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
-    m_score_rw = mcc(approx_rw, trace, ucip_mask)
+    m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask,
+                                return_counts=True)
     pnc_rw = np.logical_and(skeltrace, approx_rw).sum() / skeltrace.sum()
 
-    mccs[filename] =  (m_score, m_score_LO, m_score_rw)
+    mccs[filename] =  (m_score, m_score_FA, m_score_rw)
 
     print(f'mcc score of {m_score:.3} for {filename}')
     #print(f'mcc score of {m_score_LO:.3} with larger sigmas only')
     print(f'mcc score of {m_score_rw:.3} after random walker')
-
     # --- Generating Visual Outputs--------------------------------------------
     crop = cropped_args(img)  # these indices crop out the mask significantly
 
@@ -295,31 +308,65 @@ for i, filename in enumerate(placentas):
     plt.imsave(outname('4_confusion'), confuse[crop])
 
     #plt.imsave(outname('7_confusion_LO'), confuse_LO[crop])
-    plt.imsave(outname('9_confusion_rw'), confuse_rw[crop])
+    plt.imsave(outname('7_confusion_FA'), confuse_FA[crop])
+    plt.imsave(outname('A_confusion_rw'), confuse_rw[crop])
 
+    plt.imsave(outname('9_margin_for_rw'), confuse_margins[crop])
     percent_covered = np.logical_and(skeltrace, approx).sum() / skeltrace.sum()
-    percent_covered_LO = np.logical_and(skeltrace,
-                                        approx_LO).sum() / skeltrace.sum()
+    percent_covered_FA = np.logical_and(skeltrace,
+                                        approx_FA).sum() / skeltrace.sum()
 
-    pncs[filename] = (percent_covered, percent_covered_LO, pnc_rw)
-    #pncs[filename] = (percent_covered, pnc_rw)
+    pncs[filename] = (percent_covered, percent_covered_FA, pnc_rw)
+
+
+
+    st_colors = {
+        'TN': (79,79,79),  # true negative# 'f7f7f7'
+        'TP': (0, 0, 0),  # true positive  # '000000'
+        'FN': (201,53,108),  # false negative # 'f1a340' orange
+        'FP': (92,92,92),  # false positive
+        'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
+    }
 
     print('percentage of skeltrace covered:', f'{percent_covered:.2%}')
     print('percentage of skeltrace covered (larger sigmas only):',
-          f'{percent_covered_LO:.2%}')
+          f'{percent_covered_FA:.2%}')
     print('percentage of skeltrace covered (random_walker):',
           f'{pnc_rw:.2%}')
-    plt.imsave(outname('5_coverage'), confusion(approx, skeltrace)[crop])
+    plt.imsave(outname('5_coverage'), confusion(approx, skeltrace,
+                                                colordict=st_colors)[crop])
     #plt.imsave(outname('8_coverage_LO'), confusion(approx_LO, skeltrace)[crop])
-    plt.imsave(outname('9_coverage_rw'), confusion(approx_rw, skeltrace)[crop])
+    plt.imsave(outname('8_coverage_FA'), confusion(approx_FA, skeltrace,
+                                                   colordict=st_colors)[crop])
+    plt.imsave(outname('B_coverage_rw'), confusion(approx_rw, skeltrace,
+                                                   colordict=st_colors)[crop])
 
     # make the graph that shows what scale the max was pulled from
 
-    #scale_label_figure(labs_LO, scales, crop=crop,
-    #                   savefilename=outname('4_labeled_LO'), image_only=True,
-    #                   save_colorbar_separate=False, output_dir=OUTPUT_DIR)
+    scale_label_figure(labs_FA, scales, crop=crop,
+                       savefilename=outname('6_labeled_FA'), image_only=True,
+                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
     plt.close('all')  # something's leaking :(
 
+
+    ### THIS IS ALL A HORRIBLE MESS. FIX IT
+
+    # why don't you just return the dict instead
+    with open(jfile, 'r') as f:
+        slog = json.load(f)
+
+    c2d = lambda t: dict(zip(('TP','TN', 'FP', 'FN'), [int(c) for c in t]))
+
+    slog['counts'] = c2d(counts)
+    slog['counts_FA'] = c2d(counts_FA)
+    slog['counts_rw'] = c2d(counts_rw)
+    slog['pnc'] = pncs[filename]
+    slog['mcc'] = mccs[filename]
+    slog['scale_maxes'] = list(scale_maxes)
+    slog['alphas'] = list(alphas)
+
+    with open(jfile, 'w') as f:
+        json.dump(slog, f)
 
 # Post-run Meta-Output and Logging ____________________________________________
 

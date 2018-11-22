@@ -95,6 +95,8 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
         gamma = .5 * max_hessian_norm(hesh, mask=hcollar)
         print(f'\t{gamma:.5f} = γ post-hdilation (this is the one we use)')
 
+        print('changing gamma to collar radius gamma')
+        gamma = l2gamma
         print('-'*80)
 
         if verbose:

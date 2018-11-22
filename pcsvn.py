@@ -189,7 +189,7 @@ def extract_pcsvn(img, filename, scales, betas=None, gammas=None, dark_bg=True,
         with open(dumpfile, 'w') as f:
             json.dump(logdata, f, indent=True)
 
-    return F_all
+    return F_all, dumpfile
 
 
 def get_outname_lambda(filename, output_dir=None, timestring=None):

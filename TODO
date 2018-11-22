@@ -1,0 +1,6 @@
+* make a skeltrace network coverage custom function that passes into confuion
+     where the skeltrace is dilated a bit so you can see, also custom colors
+* FIX THE FUCKING OUTPUT MESS so you can return gammas etc.
+* fix the border issue 
+* figure out if doing the extra dilation does anything (guess it doesn't)
+* figure out what to do / if you want to show anything about the hessian

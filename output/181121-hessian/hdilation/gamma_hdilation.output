@@ -1,0 +1,1932 @@
+5 samples total!
+********************************************************************************
+extracting PCSVN of T-BN0164923.png	 (0 of 5)
+finding multiscale frangi targets
+σ=0.250000
+	0.15781 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15108 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15103 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10560 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.275672
+	0.15417 = frob-norm γ pre-dilation
+collar radius: 1
+	0.14888 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14881 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10334 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.303981
+	0.14991 = frob-norm γ pre-dilation
+collar radius: 1
+	0.14627 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14617 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10067 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.335196
+	0.14493 = frob-norm γ pre-dilation
+collar radius: 1
+	0.14322 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14303 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.09792 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.369617
+	0.13970 = frob-norm γ pre-dilation
+collar radius: 1
+	0.13970 = frob-norm γ post-collar dilation
+alternative calculation
+	0.13933 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.09471 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.407572
+	0.13560 = frob-norm γ pre-dilation
+collar radius: 1
+	0.13560 = frob-norm γ post-collar dilation
+alternative calculation
+	0.13500 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.09098 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.449425
+	0.13086 = frob-norm γ pre-dilation
+collar radius: 1
+	0.13086 = frob-norm γ post-collar dilation
+alternative calculation
+	0.12995 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08670 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.495576
+	0.12543 = frob-norm γ pre-dilation
+collar radius: 1
+	0.12543 = frob-norm γ post-collar dilation
+alternative calculation
+	0.12413 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08184 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.546467
+	0.11928 = frob-norm γ pre-dilation
+collar radius: 2
+	0.11928 = frob-norm γ post-collar dilation
+alternative calculation
+	0.11750 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.07640 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.602583
+	0.11240 = frob-norm γ pre-dilation
+collar radius: 2
+	0.11240 = frob-norm γ post-collar dilation
+alternative calculation
+	0.11113 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.07040 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.664461
+	0.10482 = frob-norm γ pre-dilation
+collar radius: 2
+	0.10482 = frob-norm γ post-collar dilation
+alternative calculation
+	0.10401 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.06392 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.732694
+	0.09661 = frob-norm γ pre-dilation
+collar radius: 2
+	0.09661 = frob-norm γ post-collar dilation
+alternative calculation
+	0.09617 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.05883 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.807933
+	0.08789 = frob-norm γ pre-dilation
+collar radius: 3
+	0.05457 = frob-norm γ post-collar dilation
+alternative calculation
+	0.05451 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.05457 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.890899
+	0.07881 = frob-norm γ pre-dilation
+collar radius: 3
+	0.05005 = frob-norm γ post-collar dilation
+alternative calculation
+	0.05000 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.05005 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.982384
+	0.06959 = frob-norm γ pre-dilation
+collar radius: 3
+	0.04524 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04520 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.04524 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.083264
+	0.06044 = frob-norm γ pre-dilation
+collar radius: 4
+	0.04026 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04023 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.04026 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.194503
+	0.05163 = frob-norm γ pre-dilation
+collar radius: 4
+	0.03526 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03523 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.03526 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.317165
+	0.04384 = frob-norm γ pre-dilation
+collar radius: 5
+	0.03038 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03036 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.03038 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.452423
+	0.03717 = frob-norm γ pre-dilation
+collar radius: 5
+	0.02577 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02574 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.02577 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.601570
+	0.03085 = frob-norm γ pre-dilation
+collar radius: 6
+	0.02152 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02150 =  from L2-norm γ (K2 with collar)
+size of hdilation: 6
+	0.02152 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.766034
+	0.02524 = frob-norm γ pre-dilation
+collar radius: 7
+	0.01772 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01770 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.01772 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.947385
+	0.02049 = frob-norm γ pre-dilation
+collar radius: 7
+	0.01441 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01438 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.01441 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.147360
+	0.01693 = frob-norm γ pre-dilation
+collar radius: 8
+	0.01163 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01155 =  from L2-norm γ (K2 with collar)
+size of hdilation: 8
+	0.01163 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.367870
+	0.01375 = frob-norm γ pre-dilation
+collar radius: 9
+	0.00965 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00941 =  from L2-norm γ (K2 with collar)
+size of hdilation: 9
+	0.00965 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.611023
+	0.01132 = frob-norm γ pre-dilation
+collar radius: 10
+	0.00820 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00819 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.00820 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.879146
+	0.00950 = frob-norm γ pre-dilation
+collar radius: 11
+	0.00698 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00697 =  from L2-norm γ (K2 with collar)
+size of hdilation: 11
+	0.00698 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.174802
+	0.00781 = frob-norm γ pre-dilation
+collar radius: 12
+	0.00584 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00582 =  from L2-norm γ (K2 with collar)
+size of hdilation: 12
+	0.00584 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.500819
+	0.00633 = frob-norm γ pre-dilation
+collar radius: 14
+	0.00478 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00477 =  from L2-norm γ (K2 with collar)
+size of hdilation: 14
+	0.00478 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.860313
+	0.00529 = frob-norm γ pre-dilation
+collar radius: 15
+	0.00385 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00383 =  from L2-norm γ (K2 with collar)
+size of hdilation: 15
+	0.00385 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.256724
+	0.00444 = frob-norm γ pre-dilation
+collar radius: 17
+	0.00304 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00303 =  from L2-norm γ (K2 with collar)
+size of hdilation: 17
+	0.00320 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.693842
+	0.00377 = frob-norm γ pre-dilation
+collar radius: 18
+	0.00240 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00240 =  from L2-norm γ (K2 with collar)
+size of hdilation: 18
+	0.00307 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.175847
+	0.00322 = frob-norm γ pre-dilation
+collar radius: 20
+	0.00197 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00191 =  from L2-norm γ (K2 with collar)
+size of hdilation: 20
+	0.00286 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.707348
+	0.00278 = frob-norm γ pre-dilation
+collar radius: 22
+	0.00172 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00160 =  from L2-norm γ (K2 with collar)
+size of hdilation: 22
+	0.00264 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.293428
+	0.00241 = frob-norm γ pre-dilation
+collar radius: 25
+	0.00147 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00136 =  from L2-norm γ (K2 with collar)
+size of hdilation: 25
+	0.00236 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.939693
+	0.00205 = frob-norm γ pre-dilation
+collar radius: 27
+	0.00123 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00114 =  from L2-norm γ (K2 with collar)
+size of hdilation: 27
+	0.00204 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=7.652321
+	0.00172 = frob-norm γ pre-dilation
+collar radius: 30
+	0.00100 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00093 =  from L2-norm γ (K2 with collar)
+size of hdilation: 30
+	0.00172 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=8.438129
+	0.00140 = frob-norm γ pre-dilation
+collar radius: 33
+	0.00080 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00074 =  from L2-norm γ (K2 with collar)
+size of hdilation: 33
+	0.00140 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=9.304630
+	0.00112 = frob-norm γ pre-dilation
+collar radius: 37
+	0.00061 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00057 =  from L2-norm γ (K2 with collar)
+size of hdilation: 37
+	0.00112 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=10.260110
+	0.00088 = frob-norm γ pre-dilation
+collar radius: 41
+	0.00046 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00043 =  from L2-norm γ (K2 with collar)
+size of hdilation: 41
+	0.00088 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=11.313708
+	0.00068 = frob-norm γ pre-dilation
+collar radius: 45
+	0.00036 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00032 =  from L2-norm γ (K2 with collar)
+size of hdilation: 45
+	0.00068 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+...making outputs
+thresholding alphas with top 5% scores at each scale
+the image size is 1200x1594
+one cm equals 43.0 pixels
+the middle of the UCIP location is (756, 852)
+the radius outward is 9
+the total measurable diameter is 19
+TP: 35944	 TN: 494680
+FP: 11404	FN: 62398
+TP+TN+FP+FN=604426	total pixels=604426
+σ=0.800000
+	0.09635 = frob-norm γ pre-dilation
+collar radius: 10
+	0.03177 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03176 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.03177 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+mcc score of 0.471 for T-BN0164923.png
+mcc score of 0.609 after random walker
+percentage of skeltrace covered: 55.67%
+percentage of skeltrace covered (larger sigmas only): 55.44%
+percentage of skeltrace covered (random_walker): 69.91%
+********************************************************************************
+extracting PCSVN of T-BN0651415.png	 (1 of 5)
+finding multiscale frangi targets
+σ=0.250000
+	0.18544 = frob-norm γ pre-dilation
+collar radius: 1
+	0.18479 = frob-norm γ post-collar dilation
+alternative calculation
+	0.18474 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.09069 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.275672
+	0.18122 = frob-norm γ pre-dilation
+collar radius: 1
+	0.18122 = frob-norm γ post-collar dilation
+alternative calculation
+	0.18116 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08950 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.303981
+	0.17701 = frob-norm γ pre-dilation
+collar radius: 1
+	0.17701 = frob-norm γ post-collar dilation
+alternative calculation
+	0.17693 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08808 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.335196
+	0.17208 = frob-norm γ pre-dilation
+collar radius: 1
+	0.17208 = frob-norm γ post-collar dilation
+alternative calculation
+	0.17197 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08639 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.369617
+	0.16635 = frob-norm γ pre-dilation
+collar radius: 1
+	0.16635 = frob-norm γ post-collar dilation
+alternative calculation
+	0.16621 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08440 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.407572
+	0.15975 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15975 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15956 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08207 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.449425
+	0.15223 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15223 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15197 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.07936 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.495576
+	0.14375 = frob-norm γ pre-dilation
+collar radius: 1
+	0.14375 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14342 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.07622 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.546467
+	0.13564 = frob-norm γ pre-dilation
+collar radius: 2
+	0.13564 = frob-norm γ post-collar dilation
+alternative calculation
+	0.13508 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.07265 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.602583
+	0.12735 = frob-norm γ pre-dilation
+collar radius: 2
+	0.12735 = frob-norm γ post-collar dilation
+alternative calculation
+	0.12672 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.06861 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.664461
+	0.11813 = frob-norm γ pre-dilation
+collar radius: 2
+	0.11813 = frob-norm γ post-collar dilation
+alternative calculation
+	0.11745 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.06413 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.732694
+	0.10808 = frob-norm γ pre-dilation
+collar radius: 2
+	0.10808 = frob-norm γ post-collar dilation
+alternative calculation
+	0.10737 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.05922 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.807933
+	0.09734 = frob-norm γ pre-dilation
+collar radius: 3
+	0.07554 = frob-norm γ post-collar dilation
+alternative calculation
+	0.07127 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.05395 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.890899
+	0.08640 = frob-norm γ pre-dilation
+collar radius: 3
+	0.06945 = frob-norm γ post-collar dilation
+alternative calculation
+	0.06628 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.04842 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.982384
+	0.07587 = frob-norm γ pre-dilation
+collar radius: 3
+	0.06298 = frob-norm γ post-collar dilation
+alternative calculation
+	0.06074 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.04273 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.083264
+	0.06547 = frob-norm γ pre-dilation
+collar radius: 4
+	0.03782 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03780 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.03782 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.194503
+	0.05552 = frob-norm γ pre-dilation
+collar radius: 4
+	0.03448 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03445 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.03448 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.317165
+	0.04698 = frob-norm γ pre-dilation
+collar radius: 5
+	0.03119 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03116 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.03119 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.452423
+	0.04009 = frob-norm γ pre-dilation
+collar radius: 5
+	0.02786 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02786 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.02786 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.601570
+	0.03449 = frob-norm γ pre-dilation
+collar radius: 6
+	0.02479 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02478 =  from L2-norm γ (K2 with collar)
+size of hdilation: 6
+	0.02479 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.766034
+	0.02959 = frob-norm γ pre-dilation
+collar radius: 7
+	0.02174 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02172 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.02174 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.947385
+	0.02498 = frob-norm γ pre-dilation
+collar radius: 7
+	0.01879 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01877 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.01879 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.147360
+	0.02100 = frob-norm γ pre-dilation
+collar radius: 8
+	0.01629 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01627 =  from L2-norm γ (K2 with collar)
+size of hdilation: 8
+	0.01629 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.367870
+	0.01745 = frob-norm γ pre-dilation
+collar radius: 9
+	0.01415 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01413 =  from L2-norm γ (K2 with collar)
+size of hdilation: 9
+	0.01415 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.611023
+	0.01429 = frob-norm γ pre-dilation
+collar radius: 10
+	0.01198 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01196 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.01198 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.879146
+	0.01165 = frob-norm γ pre-dilation
+collar radius: 11
+	0.00990 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00988 =  from L2-norm γ (K2 with collar)
+size of hdilation: 11
+	0.00990 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.174802
+	0.00955 = frob-norm γ pre-dilation
+collar radius: 12
+	0.00798 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00796 =  from L2-norm γ (K2 with collar)
+size of hdilation: 12
+	0.00798 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.500819
+	0.00784 = frob-norm γ pre-dilation
+collar radius: 14
+	0.00627 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00625 =  from L2-norm γ (K2 with collar)
+size of hdilation: 14
+	0.00627 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.860313
+	0.00666 = frob-norm γ pre-dilation
+collar radius: 15
+	0.00481 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00479 =  from L2-norm γ (K2 with collar)
+size of hdilation: 15
+	0.00481 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.256724
+	0.00563 = frob-norm γ pre-dilation
+collar radius: 17
+	0.00383 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00373 =  from L2-norm γ (K2 with collar)
+size of hdilation: 17
+	0.00383 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.693842
+	0.00479 = frob-norm γ pre-dilation
+collar radius: 18
+	0.00312 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00309 =  from L2-norm γ (K2 with collar)
+size of hdilation: 18
+	0.00333 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.175847
+	0.00403 = frob-norm γ pre-dilation
+collar radius: 20
+	0.00259 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00256 =  from L2-norm γ (K2 with collar)
+size of hdilation: 20
+	0.00307 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.707348
+	0.00335 = frob-norm γ pre-dilation
+collar radius: 22
+	0.00214 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00212 =  from L2-norm γ (K2 with collar)
+size of hdilation: 22
+	0.00274 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.293428
+	0.00275 = frob-norm γ pre-dilation
+collar radius: 25
+	0.00176 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00174 =  from L2-norm γ (K2 with collar)
+size of hdilation: 25
+	0.00239 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.939693
+	0.00224 = frob-norm γ pre-dilation
+collar radius: 27
+	0.00144 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00143 =  from L2-norm γ (K2 with collar)
+size of hdilation: 27
+	0.00204 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=7.652321
+	0.00182 = frob-norm γ pre-dilation
+collar radius: 30
+	0.00120 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00117 =  from L2-norm γ (K2 with collar)
+size of hdilation: 30
+	0.00172 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=8.438129
+	0.00147 = frob-norm γ pre-dilation
+collar radius: 33
+	0.00103 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00099 =  from L2-norm γ (K2 with collar)
+size of hdilation: 33
+	0.00144 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=9.304630
+	0.00119 = frob-norm γ pre-dilation
+collar radius: 37
+	0.00086 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00082 =  from L2-norm γ (K2 with collar)
+size of hdilation: 37
+	0.00119 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=10.260110
+	0.00098 = frob-norm γ pre-dilation
+collar radius: 41
+	0.00070 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00067 =  from L2-norm γ (K2 with collar)
+size of hdilation: 41
+	0.00098 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=11.313708
+	0.00079 = frob-norm γ pre-dilation
+collar radius: 45
+	0.00055 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00053 =  from L2-norm γ (K2 with collar)
+size of hdilation: 45
+	0.00079 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+...making outputs
+the image size is 1200x1594
+one cm equals 46.95742752749558 pixels
+the middle of the UCIP location is (481, 859)
+the radius outward is 9
+the total measurable diameter is 19
+TP: 45861	 TN: 581989
+FP: 25577	FN: 49003
+TP+TN+FP+FN=702430	total pixels=702430
+σ=0.800000
+	0.11252 = frob-norm γ pre-dilation
+collar radius: 10
+	0.03558 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03558 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.03558 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+mcc score of 0.499 for T-BN0651415.png
+mcc score of 0.595 after random walker
+percentage of skeltrace covered: 67.52%
+percentage of skeltrace covered (larger sigmas only): 66.37%
+percentage of skeltrace covered (random_walker): 77.24%
+********************************************************************************
+extracting PCSVN of T-BN0033885.png	 (2 of 5)
+finding multiscale frangi targets
+σ=0.250000
+	0.16938 = frob-norm γ pre-dilation
+collar radius: 1
+	0.16158 = frob-norm γ post-collar dilation
+alternative calculation
+	0.16151 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10587 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.275672
+	0.16579 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15926 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15923 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10445 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.303981
+	0.16320 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15656 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15651 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10276 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.335196
+	0.16021 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15336 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15329 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10075 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.369617
+	0.15663 = frob-norm γ pre-dilation
+collar radius: 1
+	0.14958 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14948 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.09839 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.407572
+	0.15237 = frob-norm γ pre-dilation
+collar radius: 1
+	0.14515 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14500 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.09561 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.449425
+	0.14732 = frob-norm γ pre-dilation
+collar radius: 1
+	0.13998 = frob-norm γ post-collar dilation
+alternative calculation
+	0.13979 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.09239 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.495576
+	0.14138 = frob-norm γ pre-dilation
+collar radius: 1
+	0.13402 = frob-norm γ post-collar dilation
+alternative calculation
+	0.13387 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.08910 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.546467
+	0.13447 = frob-norm γ pre-dilation
+collar radius: 2
+	0.12719 = frob-norm γ post-collar dilation
+alternative calculation
+	0.12719 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.08533 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.602583
+	0.12651 = frob-norm γ pre-dilation
+collar radius: 2
+	0.11962 = frob-norm γ post-collar dilation
+alternative calculation
+	0.11962 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.08109 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.664461
+	0.11749 = frob-norm γ pre-dilation
+collar radius: 2
+	0.11115 = frob-norm γ post-collar dilation
+alternative calculation
+	0.11115 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.07654 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.732694
+	0.10745 = frob-norm γ pre-dilation
+collar radius: 2
+	0.10187 = frob-norm γ post-collar dilation
+alternative calculation
+	0.10187 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.07149 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.807933
+	0.09655 = frob-norm γ pre-dilation
+collar radius: 3
+	0.06599 = frob-norm γ post-collar dilation
+alternative calculation
+	0.06592 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.06599 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.890899
+	0.08501 = frob-norm γ pre-dilation
+collar radius: 3
+	0.06012 = frob-norm γ post-collar dilation
+alternative calculation
+	0.06005 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.06012 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.982384
+	0.07321 = frob-norm γ pre-dilation
+collar radius: 3
+	0.05397 = frob-norm γ post-collar dilation
+alternative calculation
+	0.05391 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.05397 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.083264
+	0.06156 = frob-norm γ pre-dilation
+collar radius: 4
+	0.04771 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04765 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.04771 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.194503
+	0.05188 = frob-norm γ pre-dilation
+collar radius: 4
+	0.04160 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04160 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.04160 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.317165
+	0.04314 = frob-norm γ pre-dilation
+collar radius: 5
+	0.03574 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03574 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.03574 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.452423
+	0.03641 = frob-norm γ pre-dilation
+collar radius: 5
+	0.03017 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03017 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.03017 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.601570
+	0.03057 = frob-norm γ pre-dilation
+collar radius: 6
+	0.02556 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02544 =  from L2-norm γ (K2 with collar)
+size of hdilation: 6
+	0.02556 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.766034
+	0.02611 = frob-norm γ pre-dilation
+collar radius: 7
+	0.02215 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02202 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.02215 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.947385
+	0.02241 = frob-norm γ pre-dilation
+collar radius: 7
+	0.01883 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01869 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.01883 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.147360
+	0.01877 = frob-norm γ pre-dilation
+collar radius: 8
+	0.01569 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01554 =  from L2-norm γ (K2 with collar)
+size of hdilation: 8
+	0.01569 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.367870
+	0.01564 = frob-norm γ pre-dilation
+collar radius: 9
+	0.01283 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01266 =  from L2-norm γ (K2 with collar)
+size of hdilation: 9
+	0.01283 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.611023
+	0.01297 = frob-norm γ pre-dilation
+collar radius: 10
+	0.01068 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01059 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.01068 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.879146
+	0.01096 = frob-norm γ pre-dilation
+collar radius: 11
+	0.00927 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00918 =  from L2-norm γ (K2 with collar)
+size of hdilation: 11
+	0.00927 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.174802
+	0.00916 = frob-norm γ pre-dilation
+collar radius: 12
+	0.00804 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00798 =  from L2-norm γ (K2 with collar)
+size of hdilation: 12
+	0.00804 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.500819
+	0.00752 = frob-norm γ pre-dilation
+collar radius: 14
+	0.00689 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00683 =  from L2-norm γ (K2 with collar)
+size of hdilation: 14
+	0.00689 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.860313
+	0.00628 = frob-norm γ pre-dilation
+collar radius: 15
+	0.00584 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00580 =  from L2-norm γ (K2 with collar)
+size of hdilation: 15
+	0.00584 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.256724
+	0.00529 = frob-norm γ pre-dilation
+collar radius: 17
+	0.00492 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00489 =  from L2-norm γ (K2 with collar)
+size of hdilation: 17
+	0.00492 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.693842
+	0.00440 = frob-norm γ pre-dilation
+collar radius: 18
+	0.00410 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00407 =  from L2-norm γ (K2 with collar)
+size of hdilation: 18
+	0.00410 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.175847
+	0.00364 = frob-norm γ pre-dilation
+collar radius: 20
+	0.00337 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00334 =  from L2-norm γ (K2 with collar)
+size of hdilation: 20
+	0.00337 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.707348
+	0.00299 = frob-norm γ pre-dilation
+collar radius: 22
+	0.00273 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00271 =  from L2-norm γ (K2 with collar)
+size of hdilation: 22
+	0.00273 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.293428
+	0.00244 = frob-norm γ pre-dilation
+collar radius: 25
+	0.00219 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00217 =  from L2-norm γ (K2 with collar)
+size of hdilation: 25
+	0.00219 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.939693
+	0.00199 = frob-norm γ pre-dilation
+collar radius: 27
+	0.00175 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00174 =  from L2-norm γ (K2 with collar)
+size of hdilation: 27
+	0.00184 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=7.652321
+	0.00162 = frob-norm γ pre-dilation
+collar radius: 30
+	0.00144 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00143 =  from L2-norm γ (K2 with collar)
+size of hdilation: 30
+	0.00158 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=8.438129
+	0.00133 = frob-norm γ pre-dilation
+collar radius: 33
+	0.00116 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00116 =  from L2-norm γ (K2 with collar)
+size of hdilation: 33
+	0.00133 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=9.304630
+	0.00112 = frob-norm γ pre-dilation
+collar radius: 37
+	0.00092 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00092 =  from L2-norm γ (K2 with collar)
+size of hdilation: 37
+	0.00112 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=10.260110
+	0.00094 = frob-norm γ pre-dilation
+collar radius: 41
+	0.00071 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00071 =  from L2-norm γ (K2 with collar)
+size of hdilation: 41
+	0.00094 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=11.313708
+	0.00079 = frob-norm γ pre-dilation
+collar radius: 45
+	0.00054 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00054 =  from L2-norm γ (K2 with collar)
+size of hdilation: 45
+	0.00079 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+...making outputs
+the image size is 1150x1528
+one cm equals 54.037024344425184 pixels
+the middle of the UCIP location is (441, 902)
+the radius outward is 9
+the total measurable diameter is 19
+TP: 29074	 TN: 655225
+FP: 39707	FN: 49410
+TP+TN+FP+FN=773416	total pixels=773416
+σ=0.800000
+	0.11371 = frob-norm γ pre-dilation
+collar radius: 10
+	0.04281 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04281 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.04281 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+mcc score of 0.332 for T-BN0033885.png
+mcc score of 0.403 after random walker
+percentage of skeltrace covered: 45.94%
+percentage of skeltrace covered (larger sigmas only): 44.30%
+percentage of skeltrace covered (random_walker): 56.87%
+********************************************************************************
+extracting PCSVN of T-BN0013990.png	 (3 of 5)
+finding multiscale frangi targets
+σ=0.250000
+	0.19048 = frob-norm γ pre-dilation
+collar radius: 1
+	0.17779 = frob-norm γ post-collar dilation
+alternative calculation
+	0.17778 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.11768 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.275672
+	0.18693 = frob-norm γ pre-dilation
+collar radius: 1
+	0.17541 = frob-norm γ post-collar dilation
+alternative calculation
+	0.17540 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.11666 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.303981
+	0.18274 = frob-norm γ pre-dilation
+collar radius: 1
+	0.17258 = frob-norm γ post-collar dilation
+alternative calculation
+	0.17257 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.11542 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.335196
+	0.17781 = frob-norm γ pre-dilation
+collar radius: 1
+	0.16919 = frob-norm γ post-collar dilation
+alternative calculation
+	0.16918 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.11392 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.369617
+	0.17206 = frob-norm γ pre-dilation
+collar radius: 1
+	0.16518 = frob-norm γ post-collar dilation
+alternative calculation
+	0.16517 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.11210 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.407572
+	0.16540 = frob-norm γ pre-dilation
+collar radius: 1
+	0.16045 = frob-norm γ post-collar dilation
+alternative calculation
+	0.16043 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10990 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.449425
+	0.15777 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15490 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15489 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10726 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.495576
+	0.14914 = frob-norm γ pre-dilation
+collar radius: 1
+	0.14846 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14844 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.10408 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.546467
+	0.14105 = frob-norm γ pre-dilation
+collar radius: 2
+	0.14105 = frob-norm γ post-collar dilation
+alternative calculation
+	0.14103 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.10030 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.602583
+	0.13265 = frob-norm γ pre-dilation
+collar radius: 2
+	0.13265 = frob-norm γ post-collar dilation
+alternative calculation
+	0.13262 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.09584 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.664461
+	0.12325 = frob-norm γ pre-dilation
+collar radius: 2
+	0.12325 = frob-norm γ post-collar dilation
+alternative calculation
+	0.12322 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.09062 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.732694
+	0.11295 = frob-norm γ pre-dilation
+collar radius: 2
+	0.11295 = frob-norm γ post-collar dilation
+alternative calculation
+	0.11290 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.08462 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.807933
+	0.10189 = frob-norm γ pre-dilation
+collar radius: 3
+	0.07784 = frob-norm γ post-collar dilation
+alternative calculation
+	0.06686 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.07784 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.890899
+	0.09032 = frob-norm γ pre-dilation
+collar radius: 3
+	0.07036 = frob-norm γ post-collar dilation
+alternative calculation
+	0.06203 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.07036 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.982384
+	0.07857 = frob-norm γ pre-dilation
+collar radius: 3
+	0.06232 = frob-norm γ post-collar dilation
+alternative calculation
+	0.05660 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.06232 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.083264
+	0.06702 = frob-norm γ pre-dilation
+collar radius: 4
+	0.05396 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04383 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.05396 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.194503
+	0.05606 = frob-norm γ pre-dilation
+collar radius: 4
+	0.04557 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03677 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.04557 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.317165
+	0.04698 = frob-norm γ pre-dilation
+collar radius: 5
+	0.03748 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03003 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.03748 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.452423
+	0.04001 = frob-norm γ pre-dilation
+collar radius: 5
+	0.03001 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02662 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.03001 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.601570
+	0.03374 = frob-norm γ pre-dilation
+collar radius: 6
+	0.02493 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02372 =  from L2-norm γ (K2 with collar)
+size of hdilation: 6
+	0.02493 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.766034
+	0.02788 = frob-norm γ pre-dilation
+collar radius: 7
+	0.02185 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02076 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.02185 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.947385
+	0.02323 = frob-norm γ pre-dilation
+collar radius: 7
+	0.01873 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01803 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.01873 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.147360
+	0.01914 = frob-norm γ pre-dilation
+collar radius: 8
+	0.01615 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01561 =  from L2-norm γ (K2 with collar)
+size of hdilation: 8
+	0.01615 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.367870
+	0.01552 = frob-norm γ pre-dilation
+collar radius: 9
+	0.01377 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01320 =  from L2-norm γ (K2 with collar)
+size of hdilation: 9
+	0.01377 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.611023
+	0.01270 = frob-norm γ pre-dilation
+collar radius: 10
+	0.01151 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01094 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.01151 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.879146
+	0.01037 = frob-norm γ pre-dilation
+collar radius: 11
+	0.00973 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00912 =  from L2-norm γ (K2 with collar)
+size of hdilation: 11
+	0.00973 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.174802
+	0.00850 = frob-norm γ pre-dilation
+collar radius: 12
+	0.00825 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00749 =  from L2-norm γ (K2 with collar)
+size of hdilation: 12
+	0.00825 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.500819
+	0.00706 = frob-norm γ pre-dilation
+collar radius: 14
+	0.00691 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00606 =  from L2-norm γ (K2 with collar)
+size of hdilation: 14
+	0.00691 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.860313
+	0.00591 = frob-norm γ pre-dilation
+collar radius: 15
+	0.00570 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00479 =  from L2-norm γ (K2 with collar)
+size of hdilation: 15
+	0.00570 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.256724
+	0.00488 = frob-norm γ pre-dilation
+collar radius: 17
+	0.00462 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00369 =  from L2-norm γ (K2 with collar)
+size of hdilation: 17
+	0.00462 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.693842
+	0.00400 = frob-norm γ pre-dilation
+collar radius: 18
+	0.00367 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00278 =  from L2-norm γ (K2 with collar)
+size of hdilation: 18
+	0.00367 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.175847
+	0.00329 = frob-norm γ pre-dilation
+collar radius: 20
+	0.00287 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00231 =  from L2-norm γ (K2 with collar)
+size of hdilation: 20
+	0.00296 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.707348
+	0.00275 = frob-norm γ pre-dilation
+collar radius: 22
+	0.00218 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00195 =  from L2-norm γ (K2 with collar)
+size of hdilation: 22
+	0.00256 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.293428
+	0.00228 = frob-norm γ pre-dilation
+collar radius: 25
+	0.00168 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00159 =  from L2-norm γ (K2 with collar)
+size of hdilation: 25
+	0.00218 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.939693
+	0.00187 = frob-norm γ pre-dilation
+collar radius: 27
+	0.00136 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00127 =  from L2-norm γ (K2 with collar)
+size of hdilation: 27
+	0.00182 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=7.652321
+	0.00152 = frob-norm γ pre-dilation
+collar radius: 30
+	0.00112 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00103 =  from L2-norm γ (K2 with collar)
+size of hdilation: 30
+	0.00151 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=8.438129
+	0.00123 = frob-norm γ pre-dilation
+collar radius: 33
+	0.00094 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00082 =  from L2-norm γ (K2 with collar)
+size of hdilation: 33
+	0.00123 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=9.304630
+	0.00101 = frob-norm γ pre-dilation
+collar radius: 37
+	0.00077 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00064 =  from L2-norm γ (K2 with collar)
+size of hdilation: 37
+	0.00100 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=10.260110
+	0.00083 = frob-norm γ pre-dilation
+collar radius: 41
+	0.00060 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00054 =  from L2-norm γ (K2 with collar)
+size of hdilation: 41
+	0.00082 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=11.313708
+	0.00067 = frob-norm γ pre-dilation
+collar radius: 45
+	0.00048 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00044 =  from L2-norm γ (K2 with collar)
+size of hdilation: 45
+	0.00067 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+...making outputs
+the image size is 1200x1594
+one cm equals 55.00909015790027 pixels
+the middle of the UCIP location is (841, 652)
+the radius outward is 9
+the total measurable diameter is 19
+TP: 27420	 TN: 527613
+FP: 35915	FN: 58764
+TP+TN+FP+FN=649712	total pixels=649712
+σ=0.800000
+	0.10960 = frob-norm γ pre-dilation
+collar radius: 10
+	0.04823 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04814 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.04823 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+mcc score of 0.291 for T-BN0013990.png
+mcc score of 0.348 after random walker
+percentage of skeltrace covered: 34.55%
+percentage of skeltrace covered (larger sigmas only): 32.14%
+percentage of skeltrace covered (random_walker): 44.63%
+********************************************************************************
+extracting PCSVN of T-BN0204423.png	 (4 of 5)
+finding multiscale frangi targets
+σ=0.250000
+	0.22175 = frob-norm γ pre-dilation
+collar radius: 1
+	0.20177 = frob-norm γ post-collar dilation
+alternative calculation
+	0.20177 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.16850 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.275672
+	0.21655 = frob-norm γ pre-dilation
+collar radius: 1
+	0.19772 = frob-norm γ post-collar dilation
+alternative calculation
+	0.19772 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.16639 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.303981
+	0.21045 = frob-norm γ pre-dilation
+collar radius: 1
+	0.19295 = frob-norm γ post-collar dilation
+alternative calculation
+	0.19294 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.16387 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.335196
+	0.20336 = frob-norm γ pre-dilation
+collar radius: 1
+	0.18734 = frob-norm γ post-collar dilation
+alternative calculation
+	0.18734 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.16086 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.369617
+	0.19518 = frob-norm γ pre-dilation
+collar radius: 1
+	0.18083 = frob-norm γ post-collar dilation
+alternative calculation
+	0.18082 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.15731 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.407572
+	0.18586 = frob-norm γ pre-dilation
+collar radius: 1
+	0.17331 = frob-norm γ post-collar dilation
+alternative calculation
+	0.17331 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.15311 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.449425
+	0.17536 = frob-norm γ pre-dilation
+collar radius: 1
+	0.16473 = frob-norm γ post-collar dilation
+alternative calculation
+	0.16473 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.14821 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.495576
+	0.16373 = frob-norm γ pre-dilation
+collar radius: 1
+	0.15507 = frob-norm γ post-collar dilation
+alternative calculation
+	0.15507 =  from L2-norm γ (K2 with collar)
+size of hdilation: 1
+	0.14251 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.546467
+	0.15106 = frob-norm γ pre-dilation
+collar radius: 2
+	0.13595 = frob-norm γ post-collar dilation
+alternative calculation
+	0.13580 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.13595 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.602583
+	0.13757 = frob-norm γ pre-dilation
+collar radius: 2
+	0.12850 = frob-norm γ post-collar dilation
+alternative calculation
+	0.12836 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.12850 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.664461
+	0.12374 = frob-norm γ pre-dilation
+collar radius: 2
+	0.12012 = frob-norm γ post-collar dilation
+alternative calculation
+	0.12000 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.12012 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.732694
+	0.11352 = frob-norm γ pre-dilation
+collar radius: 2
+	0.11087 = frob-norm γ post-collar dilation
+alternative calculation
+	0.11076 =  from L2-norm γ (K2 with collar)
+size of hdilation: 2
+	0.11087 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.807933
+	0.10404 = frob-norm γ pre-dilation
+collar radius: 3
+	0.10082 = frob-norm γ post-collar dilation
+alternative calculation
+	0.10073 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.10082 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.890899
+	0.09389 = frob-norm γ pre-dilation
+collar radius: 3
+	0.09016 = frob-norm γ post-collar dilation
+alternative calculation
+	0.09008 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.09016 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=0.982384
+	0.08324 = frob-norm γ pre-dilation
+collar radius: 3
+	0.07910 = frob-norm γ post-collar dilation
+alternative calculation
+	0.07904 =  from L2-norm γ (K2 with collar)
+size of hdilation: 3
+	0.07910 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.083264
+	0.07235 = frob-norm γ pre-dilation
+collar radius: 4
+	0.06796 = frob-norm γ post-collar dilation
+alternative calculation
+	0.06792 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.06796 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.194503
+	0.06150 = frob-norm γ pre-dilation
+collar radius: 4
+	0.05859 = frob-norm γ post-collar dilation
+alternative calculation
+	0.05788 =  from L2-norm γ (K2 with collar)
+size of hdilation: 4
+	0.05859 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.317165
+	0.05285 = frob-norm γ pre-dilation
+collar radius: 5
+	0.05137 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04999 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.05137 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.452423
+	0.04506 = frob-norm γ pre-dilation
+collar radius: 5
+	0.04456 = frob-norm γ post-collar dilation
+alternative calculation
+	0.04266 =  from L2-norm γ (K2 with collar)
+size of hdilation: 5
+	0.04456 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.601570
+	0.03774 = frob-norm γ pre-dilation
+collar radius: 6
+	0.03774 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03669 =  from L2-norm γ (K2 with collar)
+size of hdilation: 6
+	0.03774 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.766034
+	0.03238 = frob-norm γ pre-dilation
+collar radius: 7
+	0.03197 = frob-norm γ post-collar dilation
+alternative calculation
+	0.03152 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.03197 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=1.947385
+	0.02803 = frob-norm γ pre-dilation
+collar radius: 7
+	0.02675 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02675 =  from L2-norm γ (K2 with collar)
+size of hdilation: 7
+	0.02675 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.147360
+	0.02417 = frob-norm γ pre-dilation
+collar radius: 8
+	0.02238 = frob-norm γ post-collar dilation
+alternative calculation
+	0.02238 =  from L2-norm γ (K2 with collar)
+size of hdilation: 8
+	0.02238 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.367870
+	0.02026 = frob-norm γ pre-dilation
+collar radius: 9
+	0.01849 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01849 =  from L2-norm γ (K2 with collar)
+size of hdilation: 9
+	0.01849 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.611023
+	0.01654 = frob-norm γ pre-dilation
+collar radius: 10
+	0.01510 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01510 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.01510 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=2.879146
+	0.01320 = frob-norm γ pre-dilation
+collar radius: 11
+	0.01224 = frob-norm γ post-collar dilation
+alternative calculation
+	0.01220 =  from L2-norm γ (K2 with collar)
+size of hdilation: 11
+	0.01224 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.174802
+	0.01100 = frob-norm γ pre-dilation
+collar radius: 12
+	0.00983 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00978 =  from L2-norm γ (K2 with collar)
+size of hdilation: 12
+	0.00983 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.500819
+	0.00940 = frob-norm γ pre-dilation
+collar radius: 14
+	0.00782 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00777 =  from L2-norm γ (K2 with collar)
+size of hdilation: 14
+	0.00782 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=3.860313
+	0.00780 = frob-norm γ pre-dilation
+collar radius: 15
+	0.00617 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00612 =  from L2-norm γ (K2 with collar)
+size of hdilation: 15
+	0.00617 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.256724
+	0.00632 = frob-norm γ pre-dilation
+collar radius: 17
+	0.00482 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00478 =  from L2-norm γ (K2 with collar)
+size of hdilation: 17
+	0.00482 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=4.693842
+	0.00504 = frob-norm γ pre-dilation
+collar radius: 18
+	0.00387 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00376 =  from L2-norm γ (K2 with collar)
+size of hdilation: 18
+	0.00422 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.175847
+	0.00397 = frob-norm γ pre-dilation
+collar radius: 20
+	0.00329 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00325 =  from L2-norm γ (K2 with collar)
+size of hdilation: 20
+	0.00366 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=5.707348
+	0.00322 = frob-norm γ pre-dilation
+collar radius: 22
+	0.00283 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00280 =  from L2-norm γ (K2 with collar)
+size of hdilation: 22
+	0.00310 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.293428
+	0.00266 = frob-norm γ pre-dilation
+collar radius: 25
+	0.00243 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00238 =  from L2-norm γ (K2 with collar)
+size of hdilation: 25
+	0.00257 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=6.939693
+	0.00217 = frob-norm γ pre-dilation
+collar radius: 27
+	0.00205 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00200 =  from L2-norm γ (K2 with collar)
+size of hdilation: 27
+	0.00210 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=7.652321
+	0.00174 = frob-norm γ pre-dilation
+collar radius: 30
+	0.00171 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00165 =  from L2-norm γ (K2 with collar)
+size of hdilation: 30
+	0.00173 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=8.438129
+	0.00151 = frob-norm γ pre-dilation
+collar radius: 33
+	0.00140 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00134 =  from L2-norm γ (K2 with collar)
+size of hdilation: 33
+	0.00151 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=9.304630
+	0.00130 = frob-norm γ pre-dilation
+collar radius: 37
+	0.00112 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00106 =  from L2-norm γ (K2 with collar)
+size of hdilation: 37
+	0.00130 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=10.260110
+	0.00109 = frob-norm γ pre-dilation
+collar radius: 41
+	0.00088 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00082 =  from L2-norm γ (K2 with collar)
+size of hdilation: 41
+	0.00109 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+σ=11.313708
+	0.00090 = frob-norm γ pre-dilation
+collar radius: 45
+	0.00067 = frob-norm γ post-collar dilation
+alternative calculation
+	0.00062 =  from L2-norm γ (K2 with collar)
+size of hdilation: 45
+	0.00090 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+...making outputs
+the image size is 1054x1400
+one cm equals 61.84658438426491 pixels
+the middle of the UCIP location is (139, 461)
+the radius outward is 9
+the total measurable diameter is 19
+TP: 29232	 TN: 708193
+FP: 48698	FN: 73238
+TP+TN+FP+FN=859361	total pixels=859361
+σ=0.800000
+	0.11292 = frob-norm γ pre-dilation
+collar radius: 10
+	0.08326 = frob-norm γ post-collar dilation
+alternative calculation
+	0.08326 =  from L2-norm γ (K2 with collar)
+size of hdilation: 10
+	0.08326 = γ post-hdilation (this is the one we use)
+--------------------------------------------------------------------------------
+mcc score of 0.249 for T-BN0204423.png
+mcc score of 0.3 after random walker
+percentage of skeltrace covered: 33.44%
+percentage of skeltrace covered (larger sigmas only): 32.56%
+percentage of skeltrace covered (random_walker): 44.33%
