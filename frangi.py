@@ -81,21 +81,17 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
         gamma0 = .5*max_hessian_norm(hesh)
         print(f'\t{gamma0:.5f} = frob-norm γ pre-dilation')
 
-        print(f'collar radius: {dilation_radius}')
         gamma1 = .5*max_hessian_norm(hesh, mask=collar)
-        print(f'\t{gamma1:.5f} = frob-norm γ post-collar dilation')
-
+        print(f'\t{gamma1:.5f} = frob-norm γ post-collar dilation {dilation_radius}')
         l2gamma = .5*np.max(np.abs(k2))
-        print('alternative calculation')
         print(f'\t{l2gamma:.5f} =  from L2-norm γ (K2 with collar)')
 
         hdilation = int(max(np.ceil(sigma),10))
         hcollar = dilate_boundary(None, radius=hdilation, mask=img.mask)
-        print(f"size of hdilation: {dilation_radius}")
         gamma = .5 * max_hessian_norm(hesh, mask=hcollar)
-        print(f'\t{gamma:.5f} = γ post-hdilation (this is the one we use)')
+        print(f'\t{gamma:.5f} = γ post-hdilation (radius {hdilation}) (old γ)')
 
-        print('changing gamma to collar radius gamma')
+        print('changing γ to L2-norm with collar')
         gamma = l2gamma
         print('-'*80)
 
