@@ -4,6 +4,9 @@ import numpy as np
 from placenta import open_typefile, open_tracefile
 from skimage.morphology import thin
 
+import itertools
+from collections import deque
+
 def rgb_to_widths(T):
     """
     this will take an RGB trace image (MxNx3) and return a 2D (MxN)
@@ -453,6 +456,51 @@ def mean_squared_error(A,B):
         raise
 
     return mse
+
+def chain_lengths(iterable):
+
+    pos, s = 0, 0
+
+    for b, g in itertools.groupby(iterable):
+
+        if not b:
+            # alternative if the bottom doesn't work or something
+            #d = deque(enumerate(g,1), maxlen=1)
+            #pos += d[0][0] if d else 0
+
+            pos += sum((1 for i in g if not i))
+
+        else:
+
+            s = sum(g)
+
+            yield pos, s
+
+            pos += s
+
+    if not s:
+        # so it will return something even if iterable is empty
+        yield 0, 0
+
+
+def _longest_chain_1d(iterable):
+    """ will return a tuple of ind, length
+    where ind is the position in the iterable the chain starts and length is the
+    length of the chain
+    """ 
+    return max(chain_lengths(iterable), key=lambda x: x[1])
+
+
+def longest_chain(arr, axis):
+    """Find where the longest chain of boolean values and occurs across an array
+    and also return its length
+    """
+
+    C = np.apply_along_axis(_longest_chain_1d, axis, arr.astype('bool'))
+    
+    start_inds, chain_lens =  np.split(C, 2, axis)
+
+    return np.squeeze(start_inds), np.squeeze(chain_lens)
 
 
 if __name__ == "__main__":

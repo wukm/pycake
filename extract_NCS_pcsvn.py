@@ -58,10 +58,10 @@ n_samples = len(placentas)
 # RUNTIME OPTIONS ___________________________________________________________
 #   Where to save and whether or not to use old targets.
 
-MAKE_NPZ_FILES = False  # pickle frangi targets if you can
-USE_NPZ_FILES = False   # use old npz files if you can
-NPZ_DIR = 'output/181121-refactoring'  # where to look for npz files
-OUTPUT_DIR = 'output/181121-hessian'  # where to save outputs
+MAKE_NPZ_FILES = True  # pickle frangi targets if you can
+USE_NPZ_FILES = True   # use old npz files if you can
+NPZ_DIR = 'output/181122-bigrun'  # where to look for npz files
+OUTPUT_DIR = 'output/181122-bigrun'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
@@ -87,7 +87,7 @@ DILATE_PER_SCALE = True
 REMOVE_GLARE = True
 
 # What scales to use!
-log_range = (-2, 3.5)
+log_range = (-1, 3.5)
 n_scales = 40
 
 # when showing "large scales only", this is where to start
@@ -98,11 +98,11 @@ LO_offset = 8
 betas = None  # None -> use default parameters (0.5)
 gammas = None # None -> use default parameters (calculate half of hessian norm)
 alphas = None # none to set later
-fixed_alpha = .15
+fixed_alpha = .2
 
 
 # Scoring Decisions (don't need to touch these)
-ucip_radius = 90  # area around the umbilical cord insertion point to ignore
+ucip_radius = 50  # area around the umbilical cord insertion point to ignore
 
 # some other initializations, don't mind me
 
@@ -367,6 +367,9 @@ for i, filename in enumerate(placentas):
 
     with open(jfile, 'w') as f:
         json.dump(slog, f)
+    
+    break
+
 
 # Post-run Meta-Output and Logging ____________________________________________
 
