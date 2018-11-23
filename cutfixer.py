@@ -1,4 +1,3 @@
-# coding: utf-8
 Afile = 'T-BN5852719.png'
 A = get_named_placenta(Afile)
 ucip = open_typefile(Afile, 'ucip')
