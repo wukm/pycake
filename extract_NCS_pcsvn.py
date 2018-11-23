@@ -40,12 +40,13 @@ from skimage.segmentation import random_walker
 #   There are several ways to initialize samples. Uncomment one.
 
 # load all 201 samples
-#placentas = list_placentas('T-BN')
+placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
-placentas = list_by_quality(0, N=2)
-placentas.extend(list_by_quality(1, N=1))
-placentas.extend(list_by_quality(2, N=1))
-placentas.extend(list_by_quality(3, N=1))
+
+#placentas = list_by_quality(0, N=2)
+#placentas.extend(list_by_quality(1, N=1))
+#placentas.extend(list_by_quality(2, N=1))
+#placentas.extend(list_by_quality(3, N=1))
 
 # load from a file (sample names are keys of the json file)
 # placentas = list_by_quality(json_file='manual_batch.json')
@@ -368,7 +369,6 @@ for i, filename in enumerate(placentas):
     with open(jfile, 'w') as f:
         json.dump(slog, f)
     
-    break
 
 
 # Post-run Meta-Output and Logging ____________________________________________
