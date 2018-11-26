@@ -62,7 +62,6 @@ def rotating_box_filter(img, thetas, sigma, length_ratio=4, verbose=True):
     mask = img.mask
     extracted = np.zeros_like(img)
     img = binary_erosion(img, selem=disk(sigma))
-    #img = remove_small_objects(img, min_size=sigma**3)
     img = binary_dilation(img, selem=disk(sigma))
 
 

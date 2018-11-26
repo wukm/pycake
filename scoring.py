@@ -114,7 +114,7 @@ def merge_widths_from_traces(A_trace, V_trace, strategy='minimum'):
     V = rgb_to_widths(V_trace)
 
     # collisions (where are widths both reported)
-    c = np.logical_and(A!=0, V!=0)
+    c = (A!=0 & V!=0)
 
     W = np.maximum(A,V)  # get the nonzero value
     if strategy == 'maximum':
@@ -168,7 +168,7 @@ def filter_widths(W, widths=None, min_width=3, max_width=19):
         # use numpy.isin(T, widths) but that's only in version 1.13 and up
         # of numpy this is basically the code for that though
         to_keep = np.in1d(W, widths, assume_unique=True).reshape(W.shape)
-        Wout[np.invert(to_keep)] = 0
+        Wout[~to_keep] = 0
     return Wout
 
 
@@ -306,10 +306,10 @@ def confusion(test, truth, bg_mask=None, colordict=None, tint_mask=True):
     output = np.zeros((test.shape[0], test.shape[1], 3), dtype='f')
 
     # truth conditions
-    true_pos = np.bitwise_and(test==truth, truth)
-    true_neg = np.bitwise_and(test==truth, np.invert(truth))
-    false_neg = np.bitwise_and(truth, np.invert(test))
-    false_pos = np.bitwise_and(test, np.invert(truth))
+    true_pos = (test==truth & truth)
+    true_neg = (test==truth & ~truth)
+    false_neg = (truth & ~test)
+    false_pos = (test & ~truth)
 
     output[true_pos,:] = true_pos_color
     output[true_neg,:] = true_neg_color
@@ -386,10 +386,11 @@ def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
     false positives will be inflated.
 
     """
-    true_pos = np.logical_and(test==truth, truth)
-    true_neg = np.logical_and(test==truth, np.invert(truth))
-    false_neg = np.logical_and(truth, np.invert(test))
-    false_pos = np.logical_and(test, np.invert(truth))
+
+    true_pos = ((test == truth) & truth)
+    true_neg = ((test == truth) & ~truth)
+    false_neg = (truth & ~test)
+    false_pos = (test & ~truth)
 
     if score_bg:
         # take the classifications above as they are (nothing is masked)
@@ -416,9 +417,10 @@ def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
     FN = false_neg.sum()
 
     if not score_bg:
-        total = np.invert(bg_mask).sum()
+        total = np.sum(~bg_mask)
     else:
         total = test.size
+
     #print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
     #print('TP+TN+FN+FP={}\ntotal pixels={}'.format(TP+TN+FP+TN,total))
     # prevent potential overflow

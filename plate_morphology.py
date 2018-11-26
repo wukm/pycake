@@ -71,7 +71,7 @@ def mask_cuts(img, ucip, mask_only=False, in_place=False, return_success=False):
     Otherwise, it returns a masked_array.
     The cut region will be added to the img's mask. If you really want just the
     difference, you'll have to to run
-    >>>np.logical_and(cut_mask, np.invert(img.mask)) youself.
+    >>>(cut_mask & ~img.mask) youself.
 
     yourself.
 

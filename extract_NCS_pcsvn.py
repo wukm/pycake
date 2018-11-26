@@ -280,7 +280,7 @@ for i, filename in enumerate(placentas):
     finv = frangi_from_image(s, sigma=0.8, dark_bg=True, dilation_radius=10)
     finv_thresh = nz_percentile(finv, 80)
     margins = remove_small_objects((finv > finv_thresh).filled(0), min_size=32)
-    margins_added = np.logical_or(margins, approx)
+    margins_added = (margins | approx)
     margins_added = remove_small_holes(margins_added, area_threshold=100,
                                        connectivity=2)
 
@@ -295,7 +295,7 @@ for i, filename in enumerate(placentas):
     confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
     m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask,
                                 return_counts=True)
-    pnc_rw = np.logical_and(skeltrace, approx_rw).sum() / skeltrace.sum()
+    pnc_rw = (skeltrace & approx_rw).sum() / skeltrace.sum()
 
     mccs[filename] =  (m_score, m_score_FA, m_score_rw)
 
@@ -329,9 +329,8 @@ for i, filename in enumerate(placentas):
     plt.imsave(outname('A_confusion_rw'), confuse_rw[crop])
 
     plt.imsave(outname('9_margin_for_rw'), confuse_margins[crop])
-    percent_covered = np.logical_and(skeltrace, approx).sum() / skeltrace.sum()
-    percent_covered_FA = np.logical_and(skeltrace,
-                                        approx_FA).sum() / skeltrace.sum()
+    percent_covered = (skeltrace & approx).sum() / skeltrace.sum()
+    percent_covered_FA = (skeltrace & approx_FA).sum() / skeltrace.sum()
 
     pncs[filename] = (percent_covered, percent_covered_FA, pnc_rw)
 

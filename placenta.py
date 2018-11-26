@@ -496,7 +496,7 @@ def add_ucip_to_mask(m, radius=100, mask=None, size_like=None):
     to_add[m[0]-radius:m[0]+radius+1, m[1]-radius:m[1]+radius+1] = D
 
     # merge with supplied mask
-    return np.logical_or(mask, to_add)
+    return mask | to_add
 
 
 if __name__ == "__main__":
