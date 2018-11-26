@@ -487,7 +487,7 @@ def _longest_chain_1d(iterable):
     """ will return a tuple of ind, length
     where ind is the position in the iterable the chain starts and length is the
     length of the chain
-    """ 
+    """
     return max(chain_lengths(iterable), key=lambda x: x[1])
 
 
@@ -497,7 +497,7 @@ def longest_chain(arr, axis):
     """
 
     C = np.apply_along_axis(_longest_chain_1d, axis, arr.astype('bool'))
-    
+
     start_inds, chain_lens =  np.split(C, 2, axis)
 
     return np.squeeze(start_inds), np.squeeze(chain_lens)

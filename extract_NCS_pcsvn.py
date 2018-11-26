@@ -11,6 +11,7 @@ from placenta import (get_named_placenta, cropped_args, cropped_view,
                       open_tracefile, add_ucip_to_mask, measure_ncs_markings)
 
 from merging import nz_percentile, apply_threshold
+
 from scoring import (compare_trace, rgb_to_widths, merge_widths_from_traces,
                      filter_widths, mcc, confusion, skeletonize_trace)
 
@@ -40,10 +41,11 @@ from skimage.segmentation import random_walker
 #   There are several ways to initialize samples. Uncomment one.
 
 # load all 201 samples
-placentas = list_placentas('T-BN')
+#placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-#placentas = list_by_quality(0, N=2)
+placentas = list_by_quality(0, N=1)
+placentas = list(placentas)
 #placentas.extend(list_by_quality(1, N=1))
 #placentas.extend(list_by_quality(2, N=1))
 #placentas.extend(list_by_quality(3, N=1))
@@ -59,8 +61,8 @@ n_samples = len(placentas)
 # RUNTIME OPTIONS ___________________________________________________________
 #   Where to save and whether or not to use old targets.
 
-MAKE_NPZ_FILES = True  # pickle frangi targets if you can
-USE_NPZ_FILES = True   # use old npz files if you can
+MAKE_NPZ_FILES = False  # pickle frangi targets if you can
+USE_NPZ_FILES = False  # use old npz files if you can
 NPZ_DIR = 'output/181122-bigrun'  # where to look for npz files
 OUTPUT_DIR = 'output/181122-bigrun'  # where to save outputs
 
@@ -87,23 +89,27 @@ DILATE_PER_SCALE = True
 # Attempt to remove glare from sample (some are OK, some are bad)
 REMOVE_GLARE = True
 
-# What scales to use!
-log_range = (-1, 3.5)
-n_scales = 40
+# Which scales to use
+#LOG_RANGE = (-1, 3.5); SCALE_TYPE = 'logarithmic'
+SCALE_RANGE = (.25, 16); SCALE_TYPE = 'linear'
+N_SCALES = 60
+
+# use this if you want to use a custom argument (comment out the above)
+#SCALES = None; SCALE_RANGE = None, SCALE_TYPE == 'custom'
 
 # when showing "large scales only", this is where to start
-# (some index between 0 and n_scales)
+# (some index between 0 and N_SCALES)
 LO_offset = 8
 
 # Explicit Frangi Parameters (pass an array as long as scales or pass None)
-betas = None  # None -> use default parameters (0.5)
-gammas = None # None -> use default parameters (calculate half of hessian norm)
-alphas = None # none to set later
-fixed_alpha = .2
+BETAS = None  # None -> use default parameters (0.5)
+GAMMAS = None # None -> use default parameters (calculate half of hessian norm)
+ALPHAS = None # none to set later
+FIXED_ALPHA = .2
 
 
 # Scoring Decisions (don't need to touch these)
-ucip_radius = 50  # area around the umbilical cord insertion point to ignore
+UCIP_RADIUS = 50  # area around the umbilical cord insertion point to ignore
 
 # some other initializations, don't mind me
 
@@ -112,10 +118,20 @@ ucip_radius = 50  # area around the umbilical cord insertion point to ignore
 
 # CODE BEGINS HERE ____________________________________________________________
 
-n_samples = len(placentas)
-scales = np.logspace(log_range[0], log_range[1], num=n_scales, base=2)
+if SCALE_TYPE == 'linear':
+    scales = np.linspace(*SCALE_RANGE, num=N_SCALES)
+elif SCALE_TYPE == 'logarithmic':
+    scales = np.logspace(*LOG_RANGE, num=N_SCALES, base=2)
+else:
+    scales = SCALES
+    SCALE_TYPE = 'custom'  # this and the next three lines are just for logging
+    N_SCALES = len(SCALES)
+    SCALES = (min(scales), max(scales))
+
 mccs = dict()  # empty dict to store MCC's of each sample
 pncs = dict()  # empty dict to store percent network covered for each sample
+
+n_samples = len(placentas)
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -165,9 +181,9 @@ for i, filename in enumerate(placentas):
     else:
         print('finding multiscale frangi targets')
 
-        # F is an array of frangi scores of shape (*img.shape, n_scales)
-        F, jfile = extract_pcsvn(img, filename, dark_bg=DARK_BG, betas=betas,
-                                 scales=scales, gammas=gammas,
+        # F is an array of frangi scores of shape (*img.shape, N_SCALES)
+        F, jfile = extract_pcsvn(img, filename, dark_bg=DARK_BG, betas=BETAS,
+                                 scales=scales, gammas=GAMMAS,
                                  kernel='discrete', dilate_per_scale=True,
                                  verbose=False, signed_frangi=SIGNED_FRANGI,
                                  generate_json=True, output_dir=OUTPUT_DIR)
@@ -185,20 +201,20 @@ for i, filename in enumerate(placentas):
 
     print("...making outputs")
 
-    if alphas is None:
-        print("thresholding alphas with top 5% scores at each scale")
-        alphas = np.array([nz_percentile(F[:, :, k], 95.0)
-                           for k in range(n_scales)]
+    if ALPHAS is None:
+        print("thresholding ALPHAS with top 5% scores at each scale")
+        ALPHAS = np.array([nz_percentile(F[..., k], 95.0)
+                           for k in range(N_SCALES)]
                           )
+    # the maximum value of the entire image at each scale
     scale_maxes = np.array([F[...,i].max() for i in range(F.shape[-1])])
-    #print('percentile alphas:', alphas)
-    #print('max at each scale:', scale_maxes)
-    table = pandas.DataFrame(np.dstack((scales, alphas, scale_maxes)).squeeze(),
+
+    table = pandas.DataFrame(np.dstack((scales, ALPHAS, scale_maxes)).squeeze(),
                                 columns=('σ', 'α_p', 'max(F_σ)'))
 
     print(table)
     # threshold the responses at each of these values and get labels of max
-    approx, labs = apply_threshold(F, alphas, return_labels=True)
+    approx, labs = apply_threshold(F, ALPHAS, return_labels=True)
 
     # --- Scoring and Outputs -------------------------------------------------
 
@@ -219,7 +235,7 @@ for i, filename in enumerate(placentas):
     # print(f"The resolution of the image is {resolution} pixels per cm.")
 
     # mask anywhere close to the UCIP
-    ucip_mask = add_ucip_to_mask(ucip_midpoint, radius=int(ucip_radius),
+    ucip_mask = add_ucip_to_mask(ucip_midpoint, radius=int(UCIP_RADIUS),
                                  mask=img.mask)
 
     # The following are examples of things you can do:
@@ -233,8 +249,8 @@ for i, filename in enumerate(placentas):
     # trace_smaller_only != 0
 
     # use only some scales
-    #approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], alphas[LO_offset:])
-    approx_FA, labs_FA = apply_threshold(F, fixed_alpha)
+    #approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], ALPHAS[LO_offset:])
+    approx_FA, labs_FA = apply_threshold(F, FIXED_ALPHA)
 
     # fix labels to incorporate offset
     #labs_LO = (labs_LO != 0)*(labs_LO + LO_offset)
@@ -364,12 +380,23 @@ for i, filename in enumerate(placentas):
     slog['pnc'] = pncs[filename]
     slog['mcc'] = mccs[filename]
     slog['scale_maxes'] = list(scale_maxes)
-    slog['alphas'] = list(alphas)
+    slog['ALPHAS'] = list(ALPHAS)
 
     with open(jfile, 'w') as f:
         json.dump(slog, f)
-    
 
+V = np.transpose(F, axes=(2,0,1))
+
+for v, sigma in zip(V, scales):
+    plt.imshow(v[crop], cmap='nipy_spectral', vmin=0, vmax=1.0)
+    mng = plt.get_current_fig_manager()
+    mng.window.showMaximized()
+    plt.tight_layout()
+    plt.title(r'$\sigma={:.2f}$'.format(sigma))
+    plt.axis('off')
+    plt.tight_layout()
+    plt.show()
+    plt.close('all')
 
 # Post-run Meta-Output and Logging ____________________________________________
 
@@ -380,13 +407,14 @@ mccfile = os.path.join(OUTPUT_DIR, f"runlog_{timestring}.json")
 
 runlog = {
     'time': timestring,
-    'dark_bg': DARK_BG,
-    'dilate_per_scale': DILATE_PER_SCALE,
-    'log_range': log_range,
-    'n_scales': n_scales,
+    'DARK_BG': DARK_BG,
+    'DILATE_PER_SCALE': DILATE_PER_SCALE,
+    'SCALE_RANGE': SCALE_RANGE,
+    'SCALE_TYPE' : SCALE_TYPE,
+    'N_SCALES': N_SCALES,
     'scales': list(scales),
-    'alphas': list(alphas),
-    'betas': None,
+    'ALPHAS': list(ALPHAS),
+    'BETAS': None,
     'use_npz_files': False,
     'remove_glare': REMOVE_GLARE,
     'files': list(placentas),
