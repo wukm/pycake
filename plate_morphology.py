@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from skimage.morphology import disk, binary_erosion, binary_dilation
-from skimage.morphology import convex_hull_image
+from skimage.morphology import (disk, binary_erosion, binary_dilation,
+                                convex_hull_image, thin)
 from skimage.segmentation import find_boundaries, watershed
 
 from placenta import open_typefile, get_named_placenta
@@ -59,7 +59,98 @@ def dilate_boundary(img, radius=10, mask=None):
         return ma.masked_array(img, mask=new_mask)
 
 
-def mask_cuts(img, ucip, mask_only=False, in_place=False, return_success=False):
+def l2_dist(p,q):
+    return int(np.round(np.sqrt((p[0]-q[0])**2 + (p[1]-q[1])**2)))
+
+
+def mask_cuts_simple(img, ucip, mask_only=False, in_place=False,
+                        return_success=False):
+    """
+    this covers up the cut with a disc originating at the perimeter of
+    significant radius
+    """
+
+    cutmarks = np.all(ucip==(0,0,255), axis=-1)
+    B = np.all(ucip==(0,0,255), axis=-1)
+    dilcut = img.copy()
+
+    if not np.any(cutmarks):
+
+        #print("no cutmarks found on image")
+
+        if return_success:
+            return img, False
+        else:
+            return img
+    else:
+        #print("found a cutmark!")
+        pass
+
+    cutmarks = np.nonzero(cutmarks)
+    # get the first pixel of it (we don't need to be too precise here)
+    G = np.all(ucip==(0,255,0), axis=-1) # perimeter elements
+    cutmarks = np.nonzero(thin(B))
+    perimeter = np.nonzero(G)
+
+    cutinds = np.stack(cutmarks).T
+
+    for P in cutinds:
+
+        # consider larger and larger window sizes
+        for W in [100,200,300]:
+            # consider all perimeter elements within these bounds
+
+            rmin, rmax = max(0, P[0]-W), min(img.shape[0], P[0]+W)
+            cmin, cmax = max(0, P[1]-W), min(img.shape[1], P[1]+W)
+            #window = np.s_[rmin:rmax, cmin:cmax]
+
+            # perimeter indices within the window
+            pinds = [(x,y) for x, y in zip(*perimeter)
+                        if x > rmin and x < rmax and y > cmin and y < cmax
+                        ]
+            if pinds:
+                break #otherwise increase the size of the window
+    if pinds:
+
+        # max distance to boundary point in the window
+        # we really only need to keep the largest; deque?
+        dists = sorted([(pp, l2_dist(P,pp)) for pp in pinds],
+                        key=lambda t: t[1])
+        r = 2*int(dists[0][1]) + 1 # get largest radius but closest point
+        P = dists[0][0]
+        B = np.zeros_like(img.mask)
+
+        B[cutmarks] = True
+
+        # center a disk of found radius there
+        D = disk(r)
+        winx = max(P[0]-r,0), min(P[0]+r+1,B.shape[0])
+        winy = max(P[1]-r,0), min(P[1]+r+1,B.shape[1])
+        try:
+            B[winx[0]:winx[1] , winy[0]:winy[1]] = D
+        except ValueError:
+            # they're out of bounds so it's a size mismatch. fix it
+            # by starting/ending D index with opposite sign of the initial
+            # p +/- radius that was out of bounds
+            # for example P[0]-r was -9 and everything else was fine
+            # so you just need to set left side to D[9:,:]
+            # but you should  wrap this up in a function so the three times
+            # you do it here and the one time in ucip all gets the same
+            # code
+            pass
+        else:
+            dilcut[B] = ma.masked
+            success = True
+    else:
+        print("we completely failed to mask the cut. too close to the",
+              "boundary to fit an unmodified disk in. fix this")
+        success = False
+
+    return dilcut, success
+
+
+def mask_cuts_watershed(img, ucip, mask_only=False, in_place=False,
+                        return_success=False):
     """
 
     this doesn't handle any image, io. just provide the ucip img and the
@@ -104,7 +195,9 @@ def mask_cuts(img, ucip, mask_only=False, in_place=False, return_success=False):
     # get a value somewhat lower than the value of bg in the cut
     # (this should be a high number before we take 85%)
     # sometimes this is in a shadowy region which fucks everything up though
-    threshold = max(img[cutmarks].mean() * .85, 175)
+    #threshold = max(img[cutmarks].mean() * .85, 175)
+    # get the brightest value in a smallish window around the cut * .85
+    threshold = np.max(img[X-10:X+10,Y-10:Y+10])
 
     rmin, rmax = max(0, X-100), min(img.shape[0], X+100)
     cmin, cmax = max(0, Y-100), min(img.shape[1], Y+100)

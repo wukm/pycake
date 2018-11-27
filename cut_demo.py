@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from placenta import (open_typefile, list_placentas, get_named_placenta)
-from plate_morphology import mask_cuts, dilate_boundary
+from plate_morphology import mask_cuts_simple, dilate_boundary
 
 from skimage.color import gray2rgb
 from skimage.morphology import thin, binary_dilation, disk, square
@@ -26,84 +26,95 @@ for filename in list_placentas('T-BN'):
     img = get_named_placenta(filename)
     ucip = open_typefile(filename, 'ucip')
 
-    C, has_cut = mask_cuts(img, ucip, return_success=True, in_place=False)
+    #C, has_cut = mask_cuts(img, ucip, return_success=True, in_place=False)
 
-    if has_cut:
+    #if has_cut:
 
-        dilcut = img.copy()
+    #    dilcut = img.copy()
 
-        print(filename, "has a cut!")
-        samples_with_cuts.append(filename)
+    #    print(filename, "has a cut!")
+    #    samples_with_cuts.append(filename)
 
-        B = np.all(ucip==(0,0,255), axis=-1)
-        G = np.all(ucip==(0,255,0), axis=-1)
+    #    B = np.all(ucip==(0,0,255), axis=-1)
+    #    G = np.all(ucip==(0,255,0), axis=-1)
 
-        cutmarks = np.nonzero(thin(B))
-        perimeter = np.nonzero(G)
+    #    cutmarks = np.nonzero(thin(B))
+    #    perimeter = np.nonzero(G)
 
-        #for array in the tuple that comes out of np.nonzero(thin(B))
-        # or just one if it's just a single thing i guess?
+    #    #for array in the tuple that comes out of np.nonzero(thin(B))
+    #    # or just one if it's just a single thing i guess?
 
-        # the x, y points of the cutmarks are in columns
-        cutinds = np.stack(cutmarks)
+    #    # the x, y points of the cutmarks are in columns
+    #    cutinds = np.stack(cutmarks)
 
-        for P in cutinds.T:
+    #    for P in cutinds.T:
 
-            # consider larger and larger window sizes
-            for W in [100,200,300]:
-                # consider all perimeter elements within these bounds
+    #        # consider larger and larger window sizes
+    #        for W in [100,200,300]:
+    #            # consider all perimeter elements within these bounds
 
-                rmin, rmax = max(0, P[0]-W), min(img.shape[0], P[0]+W)
-                cmin, cmax = max(0, P[1]-W), min(img.shape[1], P[1]+W)
-                window = np.s_[rmin:rmax, cmin:cmax]
+    #            rmin, rmax = max(0, P[0]-W), min(img.shape[0], P[0]+W)
+    #            cmin, cmax = max(0, P[1]-W), min(img.shape[1], P[1]+W)
+    #            window = np.s_[rmin:rmax, cmin:cmax]
 
-                # perimeter indices within the window
-                pinds = [(x,y) for x, y in zip(*perimeter)
-                            if x > rmin and x < rmax and y > cmin and y < cmax
-                            ]
-                if pinds:
-                    break
-        if pinds:
+    #            # perimeter indices within the window
+    #            pinds = [(x,y) for x, y in zip(*perimeter)
+    #                        if x > rmin and x < rmax and y > cmin and y < cmax
+    #                        ]
+    #            if pinds:
+    #                break
+    #    if pinds:
 
-            # max distance to boundary point in the window
-            r = int(np.max([l2_dist(P, pp) for pp in pinds])) + 1
+    #        # max distance to boundary point in the window
+    #        # we really only need to keep the largest; deque?
+    #        dists = sorted([(pp, l2_dist(P,pp)) for pp in pinds],
+    #                        key=lambda t: t[1])
+    #        r = int(dists[-1][1]) + 1 # get largest radius but closest point
+    #        P = dists[0][0]
+    #        B = np.zeros_like(img.mask)
 
-            B = np.zeros_like(img.mask)
+    #        B[cutmarks] = True
 
-            B[cutmarks] = True
+    #        # center a disk of found radius there
+    #        D = disk(r)
+    #        winx = max(P[0]-r,0), min(P[0]+r+1,B.shape[0])
+    #        winy = max(P[1]-r,0), min(P[1]+r+1,B.shape[1])
+    #        try:
+    #            B[winx[0]:winx[1] , winy[0]:winy[1]] = D
+    #        except ValueError:
+    #            # they're out of bounds so it's a size mismatch. fix it
+    #            # by starting/ending D index with opposite sign of the initial
+    #            # p +/- radius that was out of bounds
+    #            # for example P[0]-r was -9 and everything else was fine
+    #            # so you just need to set left side to D[9:,:]
+    #            # but you should  wrap this up in a function so the three times
+    #            # you do it here and the one time in ucip all gets the same
+    #            # code
+    #            pass
+    #        dilcut[B] = ma.masked
 
-            # center a disk of found radius there
-            D = disk(r)
-            winx = max(P[0]-r,0), min(P[0]+r+1,B.shape[0])
-            winy = max(P[1]-r,0), min(P[1]+r+1,B.shape[1])
-            try:
-                B[winx[0]:winx[1] , winy[0]:winy[1]] = D
-            except ValueError:
-                # they're out of bounds so it's a size mismatch. fix it
-                # by starting/ending D index with opposite sign of the initial
-                # p +/- radius that was out of bounds
-                # for example P[0]-r was -9 and everything else was fine
-                # so you just need to set left side to D[9:,:]
-                # but you should  wrap this up in a function so the three times
-                # you do it here and the one time in ucip all gets the same
-                # code
-                pass
-            dilcut[B] = ma.masked
+    #    else:
+    #        # this is probably not going to happen, but just in case no
+    #        # nearby perimeter was found, just... give up
+    #        pass
 
-        else:
-            # this is probably not going to happen, but just in case no
-            # nearby perimeter was found, just... give up
-            pass
-
-        rminv, rmaxv = max(0, rmin-W//2), min(img.shape[0], rmax+W//2)
-        cminv, cmaxv = max(0, cmin-W//2), min(img.shape[1], cmax+W//2)
-        view = np.s_[rminv:rmaxv, cminv:cmaxv]
-        montage = np.hstack((gray2rgb(img.filled(0)[view]),
-                            ucip[view],
-                            gray2rgb(C.filled(0)[view]),
-                            gray2rgb(dilcut.filled(0)[view])))
-        filestub, _ = os.path.splitext(filename)
-        plt.imsave(f'demo_output/cut_demo/{filestub}_cutopts.png', montage)
+    #    rminv, rmaxv = max(0, rmin-W//2), min(img.shape[0], rmax+W//2)
+    #    cminv, cmaxv = max(0, cmin-W//2), min(img.shape[1], cmax+W//2)
+    #    view = np.s_[rminv:rmaxv, cminv:cmaxv]
+    #    montage = np.hstack((gray2rgb(img.filled(0)[view]),
+    #                        ucip[view],
+    #                        gray2rgb(C.filled(0)[view]),
+    #                        gray2rgb(dilcut.filled(0)[view])))
+    #    filestub, _ = os.path.splitext(filename)
+    #    plt.imsave(f'demo_output/cut_demo/{filestub}_cutopts.png', montage)
+    #    #plt.imshow(montage)
+    #    plt.show()
+    #    plt.close()
+    mimg, success = mask_cuts_simple(img, ucip, return_success=True)
+    if success:
+        montage = np.hstack((img.filled(0),
+                             mimg.filled(0)))
+        plt.imshow(montage)
         plt.show()
         plt.close()
 print("*"*80)
