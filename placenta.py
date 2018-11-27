@@ -65,7 +65,7 @@ def open_typefile(filename, filetype, sample_dir=None, mode=None):
 
     except FileNotFoundError:
         print('Could not find file', typefile)
-        raise
+        return None
 
     return img
 
@@ -417,6 +417,10 @@ def measure_ncs_markings(ucip_img=None, filename=None, verbose=True):
 
     if ucip_img is None:
         ucip_img = open_typefile(filename, 'ucip')
+
+    if ucip_img is None:
+        # if it's still none (no file), return None
+        return None, None
 
     # just in case it's got an alpha channel, remove it
     img = ucip_img[:, :, 0:3]

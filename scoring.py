@@ -114,7 +114,7 @@ def merge_widths_from_traces(A_trace, V_trace, strategy='minimum'):
     V = rgb_to_widths(V_trace)
 
     # collisions (where are widths both reported)
-    c = (A!=0 & V!=0)
+    c = (A!=0)& (V!=0)
 
     W = np.maximum(A,V)  # get the nonzero value
     if strategy == 'maximum':
@@ -235,6 +235,8 @@ def skeletonize_trace(T, T2=None):
     """
     if T.ndim == 3:
         trace = (rgb_to_widths(T) > 0)  # booleanize it
+    else:
+        trace = T.astype('bool')
 
     thinned = thin(trace)
 

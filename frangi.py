@@ -67,7 +67,8 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
         # get rid of "bad" K values before you calculate gamma
         k1[collar] = 0
         k2[collar] = 0
-
+    else:
+        collar = None
     # set default gamma value if not supplied
     if gamma is None:
         # Frangi suggested 'half the max Hessian norm' as an empirical
@@ -79,20 +80,25 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
         # alternatively you could use gamma = .5 * np.abs(k2).max()
         print(f'σ={sigma:2f}')
         gamma0 = .5*max_hessian_norm(hesh)
-        print(f'\t{gamma0:.5f} = frob-norm γ pre-dilation')
+        #print(f'\t{gamma0:.5f} = frob-norm γ pre-dilation')
 
         gamma1 = .5*max_hessian_norm(hesh, mask=collar)
-        print(f'\t{gamma1:.5f} = frob-norm γ post-collar dilation {dilation_radius}')
+        #print(f'\t{gamma1:.5f} = frob-norm γ post-collar dilation {dilation_radius}')
         l2gamma = .5*np.max(np.abs(k2))
-        print(f'\t{l2gamma:.5f} =  from L2-norm γ (K2 with collar)')
+        #print(f'\t{l2gamma:.5f} =  from L2-norm γ (K2 with collar)')
 
         hdilation = int(max(np.ceil(sigma),10))
         hcollar = dilate_boundary(None, radius=hdilation, mask=img.mask)
         gamma = .5 * max_hessian_norm(hesh, mask=hcollar)
-        print(f'\t{gamma:.5f} = γ post-hdilation (radius {hdilation}) (old γ)')
+        #print(f'\t{gamma:.5f} = γ post-hdilation (radius {hdilation}) (old γ)')
 
-        print('changing γ to L2-norm with collar')
-        gamma = l2gamma
+        #print('changing γ to L2-norm with collar')
+        #gamma = max(gamma1, l2gamma, gamma, gamma0)
+        if sigma < .5:
+            gamma = gamma
+        else:
+            gamma = l2gamma
+
         print('-'*80)
 
         if verbose:
