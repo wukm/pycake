@@ -107,6 +107,8 @@ def fft_hessian(image, sigma=1., kernel=None):
     INPUT:
         image - a 2D image (which type?)
         sigma - coefficient for gaussian blur
+        kernel - input to fft_gaussian
+        gradient - if you've already computed this
 
     OUTPUT:
         (Lxx, Lxy, Lyy) - a triple containing three arrays

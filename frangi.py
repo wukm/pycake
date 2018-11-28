@@ -64,11 +64,14 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
         # pass None to just get the mask back
         collar = dilate_boundary(None, radius=dilation_radius, mask=img.mask)
 
-        # get rid of "bad" K values before you calculate gamma
+        # get rid of "bad" K values before you calculate gamma and Frangi
         k1[collar] = 0
         k2[collar] = 0
+        hesh[0][collar] = 0
+        hesh[1][collar] = 0
+        hesh[2][collar] = 0
     else:
-        collar = None
+        collar = img.mask.copy()
     # set default gamma value if not supplied
     if gamma is None:
         # Frangi suggested 'half the max Hessian norm' as an empirical
@@ -78,35 +81,48 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
         # we actually calculate half of max hessian norm
         # using frob norm = sqrt(trace(AA^T))
         # alternatively you could use gamma = .5 * np.abs(k2).max()
-        print(f'σ={sigma:2f}')
-        gamma0 = .5*max_hessian_norm(hesh)
+        hnorm = hessian_norm(hesh, mask=collar)
+        #print(f'σ={sigma:2f}')
+        #gamma0 = .5*hessian_norm(hesh).max()
         #print(f'\t{gamma0:.5f} = frob-norm γ pre-dilation')
 
-        gamma1 = .5*max_hessian_norm(hesh, mask=collar)
+        #gamma1 = .5*hessian_norm(hesh, mask=collar).max()
         #print(f'\t{gamma1:.5f} = frob-norm γ post-collar dilation {dilation_radius}')
-        l2gamma = .5*np.max(np.abs(k2))
+        #l2gamma = .5*np.max(np.abs(k2))
         #print(f'\t{l2gamma:.5f} =  from L2-norm γ (K2 with collar)')
 
-        hdilation = int(max(np.ceil(sigma),10))
-        hcollar = dilate_boundary(None, radius=hdilation, mask=img.mask)
-        gamma = .5 * max_hessian_norm(hesh, mask=hcollar)
+        #hdilation = int(max(np.ceil(sigma),10))
+        #hcollar = dilate_boundary(None, radius=hdilation, mask=img.mask)
+        #gamma = .5 * max_hessian_norm(hesh, mask=hcollar)
         #print(f'\t{gamma:.5f} = γ post-hdilation (radius {hdilation}) (old γ)')
 
         #print('changing γ to L2-norm with collar')
         #gamma = max(gamma1, l2gamma, gamma, gamma0)
-        if sigma < .5:
-            gamma = gamma
-        else:
-            gamma = l2gamma
 
-        print('-'*80)
+        # wish this scaled a little better
 
-        if verbose:
-            print(f"gamma (half of max hessian (frob) norm is {gamma}")
-
-        # make a better test?
-        if np.isclose(gamma, 0):
-            print("WARNING: gamma is close to 0. should skip this layer.")
+        # a very large gamma here will make the Frangi score zero
+        # a very small gamma means that we are artificially inflating the
+        # structureness measure
+        #import matplotlib.pyplot as plt
+        #plt.imshow(hnorm*(~collar))
+        #plt.show()
+        #print(hnorm[~collar].min(), hnorm[~collar].max())
+        #if hnorm[~collar].max() < 0.1:
+        #    print(f'max hessian norm is very small at this scale ({sigma},{hnorm[~collar].max():.3f})',
+        #            'you should maybe skip this scale')
+        #elif hnorm[~collar].min() <  0.001:
+        #    # only trigger if the first one didn't
+        #    print(f'min hessian norm is very small at this scale ({sigma}, {hnorm[~collar].min():.3f})',
+        #          'be carefully of artificially inflated scores')
+        S = np.sqrt(k1**2 + k2**2)
+        #import matplotlib.pyplot as plt
+        #plt.imshow(S)
+        #plt.show()
+        #plt.close()
+        #print('max hessian norm (Frob): ', hnorm.max())
+        #print('max structureness: ', S.max())
+        gamma = 0.5*S.max()
 
     if verbose:
         print(f'finding Frangi targets with β={beta} and γ={gamma:.2}')
@@ -213,8 +229,8 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=None, dark_bg=True,
 
     return F
 
-def max_hessian_norm(hesh, mask=None):
-    """Calculate max Frobenius norm of Hessian.
+def hessian_norm(hesh, mask=None):
+    """Calculate Frobenius norm of Hessian.
 
     Calculates the maximal value (over all pixels of the image) of the
     Frobenius norm of the Hessian.
@@ -240,7 +256,7 @@ def max_hessian_norm(hesh, mask=None):
         hnorm[mask] = 0
 
     hnorm = np.sqrt(hnorm)
-    return hnorm.max()
+    return hnorm
 
 
 def anisotropy(K1,K2, beta=None):

@@ -137,7 +137,8 @@ def mask_cuts_simple(img, ucip, mask_only=False, in_place=False,
             # but you should  wrap this up in a function so the three times
             # you do it here and the one time in ucip all gets the same
             # code
-            pass
+            print("too close to the boundary or size mismatch?")
+            success = False
         else:
             dilcut[B] = ma.masked
             success = True

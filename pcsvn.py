@@ -50,6 +50,8 @@ def make_multiscale(img, scales, betas, gammas, dark_bg=True,
         if dilate_per_scale:
             if sigma > 20:
                 radius = int(2*sigma)
+            elif sigma < 3:
+                radius = 12
             else:
                 radius = int(4*sigma)
         else:

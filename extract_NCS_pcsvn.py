@@ -32,7 +32,7 @@ import pandas
 # for some post_processing, this needs to be moved elsewhere
 from skimage.filters import sobel
 from frangi import frangi_from_image
-from plate_morphology import dilate_boundary
+from plate_morphology import dilate_boundary, mask_cuts_simple
 from skimage.morphology import remove_small_holes, remove_small_objects
 from skimage.segmentation import random_walker
 
@@ -44,7 +44,7 @@ from skimage.segmentation import random_walker
 # placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-placentas = list_by_quality(0)
+placentas = list(list_by_quality(0,N=5))
 # placentas = list(placentas)
 # placentas.extend(list_by_quality(1, N=1))
 # placentas.extend(list_by_quality(2, N=1))
@@ -63,7 +63,7 @@ placentas = list_by_quality(0)
 MAKE_NPZ_FILES = False  # pickle frangi targets if you can
 USE_NPZ_FILES = False  # use old npz files if you can
 NPZ_DIR = 'output/181126-tests'  # where to look for npz files
-OUTPUT_DIR = 'output/181126-tests'  # where to save outputs
+OUTPUT_DIR = 'output/181127-sievetest'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
@@ -87,11 +87,12 @@ DILATE_PER_SCALE = True
 
 # Attempt to remove glare from sample (some are OK, some are bad)
 REMOVE_GLARE = True
+REMOVE_CUTS = True
 
 # Which scales to use
 SCALE_RANGE = (-2, 3.5); SCALE_TYPE = 'logarithmic'
 #SCALE_RANGE = (.2, 12); SCALE_TYPE = 'linear'
-N_SCALES = 30
+N_SCALES = 20
 
 # use this if you want to use a custom argument (comment out the above)
 SCALES = None
@@ -101,10 +102,10 @@ SCALES = None
 # (some index between 0 and N_SCALES)
 
 # Explicit Frangi Parameters (pass an array as long as scales or pass None)
-BETAS = None  # None -> use default parameters (0.5)
+BETAS = [0.35 for x in range(N_SCALES)]  # None -> use default parameters (0.5)
 GAMMAS = None # None -> use default parameters (calculate half of hessian norm)
 ALPHAS = None # none to set later
-FIXED_ALPHA = .3
+FIXED_ALPHA = .2
 
 
 # Scoring Decisions (don't need to touch these)
@@ -146,10 +147,17 @@ for i, filename in enumerate(placentas):
 
     raw_img = get_named_placenta(filename)
 
-    if REMOVE_GLARE:
-        img = inpaint_hybrid(raw_img)
+
+    if REMOVE_CUTS:
+        ucip = open_typefile(filename, 'ucip')
+        img, has_cut = mask_cuts_simple(raw_img, ucip, return_success=True)
+        img.data[img.mask] = 0 # actually zero out that area
     else:
-        img = raw_img  # in case preprocessing happens in extract_pcsvn
+        img = raw_img.copy()
+
+    if REMOVE_GLARE:
+        img = inpaint_hybrid(img)
+
 
     if USE_NPZ_FILES:
         # find the first npz file with the sample name in it in the
@@ -283,25 +291,26 @@ for i, filename in enumerate(placentas):
     # MOVE THIS ELSEWHERE
     s = sobel(img)
     s = dilate_boundary(s, mask=img.mask, radius=20)
-    finv = frangi_from_image(s, sigma=INV_SIGMA, dark_bg=(not DARK_BG),
-                             dilation_radius=20)
-    finv_thresh = (finv > nz_percentile(finv, 50)).filled(0)
+    finv = frangi_from_image(img, sigma=INV_SIGMA, beta=0.35,
+                             dark_bg=(not DARK_BG), dilation_radius=20)
+    finv_thresh = (finv > nz_percentile(finv, 80)).filled(0)
     margins = remove_small_objects(finv_thresh, min_size=32)
-    margins_added = (margins | approx)
-    margins_added = remove_small_holes(margins_added, area_threshold=100,
-                                       connectivity=2)
 
     confuse_margins = confusion(margins, trace, bg_mask=ucip_mask)
 
     # random walker markers
     markers = np.zeros(img.shape, dtype=np.uint8)
-    markers[Fmax < .05] = 1
+    markers[Fmax < .1] = 1
+    #markers[margins] = 1
     high_alphas = np.array([nz_percentile(F[..., k], 98.0)
                            for k in range(N_SCALES)]
                           )
     high_frangi = apply_threshold(F,high_alphas, return_labels=False)
-    markers[high_frangi] = 2
-    rw = random_walker(margins, markers, beta=5000)
+    margins_added = (margins | approx)
+    margins_added = remove_small_holes(margins_added, area_threshold=50,
+                                       connectivity=2)
+    markers[margins_added] = 2
+    rw = random_walker(img, markers, beta=1000)
     approx_rw = (rw == 2)
     confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
     m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask,
@@ -393,19 +402,39 @@ for i, filename in enumerate(placentas):
     with open(jfile, 'w') as f:
         json.dump(slog, f)
 
-V = np.transpose(F, axes=(2,0,1))
+    V = np.transpose(F, axes=(2, 0, 1))
 
-for v, sigma in zip(V, scales):
-    plt.imshow(v[crop], cmap='nipy_spectral', vmin=0, vmax=1.0)
-    mng = plt.get_current_fig_manager()
-    mng.window.showMaximized()
-    plt.tight_layout()
-    plt.title(r'$\sigma={:.2f}$'.format(sigma))
-    plt.axis('off')
-    plt.tight_layout()
-    plt.show()
-    plt.close('all')
+    # this is for viewing all scales in rapid succession
+    #for v, sigma in zip(V, scales):
+    #    plt.imshow(v[crop], cmap='nipy_spectral', vmin=0, vmax=1.0)
+    #    mng = plt.get_current_fig_manager()
+    #    mng.window.showMaximized()
+    #    plt.tight_layout()
+    #    plt.title(r'$\sigma={:.2f}$'.format(sigma))
+    #    plt.axis('off')
+    #    plt.tight_layout()
+    #    plt.show()
+    #    plt.close('all')
 
+    from scipy.ndimage import label
+    sieved = np.zeros(img.shape, dtype=np.int32)
+    for n, v in enumerate(V):
+        print(f'sieving by label, {n}th scale')
+        labeled, n_labels = label(v > ALPHAS[n])
+        hi_thresh = (v > high_alphas[n])
+        for lab in range(n_labels):
+            if lab == 0:
+                continue
+            if np.any(hi_thresh[labeled == lab]):
+                sieved[labeled == lab] = n
+    approx_S, labs_S = (sieved != 0), sieved
+    confuse_S = confusion(approx_S, trace, bg_mask=ucip_mask)
+
+    scale_label_figure(labs_S, scales, crop=crop,
+                       savefilename=outname('D_labeled_S'), image_only=True,
+                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
+
+    plt.imsave(outname('E_confusion_S'), confuse_S[crop])
 # Post-run Meta-Output and Logging ____________________________________________
 
 timestring = datetime.datetime.now()
