@@ -122,7 +122,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=None, dark_bg=True,
         #plt.close()
         #print('max hessian norm (Frob): ', hnorm.max())
         #print('max structureness: ', S.max())
-        gamma = 0.5*S.max()
+        gamma = 0.75*S.max()
 
     if verbose:
         print(f'finding Frangi targets with β={beta} and γ={gamma:.2}')

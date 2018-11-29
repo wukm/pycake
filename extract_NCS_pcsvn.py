@@ -10,7 +10,7 @@ from placenta import (get_named_placenta, cropped_args, cropped_view,
                       list_placentas, list_by_quality, open_typefile,
                       open_tracefile, add_ucip_to_mask, measure_ncs_markings)
 
-from merging import nz_percentile, apply_threshold
+from merging import nz_percentile, apply_threshold, sieve_scales, view_slices
 
 from scoring import (compare_trace, rgb_to_widths, merge_widths_from_traces,
                      filter_widths, mcc, confusion, skeletonize_trace)
@@ -44,7 +44,7 @@ from skimage.segmentation import random_walker
 # placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-placentas = list(list_by_quality(0,N=5))
+placentas = list(list_by_quality(0,N=1))
 # placentas = list(placentas)
 # placentas.extend(list_by_quality(1, N=1))
 # placentas.extend(list_by_quality(2, N=1))
@@ -63,7 +63,7 @@ placentas = list(list_by_quality(0,N=5))
 MAKE_NPZ_FILES = False  # pickle frangi targets if you can
 USE_NPZ_FILES = False  # use old npz files if you can
 NPZ_DIR = 'output/181126-tests'  # where to look for npz files
-OUTPUT_DIR = 'output/181127-sievetest'  # where to save outputs
+OUTPUT_DIR = 'output/junk'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
@@ -310,7 +310,7 @@ for i, filename in enumerate(placentas):
     margins_added = remove_small_holes(margins_added, area_threshold=50,
                                        connectivity=2)
     markers[margins_added] = 2
-    rw = random_walker(img, markers, beta=1000)
+    rw = random_walker(1-Fmax, markers, beta=1000)
     approx_rw = (rw == 2)
     confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
     m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask,
@@ -352,7 +352,6 @@ for i, filename in enumerate(placentas):
     percent_covered_FA = (skeltrace & approx_FA).sum() / skeltrace.sum()
 
     pncs[filename] = (percent_covered, percent_covered_FA, pnc_rw)
-
 
 
     st_colors = {
@@ -404,29 +403,10 @@ for i, filename in enumerate(placentas):
 
     V = np.transpose(F, axes=(2, 0, 1))
 
-    # this is for viewing all scales in rapid succession
-    #for v, sigma in zip(V, scales):
-    #    plt.imshow(v[crop], cmap='nipy_spectral', vmin=0, vmax=1.0)
-    #    mng = plt.get_current_fig_manager()
-    #    mng.window.showMaximized()
-    #    plt.tight_layout()
-    #    plt.title(r'$\sigma={:.2f}$'.format(sigma))
-    #    plt.axis('off')
-    #    plt.tight_layout()
-    #    plt.show()
-    #    plt.close('all')
+    view_slices(V, scales=scales)
 
-    from scipy.ndimage import label
-    sieved = np.zeros(img.shape, dtype=np.int32)
-    for n, v in enumerate(V):
-        print(f'sieving by label, {n}th scale')
-        labeled, n_labels = label(v > ALPHAS[n])
-        hi_thresh = (v > high_alphas[n])
-        for lab in range(n_labels):
-            if lab == 0:
-                continue
-            if np.any(hi_thresh[labeled == lab]):
-                sieved[labeled == lab] = n
+    sieved = sieve_scales(V, 98, 95)
+
     approx_S, labs_S = (sieved != 0), sieved
     confuse_S = confusion(approx_S, trace, bg_mask=ucip_mask)
 
