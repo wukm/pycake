@@ -35,6 +35,7 @@ from frangi import frangi_from_image
 from plate_morphology import dilate_boundary, mask_cuts_simple
 from skimage.morphology import remove_small_holes, remove_small_objects
 from skimage.segmentation import random_walker
+from postprocessing import random_walk_fill
 
 
 # INITIALIZE SAMPLES ________________________________________________________
@@ -147,9 +148,9 @@ for i, filename in enumerate(placentas):
 
     raw_img = get_named_placenta(filename)
 
+    ucip = open_typefile(filename, 'ucip')
 
     if REMOVE_CUTS:
-        ucip = open_typefile(filename, 'ucip')
         img, has_cut = mask_cuts_simple(raw_img, ucip, return_success=True)
         img.data[img.mask] = 0 # actually zero out that area
     else:
@@ -239,8 +240,7 @@ for i, filename in enumerate(placentas):
         widths = merge_widths_from_traces(A_trace, V_trace, strategy='arteries')
 
     # find cord insertion point and resolution of the image
-    ucip_midpoint, resolution = measure_ncs_markings(filename=filename)
-
+    ucip_midpoint, resolution = measure_ncs_markings(ucip)
     # if verbose:
     # print(f"The umbilicial cord insertion point is at {ucip_midpoint}")
     # print(f"The resolution of the image is {resolution} pixels per cm.")
@@ -284,34 +284,24 @@ for i, filename in enumerate(placentas):
     TP, TN, FP, FN = counts # return these for more analysis?
 
     total = np.sum(~ucip_mask)
-    print(f'TP: {TP}\t TN: {TN}\nFP: {FP}\tFN: {FN}')
+    #print(f'TP: {TP}\t TN: {TN}\nFP: {FP}\tFN: {FN}')
     # just a sanity check
-    print(f'TP+TN+FP+FN={TP+TN+FP+FN}\ttotal pixels={total}')
+    #print(f'TP+TN+FP+FN={TP+TN+FP+FN}\ttotal pixels={total}')
 
-    # MOVE THIS ELSEWHERE
-    s = sobel(img)
-    s = dilate_boundary(s, mask=img.mask, radius=20)
-    finv = frangi_from_image(img, sigma=INV_SIGMA, beta=0.35,
-                             dark_bg=(not DARK_BG), dilation_radius=20)
-    finv_thresh = (finv > nz_percentile(finv, 80)).filled(0)
-    margins = remove_small_objects(finv_thresh, min_size=32)
 
-    confuse_margins = confusion(margins, trace, bg_mask=ucip_mask)
+    approx_rw, markers, margins_added = random_walk_fill(img, Fmax, .3, .01,
+                                                         DARK_BG)
 
-    # random walker markers
-    markers = np.zeros(img.shape, dtype=np.uint8)
-    markers[Fmax < .1] = 1
-    #markers[margins] = 1
+    plt.imshow(markers)
+    plt.show()
+    plt.imshow(margins_added)
+    plt.show()
+    confuse_margins = confusion(margins_added, trace, bg_mask=ucip_mask)
+
     high_alphas = np.array([nz_percentile(F[..., k], 98.0)
                            for k in range(N_SCALES)]
                           )
     high_frangi = apply_threshold(F,high_alphas, return_labels=False)
-    margins_added = (margins | approx)
-    margins_added = remove_small_holes(margins_added, area_threshold=50,
-                                       connectivity=2)
-    markers[margins_added] = 2
-    rw = random_walker(1-Fmax, markers, beta=1000)
-    approx_rw = (rw == 2)
     confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
     m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask,
                                 return_counts=True)
