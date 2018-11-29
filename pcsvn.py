@@ -20,10 +20,13 @@ import json
 import datetime
 
 
-def make_multiscale(img, scales, betas, gammas, dark_bg=True,
+def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                     find_principal_directions=False, dilate_per_scale=True,
                     signed_frangi=False, kernel=None, verbose=True):
     """Returns an ordered list of dictionaries for each scale of Frangi info.
+
+    beta, gamma, and c can all be vectors as long as scales or constants
+    if c is None it will be set.
 
     Each element in the output contains the following info:
         {'sigma': sigma,
@@ -45,7 +48,16 @@ def make_multiscale(img, scales, betas, gammas, dark_bg=True,
 
     img = ma.masked_array(img_as_float(img), mask=img.mask)
 
-    for i, (sigma, beta, gamma) in enumerate(zip(scales, betas, gammas)):
+    # vectorize any scalar inputs here
+    if np.isscalar(beta):
+        beta = np.repeat(beta, len(scales))
+    if np.isscalar(gamma):
+        gamma = np.repeat(gamma, len(scales))
+    if np.isscalar(c):
+        # interestingly enough, np.isscalar(None) -> False
+        np.repeat(c, False)
+
+    for i, (sigma, b, g, cx) in enumerate(zip(scales, beta, gamma, c)):
 
         if dilate_per_scale:
             if sigma > 20:
@@ -60,8 +72,8 @@ def make_multiscale(img, scales, betas, gammas, dark_bg=True,
         if verbose:
             print(f'σ={sigma}\t, dilation radius ={radius}')
 
-        targets, this_scale = frangi_from_image(img, sigma, beta=beta,
-                                                gamma=gamma, dark_bg=dark_bg,
+        targets, this_scale = frangi_from_image(img, sigma, beta=b, gamma=g,
+                                                c=cx, dark_bg=dark_bg,
                                                 dilation_radius=radius,
                                                 kernel=kernel,
                                                 signed_frangi=signed_frangi,
@@ -96,9 +108,10 @@ def make_multiscale(img, scales, betas, gammas, dark_bg=True,
     return multiscale
 
 
-def extract_pcsvn(img, filename, scales, betas=None, gammas=None, dark_bg=True,
-                  dilate_per_scale=True, verbose=True, generate_json=True,
-                  output_dir=None, kernel=None, signed_frangi=False):
+def extract_pcsvn(img, filename, scales, beta=0.5, gamma=0.5, c=None,
+                  dark_bg=True, dilate_per_scale=True, verbose=True,
+                  generate_json=True, output_dir=None, kernel=None,
+                  signed_frangi=False):
     """Run PCSVN extraction on the sample given in the file.
 
     Despite the name, this simply returns the Frangi filter responses at
@@ -114,31 +127,18 @@ def extract_pcsvn(img, filename, scales, betas=None, gammas=None, dark_bg=True,
 
     """
 
-    # Multiscale & Frangi Parameters #########################################
-
-    # set default betas if undeclared
-    if betas is None:
-        betas = [0.5 for s in scales]  # anisotropy constant
-
-    # declare None here to calculate half of hessian's norm
-    if gammas is None:
-        gammas = [None for s in scales]  # structureness parameter
-
     # Multiscale Frangi Filter###############################################
 
     # output is a dictionary of relevant info at each scale
-    multiscale = make_multiscale(img, scales, betas, gammas,
+    multiscale = make_multiscale(img, scales, beta=beta, gamma=gamma, c=None,
                                  find_principal_directions=False,
                                  dilate_per_scale=dilate_per_scale,
                                  kernel=kernel, signed_frangi=signed_frangi,
                                  dark_bg=dark_bg, verbose=verbose)
 
     # extract these for logging
-    gammas = [scale['gamma'] for scale in multiscale]
+    c = [scale['c'] for scale in multiscale]
     border_radii = [scale['border_radius'] for scale in multiscale]
-
-    # removed another bordering round. i don't think it did anything but
-    # i should have checked :/
 
     # ignore targets too close to edge of plate
      # wait are we doing this twice?
@@ -169,11 +169,15 @@ def extract_pcsvn(img, filename, scales, betas=None, gammas=None, dark_bg=True,
         time_of_run = datetime.datetime.now()
         timestring = time_of_run.strftime("%y%m%d_%H%M")
 
+        # numpy arrays have to be turned into lists first
+        vectorize = lambda x: x if x is None or np.isscalar(x) else list(x)
+
         logdata = {'time': timestring,
                    'filename': filename,
-                   'betas': list(betas),
-                   'gammas': gammas,
-                   'sigmas': list(scales),
+                   'betas': vectorize(b),
+                   'gammas': vectorize(gamma),
+                   'c': vectorize(c),
+                   'sigmas': list(scales)
                    }
 
         if dilate_per_scale:

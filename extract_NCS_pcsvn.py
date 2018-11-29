@@ -102,10 +102,11 @@ SCALES = None
 # when showing "large scales only", this is where to start
 # (some index between 0 and N_SCALES)
 
-# Explicit Frangi Parameters (pass an array as long as scales or pass None)
-BETAS = [0.35 for x in range(N_SCALES)]  # None -> use default parameters (0.5)
-GAMMAS = None # None -> use default parameters (calculate half of hessian norm)
-ALPHAS = None # none to set later
+# Explicit Frangi Parameters (pass a scalar, array as long as scales, or pass None)
+BETAS = 0.35
+GAMMAS = 0.5
+CS = None # set custom structureness parameters for each scale or just one or None
+ALPHAS = None # set custom alphas or calculate later
 FIXED_ALPHA = .2
 
 
@@ -119,10 +120,11 @@ INV_SIGMA = 0.8
 
 # CODE BEGINS HERE ____________________________________________________________
 
-if SCALE_TYPE == 'linear':
-    scales = np.linspace(*SCALE_RANGE, num=N_SCALES)
-elif SCALE_TYPE == 'logarithmic':
-    scales = np.logspace(*SCALE_RANGE, num=N_SCALES, base=2)
+if SCALES is not None:
+    if SCALE_TYPE == 'linear':
+        scales = np.linspace(*SCALE_RANGE, num=N_SCALES)
+    elif SCALE_TYPE == 'logarithmic':
+        scales = np.logspace(*SCALE_RANGE, num=N_SCALES, base=2)
 else:
     scales = SCALES
     SCALE_TYPE = 'custom'  # this and the next three lines are just for logging
@@ -190,8 +192,8 @@ for i, filename in enumerate(placentas):
         print('finding multiscale frangi targets')
 
         # F is an array of frangi scores of shape (*img.shape, N_SCALES)
-        F, jfile = extract_pcsvn(img, filename, dark_bg=DARK_BG, betas=BETAS,
-                                 scales=scales, gammas=GAMMAS,
+        F, jfile = extract_pcsvn(img, filename, dark_bg=DARK_BG, beta=BETAS,
+                                 scales=scales, gamma=GAMMAS, c=CS,
                                  kernel='discrete', dilate_per_scale=True,
                                  verbose=False, signed_frangi=SIGNED_FRANGI,
                                  generate_json=True, output_dir=OUTPUT_DIR)
