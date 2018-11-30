@@ -45,7 +45,7 @@ from postprocessing import random_walk_fill, random_walk_scalewise
 # placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-placentas = list(list_by_quality(0,N=1))
+placentas = list_by_quality(0)
 # placentas = list(placentas)
 # placentas.extend(list_by_quality(1, N=1))
 # placentas.extend(list_by_quality(2, N=1))
@@ -61,10 +61,10 @@ placentas = list(list_by_quality(0,N=1))
 # RUNTIME OPTIONS ___________________________________________________________
 #   Where to save and whether or not to use old targets.
 
-MAKE_NPZ_FILES = False  # pickle frangi targets if you can
-USE_NPZ_FILES = False  # use old npz files if you can
-NPZ_DIR = 'output/181126-tests'  # where to look for npz files
-OUTPUT_DIR = 'output/junk'  # where to save outputs
+MAKE_NPZ_FILES = False # pickle frangi targets if you can
+USE_NPZ_FILES = False # use old npz files if you can
+NPZ_DIR = 'output/181129-strict'  # where to look for npz files
+OUTPUT_DIR = 'output/181129-strict'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
@@ -364,7 +364,7 @@ for i, filename in enumerate(placentas):
 
     V = np.transpose(F, axes=(2, 0, 1))
 
-    view_slices(F[crop], axis=-1, scales=scales)
+    #view_slices(F[crop], axis=-1, scales=scales)
 
     print('starting to sieve')
     sieved = sieve_scales(V, 98, 95)

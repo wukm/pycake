@@ -1,0 +1,1059 @@
+➜ pycake git:(master) ✗ ipython -i extract_NCS_pcsvn.py
+Python 3.6.6 |Anaconda custom (64-bit)| (default, Oct  9 2018, 12:34:16) 
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.1.1 -- An enhanced Interactive Python. Type '?' for help.
+25 samples total!
+********************************************************************************
+extracting PCSVN of T-BN0164923.png	 (0 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+thresholding ALPHAS with top 5% scores at each scale
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.860901
+1    0.305549  0.052473  0.877593
+2    0.373440  0.055799  0.894855
+3    0.456416  0.061317  0.918992
+4    0.557829  0.070226  0.951530
+5    0.681775  0.086026  0.991891
+6    0.833262  0.093712  0.996784
+7    1.018408  0.105315  0.996241
+8    1.244693  0.128001  0.993416
+9    1.521256  0.166998  0.991770
+10   1.859271  0.229621  0.988844
+11   2.272390  0.301189  0.963953
+12   2.777302  0.319948  0.990431
+13   3.394403  0.336685  0.987434
+14   4.148620  0.379465  0.979673
+15   5.070420  0.407890  0.987588
+16   6.197039  0.330283  0.864806
+17   7.573985  0.303201  0.865085
+18   9.256882  0.326373  0.826391
+19  11.313708  0.352479  0.848499
+the image size is 1200x1594
+one cm equals 43.0 pixels
+the middle of the UCIP location is (756, 852)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 55.84%
+percentage of skeltrace covered (fixed alpha): 36.75%
+percentage of skeltrace covered (random_walker): 53.40%
+percentage of skeltrace covered (sieving): 50.80%
+mcc score of 0.468 for percentile filtering
+mcc score of 0.422 with fixed alpha 0.4
+mcc score of 0.527 after random walker
+mcc score of 0.461 after sieving
+********************************************************************************
+extracting PCSVN of T-BN0651415.png	 (1 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.984963
+  p
+1    0.305549  0.052473  0.984298
+2    0.373440  0.055799  0.983302
+3    0.456416  0.061317  0.981813
+4    0.557829  0.070226  0.979587
+5    0.681775  0.086026  0.976268
+6    0.833262  0.093712  0.973839
+7    1.018408  0.105315  0.984816
+8    1.244693  0.128001  0.993652
+9    1.521256  0.166998  0.998949
+10   1.859271  0.229621  0.993722
+11   2.272390  0.301189  0.988443
+12   2.777302  0.319948  0.981170
+13   3.394403  0.336685  0.972762
+14   4.148620  0.379465  0.964939
+15   5.070420  0.407890  0.978874
+16   6.197039  0.330283  0.983887
+17   7.573985  0.303201  0.982847
+18   9.256882  0.326373  0.891995
+19  11.313708  0.352479  0.856006
+the image size is 1200x1594
+one cm equals 46.95742752749558 pixels
+the middle of the UCIP location is (481, 859)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 60.76%
+percentage of skeltrace covered (fixed alpha): 33.08%
+percentage of skeltrace covered (random_walker): 47.33%
+percentage of skeltrace covered (sieving): 54.90%
+mcc score of 0.456 for percentile filtering
+mcc score of 0.388 with fixed alpha 0.4
+mcc score of 0.489 after random walker
+mcc score of 0.471 after sieving
+********************************************************************************
+extracting PCSVN of T-BN1328016.png	 (2 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.988018
+1    0.305549  0.052473  0.986929
+2    0.373440  0.055799  0.985959
+3    0.456416  0.061317  0.984983
+4    0.557829  0.070226  0.983236
+5    0.681775  0.086026  0.979942
+6    0.833262  0.093712  0.973354
+7    1.018408  0.105315  0.959333
+8    1.244693  0.128001  0.997583
+9    1.521256  0.166998  0.997696
+10   1.859271  0.229621  0.999837
+11   2.272390  0.301189  0.999999
+12   2.777302  0.319948  0.999212
+13   3.394403  0.336685  0.999988
+14   4.148620  0.379465  0.999303
+15   5.070420  0.407890  0.993605
+16   6.197039  0.330283  0.989869
+17   7.573985  0.303201  0.950326
+18   9.256882  0.326373  0.922960
+19  11.313708  0.352479  0.876991
+the image size is 1200x1594
+one cm equals 52.03844732503075 pixels
+the middle of the UCIP location is (763, 892)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 54.44%
+percentage of skeltrace covered (fixed alpha): 34.31%
+percentage of skeltrace covered (random_walker): 45.16%
+percentage of skeltrace covered (sieving): 55.19%
+mcc score of 0.452 for percentile filtering
+mcc score of 0.39 with fixed alpha 0.4
+mcc score of 0.476 after random walker
+mcc score of 0.47 after sieving
+********************************************************************************
+extracting PCSVN of T-BN1650687.png	 (3 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.679931
+1    0.305549  0.052473  0.690678
+2    0.373440  0.055799  0.706486
+3    0.456416  0.061317  0.729475
+4    0.557829  0.070226  0.762182
+5    0.681775  0.086026  0.806749
+6    0.833262  0.093712  0.906275
+7    1.018408  0.105315  0.954341
+8    1.244693  0.128001  0.942722
+9    1.521256  0.166998  0.976912
+10   1.859271  0.229621  0.957432
+11   2.272390  0.301189  0.987861
+12   2.777302  0.319948  0.996623
+13   3.394403  0.336685  0.992745
+14   4.148620  0.379465  0.995605
+15   5.070420  0.407890  0.983025
+16   6.197039  0.330283  0.999761
+17   7.573985  0.303201  0.999571
+18   9.256882  0.326373  0.996152
+19  11.313708  0.352479  0.907005
+the image size is 1197x1600
+one cm equals 47.042533945356304 pixels
+the middle of the UCIP location is (559, 700)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 52.29%
+percentage of skeltrace covered (fixed alpha): 31.68%
+percentage of skeltrace covered (random_walker): 45.71%
+percentage of skeltrace covered (sieving): 50.03%
+mcc score of 0.473 for percentile filtering
+mcc score of 0.422 with fixed alpha 0.4
+mcc score of 0.503 after random walker
+mcc score of 0.488 after sieving
+********************************************************************************
+extracting PCSVN of T-BN2050224.png	 (4 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.993339
+1    0.305549  0.052473  0.989797
+2    0.373440  0.055799  0.984467
+3    0.456416  0.061317  0.976474
+4    0.557829  0.070226  0.967423
+5    0.681775  0.086026  0.982262
+6    0.833262  0.093712  0.991957
+7    1.018408  0.105315  0.991772
+8    1.244693  0.128001  0.973747
+9    1.521256  0.166998  0.973009
+10   1.859271  0.229621  0.974972
+11   2.272390  0.301189  0.984058
+12   2.777302  0.319948  0.971449
+13   3.394403  0.336685  0.995819
+14   4.148620  0.379465  0.998765
+15   5.070420  0.407890  0.974669
+16   6.197039  0.330283  0.954249
+17   7.573985  0.303201  0.957131
+18   9.256882  0.326373  0.929354
+19  11.313708  0.352479  0.916096
+the image size is 1200x1594
+one cm equals 52.009614495783374 pixels
+the middle of the UCIP location is (787, 720)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 51.01%
+percentage of skeltrace covered (fixed alpha): 32.23%
+percentage of skeltrace covered (random_walker): 44.67%
+percentage of skeltrace covered (sieving): 46.53%
+mcc score of 0.481 for percentile filtering
+mcc score of 0.417 with fixed alpha 0.4
+mcc score of 0.52 after random walker
+mcc score of 0.484 after sieving
+********************************************************************************
+extracting PCSVN of T-BN2095839.png	 (5 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.518657
+1    0.305549  0.052473  0.516463
+2    0.373440  0.055799  0.518164
+3    0.456416  0.061317  0.525820
+4    0.557829  0.070226  0.541687
+5    0.681775  0.086026  0.565240
+6    0.833262  0.093712  0.602760
+7    1.018408  0.105315  0.658384
+8    1.244693  0.128001  0.733763
+9    1.521256  0.166998  0.853660
+10   1.859271  0.229621  0.999670
+11   2.272390  0.301189  0.999966
+12   2.777302  0.319948  0.999607
+13   3.394403  0.336685  0.995733
+14   4.148620  0.379465  0.999592
+15   5.070420  0.407890  0.997273
+16   6.197039  0.330283  0.999206
+17   7.573985  0.303201  0.998102
+18   9.256882  0.326373  0.988120
+19  11.313708  0.352479  0.965536
+the image size is 1197x1600
+one cm equals 44.0 pixels
+the middle of the UCIP location is (579, 744)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 49.95%
+percentage of skeltrace covered (fixed alpha): 29.97%
+percentage of skeltrace covered (random_walker): 40.46%
+percentage of skeltrace covered (sieving): 52.91%
+mcc score of 0.502 for percentile filtering
+mcc score of 0.429 with fixed alpha 0.4
+mcc score of 0.507 after random walker
+mcc score of 0.503 after sieving
+********************************************************************************
+extracting PCSVN of T-BN2432252.png	 (6 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.989331
+1    0.305549  0.052473  0.988899
+2    0.373440  0.055799  0.988258
+3    0.456416  0.061317  0.987312
+4    0.557829  0.070226  0.985925
+5    0.681775  0.086026  0.983923
+6    0.833262  0.093712  0.981098
+7    1.018408  0.105315  0.995600
+8    1.244693  0.128001  0.999983
+9    1.521256  0.166998  0.999931
+10   1.859271  0.229621  0.992337
+11   2.272390  0.301189  0.979581
+12   2.777302  0.319948  0.995414
+13   3.394403  0.336685  0.999626
+14   4.148620  0.379465  0.947671
+15   5.070420  0.407890  0.913109
+16   6.197039  0.330283  0.862471
+17   7.573985  0.303201  0.872070
+18   9.256882  0.326373  0.937061
+19  11.313708  0.352479  0.961235
+the image size is 1200x1594
+one cm equals 46.0 pixels
+the middle of the UCIP location is (524, 480)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 57.32%
+percentage of skeltrace covered (fixed alpha): 33.78%
+percentage of skeltrace covered (random_walker): 45.82%
+percentage of skeltrace covered (sieving): 54.99%
+mcc score of 0.464 for percentile filtering
+mcc score of 0.381 with fixed alpha 0.4
+mcc score of 0.481 after random walker
+mcc score of 0.463 after sieving
+********************************************************************************
+extracting PCSVN of T-BN4130351.png	 (7 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.998343
+1    0.305549  0.052473  0.998066
+2    0.373440  0.055799  0.997638
+3    0.456416  0.061317  0.996980
+4    0.557829  0.070226  0.995984
+5    0.681775  0.086026  0.994523
+6    0.833262  0.093712  0.992486
+7    1.018408  0.105315  0.989804
+8    1.244693  0.128001  0.985300
+9    1.521256  0.166998  0.958129
+10   1.859271  0.229621  0.953229
+11   2.272390  0.301189  0.979996
+12   2.777302  0.319948  0.988192
+13   3.394403  0.336685  0.999861
+14   4.148620  0.379465  0.955796
+15   5.070420  0.407890  0.943935
+16   6.197039  0.330283  0.993134
+17   7.573985  0.303201  0.978351
+18   9.256882  0.326373  0.995232
+19  11.313708  0.352479  0.999417
+the image size is 1205x1600
+one cm equals 49.658836071740545 pixels
+the middle of the UCIP location is (758, 567)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 54.26%
+percentage of skeltrace covered (fixed alpha): 32.26%
+percentage of skeltrace covered (random_walker): 45.87%
+percentage of skeltrace covered (sieving): 49.74%
+mcc score of 0.496 for percentile filtering
+mcc score of 0.423 with fixed alpha 0.4
+mcc score of 0.534 after random walker
+mcc score of 0.495 after sieving
+********************************************************************************
+extracting PCSVN of T-BN4384182.png	 (8 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.998610
+1    0.305549  0.052473  0.998675
+2    0.373440  0.055799  0.998776
+3    0.456416  0.061317  0.998929
+4    0.557829  0.070226  0.999154
+5    0.681775  0.086026  0.999461
+6    0.833262  0.093712  0.996729
+7    1.018408  0.105315  0.997909
+8    1.244693  0.128001  0.999036
+9    1.521256  0.166998  0.999875
+10   1.859271  0.229621  0.997744
+11   2.272390  0.301189  0.997854
+12   2.777302  0.319948  0.979061
+13   3.394403  0.336685  0.959868
+14   4.148620  0.379465  0.994386
+15   5.070420  0.407890  0.944294
+16   6.197039  0.330283  0.998897
+17   7.573985  0.303201  0.992975
+18   9.256882  0.326373  0.986766
+19  11.313708  0.352479  0.976086
+the image size is 1200x1594
+one cm equals 47.0 pixels
+the middle of the UCIP location is (619, 790)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 55.51%
+percentage of skeltrace covered (fixed alpha): 30.29%
+percentage of skeltrace covered (random_walker): 42.97%
+percentage of skeltrace covered (sieving): 47.46%
+mcc score of 0.479 for percentile filtering
+mcc score of 0.368 with fixed alpha 0.4
+mcc score of 0.471 after random walker
+mcc score of 0.467 after sieving
+********************************************************************************
+extracting PCSVN of T-BN4569506.png	 (9 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.910379
+1    0.305549  0.052473  0.910821
+2    0.373440  0.055799  0.911443
+3    0.456416  0.061317  0.912274
+4    0.557829  0.070226  0.913282
+5    0.681775  0.086026  0.914209
+6    0.833262  0.093712  0.945818
+7    1.018408  0.105315  0.985801
+8    1.244693  0.128001  0.984671
+9    1.521256  0.166998  0.998048
+10   1.859271  0.229621  0.999851
+11   2.272390  0.301189  0.999324
+12   2.777302  0.319948  0.999437
+13   3.394403  0.336685  0.992423
+14   4.148620  0.379465  0.902760
+15   5.070420  0.407890  0.889932
+16   6.197039  0.330283  0.919752
+17   7.573985  0.303201  0.979216
+18   9.256882  0.326373  0.959106
+19  11.313708  0.352479  0.935074
+the image size is 1200x1594
+one cm equals 60.959002616512684 pixels
+the middle of the UCIP location is (877, 607)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσ^_σσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 51.79%
+percentage of skeltrace covered (fixed alpha): 28.66%
+percentage of skeltrace covered (random_walker): 41.93%
+percentage of skeltrace covered (sieving): 53.10%
+mcc score of 0.462 for percentile filtering
+mcc score of 0.382 with fixed alpha 0.4
+mcc score of 0.474 after random walker
+mcc score of 0.48 after sieving
+********************************************************************************
+extracting PCSVN of T-BN5280796.png	 (10 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.999860
+1    0.305549  0.052473  0.999829
+2    0.373440  0.055799  0.999782
+3    0.456416  0.061317  0.999710
+4    0.557829  0.070226  0.999610
+5    0.681775  0.086026  0.999488
+6    0.833262  0.093712  0.997042
+7    1.018408  0.105315  0.931391
+8    1.244693  0.128001  0.893349
+9    1.521256  0.166998  0.917419
+10   1.859271  0.229621  0.937141
+11   2.272390  0.301189  0.937386
+12   2.777302  0.319948  0.969192
+13   3.394403  0.336685  0.988979
+14   4.148620  0.379465  0.987985
+15   5.070420  0.407890  0.989354
+16   6.197039  0.330283  0.916257
+17   7.573985  0.303201  0.875572
+18   9.256882  0.326373  0.924053
+19  11.313708  0.352479  0.900294
+the image size is 1200x1594
+one cm equals 54.0 pixels
+the middle of the UCIP location is (527, 798)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 61.59%
+percentage of skeltrace covered (fixed alpha): 40.36%
+percentage of skeltrace covered (random_walker): 55.96%
+percentage of skeltrace covered (sieving): 53.82%
+mcc score of 0.534 for percentile filtering
+mcc score of 0.468 with fixed alpha 0.4
+mcc score of 0.579 after random walker
+mcc score of 0.495 after sieving
+********************************************************************************
+extracting PCSVN of T-BN5961598.png	 (11 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.849156
+1    0.305549  0.052473  0.839803
+2    0.373440  0.055799  0.825733
+3    0.456416  0.061317  0.804579
+4    0.557829  0.070226  0.772909
+5    0.681775  0.086026  0.726123
+6    0.833262  0.093712  0.666258
+7    1.018408  0.105315  0.677260
+8    1.244693  0.128001  0.699472
+9    1.521256  0.166998  0.720063
+10   1.859271  0.229621  0.760647
+11   2.272390  0.301189  0.956578
+12   2.777302  0.319948  0.998190
+13   3.394403  0.336685  0.997581
+14   4.148620  0.379465  0.992846
+15   5.070420  0.407890  0.983042
+16   6.197039  0.330283  0.991951
+17   7.573985  0.303201  0.981414
+18   9.256882  0.326373  0.945852
+19  11.313708  0.352479  0.851217
+the image size is 1200x1594
+one cm equals 55.00909015790027 pixels
+the middle of the UCIP location is (524, 705)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 36.43%
+percentage of skeltrace covered (fixed alpha): 23.58%
+percentage of skeltrace covered (random_walker): 34.04%
+percentage of skeltrace covered (sieving): 52.26%
+mcc score of 0.381 for percentile filtering
+mcc score of 0.333 with fixed alpha 0.4
+mcc score of 0.405 after random walker
+mcc score of 0.449 after sieving
+********************************************************************************
+extracting PCSVN of T-BN6028328.png	 (12 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.992829
+1    0.305549  0.052473  0.992526
+2    0.373440  0.055799  0.988772
+3    0.456416  0.061317  0.983026
+4    0.557829  0.070226  0.974218
+5    0.681775  0.086026  0.960803
+6    0.833262  0.093712  0.939677
+7    1.018408  0.105315  0.943236
+8    1.244693  0.128001  0.993624
+9    1.521256  0.166998  0.999963
+10   1.859271  0.229621  0.998480
+11   2.272390  0.301189  0.993340
+12   2.777302  0.319948  0.998938
+13   3.394403  0.336685  0.999794
+14   4.148620  0.379465  0.998689
+15   5.070420  0.407890  0.975505
+16   6.197039  0.330283  0.938183
+17   7.573985  0.303201  0.941908
+18   9.256882  0.326373  0.987828
+19  11.313708  0.352479  0.936365
+the image size is 1200x1594
+one cm equals 47.53945729601885 pixels
+the middle of the UCIP location is (378, 1092)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 59.57%
+percentage of skeltrace covered (fixed alpha): 38.67%
+percentage of skeltrace covered (random_walker): 52.33%
+percentage of skeltrace covered (sieving): 55.64%
+mcc score of 0.468 for percentile filtering
+mcc score of 0.408 with fixed alpha 0.4
+mcc score of 0.493 after random walker
+mcc score of 0.467 after sieving
+********************************************************************************
+extracting PCSVN of T-BN6238549.png	 (13 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.989658
+1    0.305549  0.052473  0.988957
+2    0.373440  0.055799  0.989305
+3    0.456416  0.061317  0.990326
+4    0.557829  0.070226  0.991703
+5    0.681775  0.086026  0.993425
+6    0.833262  0.093712  0.995281
+7    1.018408  0.105315  0.996670
+8    1.244693  0.128001  0.993473
+9    1.521256  0.166998  0.988260
+10   1.859271  0.229621  0.992867
+11   2.272390  0.301189  0.989921
+12   2.777302  0.319948  0.947488
+13   3.394403  0.336685  0.935989
+14   4.148620  0.379465  0.969344
+15   5.070420  0.407890  0.999245
+16   6.197039  0.330283  0.999910
+17   7.573985  0.303201  0.977123
+18   9.256882  0.326373  0.949502
+19  11.313708  0.352479  0.961511
+the image size is 1200x1594
+one cm equals 53.009433122794285 pixels
+the middle of the UCIP location is (776, 836)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 54.19%
+percentage of skeltrace covered (fixed alpha): 38.11%
+percentage of skeltrace covered (random_walker): 48.44%
+percentage of skeltrace covered (sieving): 55.06%
+mcc score of 0.511 for percentile filtering
+mcc score of 0.456 with fixed alpha 0.4
+mcc score of 0.533 after random walker
+mcc score of 0.521 after sieving
+********************************************************************************
+extracting PCSVN of T-BN6746662.png	 (14 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.987779
+1    0.305549  0.052473  0.989132
+2    0.373440  0.055799  0.991204
+3    0.456416  0.061317  0.980735
+4    0.557829  0.070226  0.976828
+5    0.681775  0.086026  0.985250
+6    0.833262  0.093712  0.994580
+7    1.018408  0.105315  0.995731
+8    1.244693  0.128001  0.999993
+9    1.521256  0.166998  0.999831
+10   1.859271  0.229621  0.936570
+11   2.272390  0.301189  0.827112
+12   2.777302  0.319948  0.765835
+13   3.394403  0.336685  0.816553
+14   4.148620  0.379465  0.859556
+15   5.070420  0.407890  0.923198
+16   6.197039  0.330283  0.978142
+17   7.573985  0.303201  0.960598
+18   9.256882  0.326373  0.952465
+19  11.313708  0.352479  0.964567
+the image size is 1200x1594
+one cm equals 52.0 pixels
+the middle of the UCIP location is (516, 873)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 58.14%
+percentage of skeltrace covered (fixed alpha): 31.46%
+percentage of skeltrace covered (random_walker): 44.70%
+percentage of skeltrace covered (sieving): 59.18%
+mcc score of 0.421 for percentile filtering
+mcc score of 0.344 with fixed alpha 0.4
+mcc score of 0.39 after random walker
+mcc score of 0.472 after sieving
+********************************************************************************
+extracting PCSVN of T-BN7531176.png	 (15 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.975296
+1    0.305549  0.052473  0.974278
+2    0.373440  0.055799  0.972755
+3    0.456416  0.061317  0.970482
+4    0.557829  0.070226  0.961107
+5    0.681775  0.086026  0.926976
+6    0.833262  0.093712  0.860655
+7    1.018408  0.105315  0.753512
+8    1.244693  0.128001  0.709995
+9    1.521256  0.166998  0.660755
+10   1.859271  0.229621  0.744176
+11   2.272390  0.301189  0.797707
+12   2.777302  0.319948  0.799441
+13   3.394403  0.336685  0.802530
+14   4.148620  0.379465  0.835049
+15   5.070420  0.407890  0.829395
+16   6.197039  0.330283  0.936739
+17   7.573985  0.303201  0.881989
+18   9.256882  0.326373  0.801639
+19  11.313708  0.352479  0.685648
+the image size is 1200x1594
+one cm equals 50.00999900019995 pixels
+the middle of the UCIP location is (508, 812)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 38.03%
+percentage of skeltrace covered (fixed alpha): 18.06%
+percentage of skeltrace covered (random_walker): 27.82%
+percentage of skeltrace covered (sieving): 50.67%
+mcc score of 0.356 for percentile filtering
+mcc score of 0.268 with fixed alpha 0.4
+mcc score of 0.349 after random walker
+mcc score of 0.413 after sieving
+********************************************************************************
+extracting PCSVN of T-BN7646343.png	 (16 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.990959
+1    0.305549  0.052473  0.988422
+2    0.373440  0.055799  0.985912
+3    0.456416  0.061317  0.981791
+4    0.557829  0.070226  0.974915
+5    0.681775  0.086026  0.980830
+6    0.833262  0.093712  0.980175
+7    1.018408  0.105315  0.975672
+8    1.244693  0.128001  0.986661
+9    1.521256  0.166998  0.969208
+10   1.859271  0.229621  0.965816
+11   2.272390  0.301189  0.933077
+12   2.777302  0.319948  0.915748
+13   3.394403  0.336685  0.956042
+14   4.148620  0.379465  0.970509
+15   5.070420  0.407890  0.980622
+16   6.197039  0.330283  0.991415
+17   7.573985  0.303201  0.996485
+18   9.256882  0.326373  0.989694
+19  11.313708  0.352479  0.983221
+the image size is 1200x1594
+one cm equals 50.0 pixels
+the middle of the UCIP location is (749, 1118)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 53.33%
+percentage of skeltrace covered (fixed alpha): 30.29%
+percentage of skeltrace covered (random_walker): 43.06%
+percentage of skeltrace covered (sieving): 47.38%
+mcc score of 0.49 for percentile filtering
+mcc score of 0.438 with fixed alpha 0.4
+mcc score of 0.527 after random walker
+mcc score of 0.496 after sieving
+********************************************************************************
+extracting PCSVN of T-BN7726580.png	 (17 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.984127
+1    0.305549  0.052473  0.984605
+2    0.373440  0.055799  0.985343
+3    0.456416  0.061317  0.986486
+4    0.557829  0.070226  0.988250
+5    0.681775  0.086026  0.990905
+6    0.833262  0.093712  0.994604
+7    1.018408  0.105315  0.985698
+8    1.244693  0.128001  0.979760
+9    1.521256  0.166998  0.976336
+10   1.859271  0.229621  0.967213
+11   2.272390  0.301189  0.959449
+12   2.777302  0.319948  0.955044
+13   3.394403  0.336685  0.997049
+14   4.148620  0.379465  0.998854
+15   5.070420  0.407890  0.980711
+16   6.197039  0.330283  0.974355
+17   7.573985  0.303201  0.993871
+18   9.256882  0.326373  0.925225
+19  11.313708  0.352479  0.989577
+the image size is 1200x1594
+one cm equals 47.042533945356304 pixels
+the middle of the UCIP location is (496, 744)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 55.85%
+percentage of skeltrace covered (fixed alpha): 34.54%
+percentage of skeltrace covered (random_walker): 47.75%
+percentage of skeltrace covered (sieving): 61.00%
+mcc score of 0.433 for percentile filtering
+mcc score of 0.394 with fixed alpha 0.4
+mcc score of 0.471 after random walker
+mcc score of 0.481 after sieving
+********************************************************************************
+extracting PCSVN of T-BN7753462.png	 (18 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.991190
+1    0.305549  0.052473  0.990196
+2    0.373440  0.055799  0.988654
+3    0.456416  0.061317  0.986244
+4    0.557829  0.070226  0.985717
+5    0.681775  0.086026  0.992695
+6    0.833262  0.093712  0.999854
+7    1.018408  0.105315  0.995500
+8    1.244693  0.128001  0.977173
+9    1.521256  0.166998  0.971791
+10   1.859271  0.229621  0.984199
+11   2.272390  0.301189  0.996115
+12   2.777302  0.319948  0.997178
+13   3.394403  0.336685  0.990473
+14   4.148620  0.379465  0.997437
+15   5.070420  0.407890  0.999113
+16   6.197039  0.330283  0.980812
+17   7.573985  0.303201  0.992567
+18   9.256882  0.326373  0.939025
+19  11.313708  0.352479  0.875797
+the image size is 1200x1594
+one cm equals 44.0 pixels
+the middle of the UCIP location is (660, 853)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 56.40%
+percentage of skeltrace covered (fixed alpha): 32.60%
+percentage of skeltrace covered (random_walker): 45.09%
+percentage of skeltrace covered (sieving): 52.76%
+mcc score of 0.486 for percentile filtering
+mcc score of 0.412 with fixed alpha 0.4
+mcc score of 0.511 after random walker
+mcc score of 0.49 after sieving
+********************************************************************************
+extracting PCSVN of T-BN7767693.png	 (19 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.970397
+1    0.305549  0.052473  0.970910
+2    0.373440  0.055799  0.971660
+3    0.456416  0.061317  0.974891
+4    0.557829  0.070226  0.978048
+5    0.681775  0.086026  0.982191
+6    0.833262  0.093712  0.987199
+7    1.018408  0.105315  0.980569
+8    1.244693  0.128001  0.988412
+9    1.521256  0.166998  0.998677
+10   1.859271  0.229621  0.993328
+11   2.272390  0.301189  0.945631
+12   2.777302  0.319948  0.952069
+13   3.394403  0.336685  0.926402
+14   4.148620  0.379465  0.827486
+15   5.070420  0.407890  0.796513
+16   6.197039  0.330283  0.789807
+17   7.573985  0.303201  0.747114
+18   9.256882  0.326373  0.788228
+19  11.313708  0.352479  0.759034
+the image size is 1200x1594
+one cm equals 53.009433122794285 pixels
+the middle of the UCIP location is (504, 718)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 53.34%
+percentage of skeltrace covered (fixed alpha): 32.13%
+percentage of skeltrace covered (random_walker): 44.83%
+percentage of skeltrace covered (sieving): 46.80%
+mcc score of 0.462 for percentile filtering
+mcc score of 0.393 with fixed alpha 0.4
+mcc score of 0.488 after random walker
+mcc score of 0.439 after sieving
+********************************************************************************
+extracting PCSVN of T-BN8333878.png	 (20 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.986564
+1    0.305549  0.052473  0.988061
+2    0.373440  0.055799  0.990180
+3    0.456416  0.061317  0.993101
+4    0.557829  0.070226  0.996961
+5    0.681775  0.086026  0.992033
+6    0.833262  0.093712  0.988775
+7    1.018408  0.105315  0.983310
+8    1.244693  0.128001  0.979144
+9    1.521256  0.166998  0.997595
+10   1.859271  0.229621  0.998812
+11   2.272390  0.301189  0.932158
+12   2.777302  0.319948  0.958130
+13   3.394403  0.336685  0.963145
+14   4.148620  0.379465  0.967060
+15   5.070420  0.407890  0.999199
+16   6.197039  0.330283  0.997726
+17   7.573985  0.303201  0.994048
+18   9.256882  0.326373  0.993667
+19  11.313708  0.352479  0.928914
+the image size is 1200x1594
+one cm equals 49.01020301937138 pixels
+the middle of the UCIP location is (575, 499)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 63.89%
+percentage of skeltrace covered (fixed alpha): 46.35%
+percentage of skeltrace covered (random_walker): 57.29%
+percentage of skeltrace covered (sieving): 58.24%
+mcc score of 0.501 for percentile filtering
+mcc score of 0.467 with fixed alpha 0.4
+mcc score of 0.532 after random walker
+mcc score of 0.504 after sieving
+********************************************************************************
+extracting PCSVN of T-BN8549337.png	 (21 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.993366
+1    0.305549  0.052473  0.992635
+2    0.373440  0.055799  0.991477
+3    0.456416  0.061317  0.989598
+4    0.557829  0.070226  0.986470
+5    0.681775  0.086026  0.986835
+6    0.833262  0.093712  0.991092
+7    1.018408  0.105315  0.989175
+8    1.244693  0.128001  0.997372
+9    1.521256  0.166998  0.992502
+10   1.859271  0.229621  0.991418
+11   2.272390  0.301189  0.995121
+12   2.777302  0.319948  0.996141
+13   3.394403  0.336685  0.992575
+14   4.148620  0.379465  0.993502
+15   5.070420  0.407890  0.974475
+16   6.197039  0.330283  0.947262
+17   7.573985  0.303201  0.858159
+18   9.256882  0.326373  0.816684
+19  11.313708  0.352479  0.938172
+the image size is 1200x1594
+one cm equals 44.10215414239989 pixels
+the middle of the UCIP location is (638, 1038)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 58.93%
+percentage of skeltrace covered (fixed alpha): 36.36%
+percentage of skeltrace covered (random_walker): 49.16%
+percentage of skeltrace covered (sieving): 54.65%
+mcc score of 0.463 for percentile filtering
+mcc score of 0.41 with fixed alpha 0.4
+mcc score of 0.456 after random walker
+mcc score of 0.495 after sieving
+********************************************************************************
+extracting PCSVN of T-BN8789191.png	 (22 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.854314
+1    0.305549  0.052473  0.859979
+2    0.373440  0.055799  0.872215
+3    0.456416  0.061317  0.888987
+4    0.557829  0.070226  0.910926
+5    0.681775  0.086026  0.937612
+6    0.833262  0.093712  0.966618
+7    1.018408  0.105315  0.974837
+8    1.244693  0.128001  0.994109
+9    1.521256  0.166998  0.997810
+10   1.859271  0.229621  0.999809
+11   2.272390  0.301189  0.998184
+12   2.777302  0.319948  0.992452
+13   3.394403  0.336685  0.999270
+14   4.148620  0.379465  0.976895
+15   5.070420  0.407890  0.945055
+16   6.197039  0.330283  0.974543
+17   7.573985  0.303201  0.950225
+18   9.256882  0.326373  0.950493
+19  11.313708  0.352479  0.991733
+the image size is 1200x1594
+one cm equals 46.0 pixels
+the middle of the UCIP location is (517, 810)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 66.69%
+percentage of skeltrace covered (fixed alpha): 44.08%
+percentage of skeltrace covered (random_walker): 59.40%
+percentage of skeltrace covered (sieving): 61.40%
+mcc score of 0.504 for percentile filtering
+mcc score of 0.457 with fixed alpha 0.4
+mcc score of 0.565 after random walker
+mcc score of 0.52 after sieving
+********************************************************************************
+extracting PCSVN of T-BN8914395.png	 (23 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.707534
+1    0.305549  0.052473  0.715795
+2    0.373440  0.055799  0.727724
+3    0.456416  0.061317  0.744643
+4    0.557829  0.070226  0.767976
+5    0.681775  0.086026  0.798763
+6    0.833262  0.093712  0.843883
+7    1.018408  0.105315  0.927198
+8    1.244693  0.128001  0.954101
+9    1.521256  0.166998  0.956990
+10   1.859271  0.229621  0.966166
+11   2.272390  0.301189  0.945153
+12   2.777302  0.319948  0.884164
+13   3.394403  0.336685  0.805729
+14   4.148620  0.379465  0.732666
+15   5.070420  0.407890  0.872227
+16   6.197039  0.330283  0.994567
+17   7.573985  0.303201  0.982288
+18   9.256882  0.326373  0.937394
+19  11.313708  0.352479  0.980746
+the image size is 1200x1594
+one cm equals 56.0 pixels
+the middle of the UCIP location is (661, 928)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 53.74%
+percentage of skeltrace covered (fixed alpha): 32.82%
+percentage of skeltrace covered (random_walker): 46.41%
+percentage of skeltrace covered (sieving): 54.99%
+mcc score of 0.442 for percentile filtering
+mcc score of 0.381 with fixed alpha 0.4
+mcc score of 0.467 after random walker
+mcc score of 0.476 after sieving
+********************************************************************************
+extracting PCSVN of T-BN9211170.png	 (24 of 25)
+finding multiscale frangi targets
+finding multiscale targets σσσσσσσσσσσσσσσσσσσσ
+...making outputs
+            σ       α_p  max(F_σ)
+0    0.250000  0.049682  0.993066
+1    0.305549  0.052473  0.993363
+2    0.373440  0.055799  0.993792
+3    0.456416  0.061317  0.994400
+4    0.557829  0.070226  0.995236
+5    0.681775  0.086026  0.996323
+6    0.833262  0.093712  0.997609
+7    1.018408  0.105315  0.998896
+8    1.244693  0.128001  0.995058
+9    1.521256  0.166998  0.992881
+10   1.859271  0.229621  0.990798
+11   2.272390  0.301189  0.986576
+12   2.777302  0.319948  0.980629
+13   3.394403  0.336685  0.992058
+14   4.148620  0.379465  0.987764
+15   5.070420  0.407890  0.990251
+16   6.197039  0.330283  0.996927
+17   7.573985  0.303201  0.990992
+18   9.256882  0.326373  0.983619
+19  11.313708  0.352479  0.904260
+the image size is 1200x1594
+one cm equals 49.0 pixels
+the middle of the UCIP location is (423, 756)
+the radius outward is 9
+the total measurable diameter is 19
+doing scalewise random walk σσσσσσσσσσσσσσσσσσσσ
+starting to sieve
+sieving σσσσσσσσσσσσσσσσσσσσ
+percentage of skeltrace covered:(percentile filtering) 58.62%
+percentage of skeltrace covered (fixed alpha): 37.88%
+percentage of skeltrace covered (random_walker): 47.65%
+percentage of skeltrace covered (sieving): 56.91%
+mcc score of 0.467 for percentile filtering
+mcc score of 0.419 with fixed alpha 0.4
+mcc score of 0.496 after random walker
+mcc score of 0.483 after sieving
+
+In [1]:                                                                      

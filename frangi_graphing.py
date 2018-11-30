@@ -3,7 +3,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import exp
-
+from skimage.io import imread
+from skimage.util import montage
 from itertools import product
 
 def s(x, gamma):
@@ -54,7 +55,7 @@ plt.legend()
 #plt.show()
 plt.close('all')
 
-prange = [0.1, 0.25, 0.35, 0.5, 0.9, 1, 1.5]
+prange = [0.1, 0.25, 0.5, 0.9, 1, 1.5]
 
 for n, (beta, gamma) in enumerate(product(prange, prange)):
 
@@ -75,5 +76,14 @@ for n, (beta, gamma) in enumerate(product(prange, prange)):
     #fig.colorbar(surf, shrink=0.5, aspect=5)
     fig.tight_layout()
 
-    plt.savefig(f'demo_output/frangi3d/{n}.png')
+    plt.savefig(f'demo_output/frangi3d/{n}.png', dpi=300)
+
     plt.close()
+
+imgs = [imread(f'demo_output/frangi3d/{n}.png') for n in range(36*1)]
+imgs = np.stack(imgs)
+
+for n in range(6):
+    plt.imsave(f'demo_output/frangi3d/frangi3dpart{n}.png',
+               montage(imgs[(n*6):((n+1)*6)], multichannel=True,
+                       grid_shape=(3,2)))
