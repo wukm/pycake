@@ -35,7 +35,7 @@ from frangi import frangi_from_image
 from plate_morphology import dilate_boundary, mask_cuts_simple
 from skimage.morphology import remove_small_holes, remove_small_objects
 from skimage.segmentation import random_walker
-from postprocessing import random_walk_fill
+from postprocessing import random_walk_fill, random_walk_scalewise
 
 
 # INITIALIZE SAMPLES ________________________________________________________
@@ -102,12 +102,14 @@ SCALES = None
 # when showing "large scales only", this is where to start
 # (some index between 0 and N_SCALES)
 
-# Explicit Frangi Parameters (pass a scalar, array as long as scales, or pass None)
+# Explicit Frangi Parameters (pass a scalar, array as long as scales)
 BETAS = 0.35
 GAMMAS = 0.5
-CS = None # set custom structureness parameters for each scale or just one or None
+CS = None # pass scalar, array, or None
 ALPHAS = None # set custom alphas or calculate later
-FIXED_ALPHA = .2
+FIXED_ALPHA = .4
+
+RESCALE_FRANGI = True
 
 
 # Scoring Decisions (don't need to touch these)
@@ -120,7 +122,7 @@ INV_SIGMA = 0.8
 
 # CODE BEGINS HERE ____________________________________________________________
 
-if SCALES is not None:
+if SCALES is None:
     if SCALE_TYPE == 'linear':
         scales = np.linspace(*SCALE_RANGE, num=N_SCALES)
     elif SCALE_TYPE == 'logarithmic':
@@ -196,7 +198,8 @@ for i, filename in enumerate(placentas):
                                  scales=scales, gamma=GAMMAS, c=CS,
                                  kernel='discrete', dilate_per_scale=True,
                                  verbose=False, signed_frangi=SIGNED_FRANGI,
-                                 generate_json=True, output_dir=OUTPUT_DIR)
+                                 generate_json=True, output_dir=OUTPUT_DIR,
+                                 rescale_frangi=RESCALE_FRANGI)
 
         if MAKE_NPZ_FILES:
             npzfile = ".".join((outname("F").rsplit('.', maxsplit=1)[0], 'npz')
@@ -291,14 +294,11 @@ for i, filename in enumerate(placentas):
     #print(f'TP+TN+FP+FN={TP+TN+FP+FN}\ttotal pixels={total}')
 
 
-    approx_rw, markers, margins_added = random_walk_fill(img, Fmax, .3, .01,
-                                                         DARK_BG)
+    #approx_rw, markers, margins_added = random_walk_fill(img, Fmax, .3, .01,
+    #                                                     DARK_BG)
 
-    plt.imshow(markers)
-    plt.show()
-    plt.imshow(margins_added)
-    plt.show()
-    confuse_margins = confusion(margins_added, trace, bg_mask=ucip_mask)
+    approx_rw = random_walk_scalewise(F, .4)
+    #confuse_margins = confusion(margins_added, trace, bg_mask=ucip_mask)
 
     high_alphas = np.array([nz_percentile(F[..., k], 98.0)
                            for k in range(N_SCALES)]
@@ -309,11 +309,7 @@ for i, filename in enumerate(placentas):
                                 return_counts=True)
     pnc_rw = (skeltrace & approx_rw).sum() / skeltrace.sum()
 
-    mccs[filename] =  (m_score, m_score_FA, m_score_rw)
 
-    print(f'mcc score of {m_score:.3} for {filename}')
-    print(f'mcc score of {m_score_FA:.3} with fixed alpha {FIXED_ALPHA}')
-    print(f'mcc score of {m_score_rw:.3} after random walker')
     # --- Generating Visual Outputs--------------------------------------------
     crop = cropped_args(img)  # these indices crop out the mask significantly
 
@@ -338,12 +334,11 @@ for i, filename in enumerate(placentas):
 
     plt.imsave(outname('7_confusion_FA'), confuse_FA[crop])
     plt.imsave(outname('B_confusion_rw'), confuse_rw[crop])
-    plt.imsave(outname('A_markers_rw'), markers[crop])
-    plt.imsave(outname('9_margin_for_rw'), confuse_margins[crop])
+    #plt.imsave(outname('A_markers_rw'), markers[crop])
+    #plt.imsave(outname('9_margin_for_rw'), confuse_margins[crop])
     percent_covered = (skeltrace & approx).sum() / skeltrace.sum()
     percent_covered_FA = (skeltrace & approx_FA).sum() / skeltrace.sum()
 
-    pncs[filename] = (percent_covered, percent_covered_FA, pnc_rw)
 
 
     st_colors = {
@@ -354,11 +349,6 @@ for i, filename in enumerate(placentas):
         'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
     }
 
-    print('percentage of skeltrace covered:', f'{percent_covered:.2%}')
-    print('percentage of skeltrace covered (larger sigmas only):',
-          f'{percent_covered_FA:.2%}')
-    print('percentage of skeltrace covered (random_walker):',
-          f'{pnc_rw:.2%}')
     plt.imsave(outname('5_coverage'), confusion(approx, skeltrace,
                                                 colordict=st_colors)[crop])
     plt.imsave(outname('8_coverage_FA'), confusion(approx_FA, skeltrace,
@@ -371,9 +361,42 @@ for i, filename in enumerate(placentas):
     scale_label_figure(labs_FA, scales, crop=crop,
                        savefilename=outname('6_labeled_FA'), image_only=True,
                        save_colorbar_separate=False, output_dir=OUTPUT_DIR)
-    plt.close('all')  # something's leaking :(
 
+    V = np.transpose(F, axes=(2, 0, 1))
 
+    view_slices(F[crop], axis=-1, scales=scales)
+
+    print('starting to sieve')
+    sieved = sieve_scales(V, 98, 95)
+
+    approx_S, labs_S = (sieved != 0), sieved
+    confuse_S = confusion(approx_S, trace, bg_mask=ucip_mask)
+
+    scale_label_figure(labs_S, scales, crop=crop,
+                       savefilename=outname('D_labeled_S'), image_only=True,
+                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
+
+    plt.imsave(outname('E_confusion_S'), confuse_S[crop])
+
+    m_score_S, counts_S = mcc(approx_S, trace, ucip_mask, return_counts=True)
+    pnc_S = (skeltrace & approx_S).sum() / skeltrace.sum()
+
+    mccs[filename] =  (m_score, m_score_FA, m_score_rw, m_score_S )
+    pncs[filename] = (percent_covered, percent_covered_FA, pnc_rw, pnc_S)
+
+    print('percentage of skeltrace covered:(percentile filtering)',
+          f'{percent_covered:.2%}')
+    print('percentage of skeltrace covered (fixed alpha):',
+          f'{percent_covered_FA:.2%}')
+    print('percentage of skeltrace covered (random_walker):',
+          f'{pnc_rw:.2%}')
+    print('percentage of skeltrace covered (sieving):',
+          f'{pnc_S:.2%}')
+
+    print(f'mcc score of {m_score:.3} for percentile filtering')
+    print(f'mcc score of {m_score_FA:.3} with fixed alpha {FIXED_ALPHA}')
+    print(f'mcc score of {m_score_rw:.3} after random walker')
+    print(f'mcc score of {m_score_S:.3} after sieving')
     ### THIS IS ALL A HORRIBLE MESS. FIX IT
 
     # why don't you just return the dict instead
@@ -393,20 +416,8 @@ for i, filename in enumerate(placentas):
     with open(jfile, 'w') as f:
         json.dump(slog, f)
 
-    V = np.transpose(F, axes=(2, 0, 1))
+    plt.close('all')
 
-    view_slices(V, scales=scales)
-
-    sieved = sieve_scales(V, 98, 95)
-
-    approx_S, labs_S = (sieved != 0), sieved
-    confuse_S = confusion(approx_S, trace, bg_mask=ucip_mask)
-
-    scale_label_figure(labs_S, scales, crop=crop,
-                       savefilename=outname('D_labeled_S'), image_only=True,
-                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
-
-    plt.imsave(outname('E_confusion_S'), confuse_S[crop])
 # Post-run Meta-Output and Logging ____________________________________________
 
 timestring = datetime.datetime.now()

@@ -151,8 +151,10 @@ def sieve_scales(multiscale, high_percentile, low_percentile, min_size=None,
     # label matrix the size of one of the images
     sieved = np.zeros(V.shape[1:], dtype=np.int32)
 
-
+    print('sieving ', end='')
     for n, v in enumerate(V):
+        print('σ', end='', flush=True)
+
         if min_size is not None:
             z = remove_small_objects(v, min_size=min_size[n])
         else:
@@ -170,8 +172,8 @@ def sieve_scales(multiscale, high_percentile, low_percentile, min_size=None,
             if np.any(high_passed[labeled == lab]):
                 sieved[labeled == lab] = n
 
+    print()
     return sieved
-
 
 def view_slices(multiscale, axis=0, scales=None, cmap='nipy_spectral',
                 vmin=0, vmax=1.0, outnames=None, show_colorbar=True):
@@ -197,6 +199,7 @@ def view_slices(multiscale, axis=0, scales=None, cmap='nipy_spectral',
     if outnames is None:
         outnames = [None for x in range(multiscale.shape[0])]
 
+    plt.close('all')
     for v, sigma, outname in zip(V, scales, outnames):
 
         if outname is None:

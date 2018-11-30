@@ -7,7 +7,8 @@ from plate_morphology import dilate_boundary
 
 def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                       dilation_radius=None, kernel=None, signed_frangi=False,
-                      return_debug_info=False, verbose=False):
+                      return_debug_info=False, verbose=False,
+                      rescale_frangi=False):
     """Calculate the (uniscale) Frangi vesselness measure on a grayscale image
 
     Parameters
@@ -49,6 +50,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         scale_dict = {'sigma': sigma,
                       'beta': beta,
                       'gamma': gamma,
+                      'c': c,
                       'H': hesh,
                       'F': targets,
                       'k1': k1,
@@ -148,14 +150,21 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         print(f'finding Frangi targets with β={beta} and γ={c:.2}')
 
     targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma, c=c,
-                                 dark_bg=dark_bg, signed=signed_frangi)
+                                 dark_bg=dark_bg, signed=signed_frangi,
+                                 rescale_frangi=rescale_frangi)
 
     if not return_debug_info:
         return targets
     else:
+
+        # for logging we have to recalculate this
+        if c is not None:
+            c = gamma * max(np.sqrt(k1**2 + k2**2))
+
         scale_dict = {'sigma': sigma,
                       'beta': beta,
                       'gamma': gamma,
+                      'c': c,
                       'H': hesh,
                       'F': targets,
                       'k1': k1,
@@ -167,7 +176,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
 
 
 def get_frangi_targets(K1, K2, beta=0.5, gamma=0.5, c=None,
-                       dark_bg=True, signed=False):
+                       dark_bg=True, signed=False, rescale_frangi=False):
     """Calculate the Frangi vesselness measure from eigenvalues.
 
     Parameters
@@ -225,6 +234,14 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=0.5, c=None,
     structureness_factor = (1 - np.exp(-S))
 
     F = anisotropy_factor * structureness_factor
+
+    if rescale_frangi:
+        if c is not None:
+            # more like will not
+            print('c was set to an arbitrary value. cannot rescale')
+        else:
+            max_theoretical = (1 - np.exp(-1/(2*gamma**2)))
+            F = F / max_theoretical
 
     # now just filter/ change sign as appropriate.
     if not signed:
@@ -299,7 +316,7 @@ def anisotropy(K1,K2, beta=0.5):
     """
 
     A = (K1 / K2) ** 2
-
+    #print(f'inside anisotropy, β={beta}')
     if beta == 0:
         return np.zeros_like(A)  # the limiting case as beta -> 0
 
@@ -318,9 +335,12 @@ def structureness(K1, K2, gamma=0.5, c=None):
     """
     S = K1**2 + K2**2
 
+
     # is c is not provided, calculate it
     if c is None:
-        c = gamma * S.max()  # the max Frob norm of the Hessian
+        c = gamma * np.sqrt(S).max()  # the max Frob norm of the Hessian
+
+    #print(f'inside structureness, γ={gamma}, c={c}')
 
     if c == 0:
         return np.zeros_like(S)

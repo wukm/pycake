@@ -22,7 +22,8 @@ import datetime
 
 def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                     find_principal_directions=False, dilate_per_scale=True,
-                    signed_frangi=False, kernel=None, verbose=True):
+                    signed_frangi=False, kernel=None, verbose=True,
+                    rescale_frangi=False):
     """Returns an ordered list of dictionaries for each scale of Frangi info.
 
     beta, gamma, and c can all be vectors as long as scales or constants
@@ -48,16 +49,16 @@ def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
 
     img = ma.masked_array(img_as_float(img), mask=img.mask)
 
-    # vectorize any scalar inputs here
-    if np.isscalar(beta):
-        beta = np.repeat(beta, len(scales))
-    if np.isscalar(gamma):
-        gamma = np.repeat(gamma, len(scales))
-    if np.isscalar(c):
-        # interestingly enough, np.isscalar(None) -> False
-        np.repeat(c, False)
+    vectorize = lambda x: np.repeat(x, len(scales)) if (x is None or np.isscalar(x)) else x
 
+    # vectorize any scalar inputs here
+    beta = vectorize(beta)
+    gamma = vectorize(gamma)
+    c = vectorize(c)
+    print('finding multiscale targets ', end='')
     for i, (sigma, b, g, cx) in enumerate(zip(scales, beta, gamma, c)):
+
+        print('σ', end='')
 
         if dilate_per_scale:
             if sigma > 20:
@@ -69,15 +70,13 @@ def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         else:
             radius = None
 
-        if verbose:
-            print(f'σ={sigma}\t, dilation radius ={radius}')
-
         targets, this_scale = frangi_from_image(img, sigma, beta=b, gamma=g,
                                                 c=cx, dark_bg=dark_bg,
                                                 dilation_radius=radius,
                                                 kernel=kernel,
                                                 signed_frangi=signed_frangi,
-                                                return_debug_info=True)
+                                                return_debug_info=True,
+                                                rescale_frangi=rescale_frangi)
 
         if find_principal_directions:
             # principal directions should only be computed for critical regions
@@ -105,13 +104,14 @@ def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         # store results as a list of dictionaries
         multiscale.append(this_scale)
 
+    print()
     return multiscale
 
 
 def extract_pcsvn(img, filename, scales, beta=0.5, gamma=0.5, c=None,
                   dark_bg=True, dilate_per_scale=True, verbose=True,
                   generate_json=True, output_dir=None, kernel=None,
-                  signed_frangi=False):
+                  signed_frangi=False, rescale_frangi=False):
     """Run PCSVN extraction on the sample given in the file.
 
     Despite the name, this simply returns the Frangi filter responses at
@@ -134,7 +134,8 @@ def extract_pcsvn(img, filename, scales, beta=0.5, gamma=0.5, c=None,
                                  find_principal_directions=False,
                                  dilate_per_scale=dilate_per_scale,
                                  kernel=kernel, signed_frangi=signed_frangi,
-                                 dark_bg=dark_bg, verbose=verbose)
+                                 dark_bg=dark_bg, verbose=verbose,
+                                 rescale_frangi=rescale_frangi)
 
     # extract these for logging
     c = [scale['c'] for scale in multiscale]
@@ -174,7 +175,7 @@ def extract_pcsvn(img, filename, scales, beta=0.5, gamma=0.5, c=None,
 
         logdata = {'time': timestring,
                    'filename': filename,
-                   'betas': vectorize(b),
+                   'betas': vectorize(beta),
                    'gammas': vectorize(gamma),
                    'c': vectorize(c),
                    'sigmas': list(scales)
@@ -282,7 +283,6 @@ def scale_label_figure(wheres, scales, savefilename=None,
         cbar.set_ticklabels(scalelabels)
         # ax.set_title(r"Scale ($\sigma$) of maximum vesselness ")
         plt.tight_layout()
-
         # plt.savefig(outname('labeled'), dpi=300)
         if show_only or (savefilename is None):
             plt.show()
