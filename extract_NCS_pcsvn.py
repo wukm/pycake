@@ -45,11 +45,11 @@ from postprocessing import random_walk_fill, random_walk_scalewise
 # placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-placentas = list_by_quality(0)
-# placentas = list(placentas)
-# placentas.extend(list_by_quality(1, N=1))
-# placentas.extend(list_by_quality(2, N=1))
-# placentas.extend(list_by_quality(3, N=1))
+#placentas = list_by_quality(0)
+placentas = list()
+placentas.extend(list_by_quality(1))
+placentas.extend(list_by_quality(2))
+placentas.extend(list_by_quality(3))
 
 # load from a file (sample names are keys of the json file)
 # placentas = list_by_quality(json_file='manual_batch.json')
@@ -63,8 +63,8 @@ placentas = list_by_quality(0)
 
 MAKE_NPZ_FILES = False # pickle frangi targets if you can
 USE_NPZ_FILES = False # use old npz files if you can
-NPZ_DIR = 'output/181129-strict'  # where to look for npz files
-OUTPUT_DIR = 'output/181129-strict'  # where to save outputs
+NPZ_DIR = 'output/181130-strict'  # where to look for npz files
+OUTPUT_DIR = 'output/181130-strict'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
