@@ -43,7 +43,7 @@ def random_walk_fill(img, Fmax, high_thresh, low_thresh, dark_bg):
 
     return approx_rw, markers, margins_added
 
-def random_walk_scalewise(F, high_thresh):
+def random_walk_scalewise(F, high_thresh, return_labels=False):
 
     print('doing scalewise random walk', end=' ')
     V = np.transpose(F, axes=(2,0,1))
@@ -56,4 +56,7 @@ def random_walk_scalewise(F, high_thresh):
         markers[v > high_thresh] = 2
         W[n] = (random_walker(1-v, markers) == 2)
     print()
-    return W.any(axis=0)
+    if return_labels:
+        return W.any(axis=0), W.argmax(axis=0)
+    else:
+        return W.any(axis=0)

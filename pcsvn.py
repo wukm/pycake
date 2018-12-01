@@ -23,7 +23,7 @@ import datetime
 def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                     find_principal_directions=False, dilate_per_scale=True,
                     signed_frangi=False, kernel=None, verbose=True,
-                    rescale_frangi=False):
+                    rescale_frangi=False, gradient_filter=False):
     """Returns an ordered list of dictionaries for each scale of Frangi info.
 
     beta, gamma, and c can all be vectors as long as scales or constants
@@ -76,7 +76,8 @@ def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                                                 kernel=kernel,
                                                 signed_frangi=signed_frangi,
                                                 return_debug_info=True,
-                                                rescale_frangi=rescale_frangi)
+                                                rescale_frangi=rescale_frangi,
+                                                gradient_filter=gradient_filter)
 
         if find_principal_directions:
             # principal directions should only be computed for critical regions
@@ -111,7 +112,8 @@ def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
 def extract_pcsvn(img, filename, scales, beta=0.5, gamma=0.5, c=None,
                   dark_bg=True, dilate_per_scale=True, verbose=True,
                   generate_json=True, output_dir=None, kernel=None,
-                  signed_frangi=False, rescale_frangi=False):
+                  signed_frangi=False, rescale_frangi=False,
+                  gradient_filter=False):
     """Run PCSVN extraction on the sample given in the file.
 
     Despite the name, this simply returns the Frangi filter responses at
@@ -135,7 +137,8 @@ def extract_pcsvn(img, filename, scales, beta=0.5, gamma=0.5, c=None,
                                  dilate_per_scale=dilate_per_scale,
                                  kernel=kernel, signed_frangi=signed_frangi,
                                  dark_bg=dark_bg, verbose=verbose,
-                                 rescale_frangi=rescale_frangi)
+                                 rescale_frangi=rescale_frangi,
+                                 gradient_filter=gradient_filter)
 
     # extract these for logging
     c = [scale['c'] for scale in multiscale]

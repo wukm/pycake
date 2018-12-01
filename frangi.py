@@ -1,14 +1,14 @@
 import numpy as np
 import numpy.ma
-from hfft import fft_hessian
+from hfft import fft_hessian, fft_gradient
 from diffgeo import principal_curvatures
 from plate_morphology import dilate_boundary
-
+from merging import nz_percentile
 
 def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                       dilation_radius=None, kernel=None, signed_frangi=False,
                       return_debug_info=False, verbose=False,
-                      rescale_frangi=False):
+                      rescale_frangi=False, gradient_filter=False):
     """Calculate the (uniscale) Frangi vesselness measure on a grayscale image
 
     Parameters
@@ -78,6 +78,8 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
     hesh = fft_hessian(img, sigma, kernel=kernel)  # the triple (Hxx,Hxy,Hyy)
     # calculate principal curvatures with |k1| <= |k2|
 
+
+        
     k1, k2 = principal_curvatures(img, sigma, H=hesh)
 
     if dilation_radius is not None:
@@ -92,6 +94,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         hesh[2][collar] = 0
     else:
         collar = img.mask.copy()
+
 
     # no need to set gamma or c anymore. will be set inside get_frangi_targets
     #if c is None:
@@ -152,6 +155,18 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
     targets = get_frangi_targets(k1, k2, beta=beta, gamma=gamma, c=c,
                                  dark_bg=dark_bg, signed=signed_frangi,
                                  rescale_frangi=rescale_frangi)
+
+    if gradient_filter:
+        # obviously you could compute this at the same time as the hessian :/
+        
+        g = fft_gradient(img, sigma)
+        g = dilate_boundary(g, radius=20, mask=img.mask)
+
+        # you could technically pass a function to switch between these
+        # behaviors
+        low_g = (g < nz_percentile(g, 50)).filled(0)
+        
+        targets[~low_g] = 0
 
     if not return_debug_info:
         return targets

@@ -45,11 +45,11 @@ from postprocessing import random_walk_fill, random_walk_scalewise
 # placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-#placentas = list_by_quality(0)
-placentas = list()
-placentas.extend(list_by_quality(1))
-placentas.extend(list_by_quality(2))
-placentas.extend(list_by_quality(3))
+placentas = list_by_quality(0)
+#placentas = list()
+#placentas.extend(list_by_quality(1))
+#placentas.extend(list_by_quality(2))
+#placentas.extend(list_by_quality(3))
 
 # load from a file (sample names are keys of the json file)
 # placentas = list_by_quality(json_file='manual_batch.json')
@@ -63,8 +63,8 @@ placentas.extend(list_by_quality(3))
 
 MAKE_NPZ_FILES = False # pickle frangi targets if you can
 USE_NPZ_FILES = False # use old npz files if you can
-NPZ_DIR = 'output/181130-strict'  # where to look for npz files
-OUTPUT_DIR = 'output/181130-strict'  # where to save outputs
+NPZ_DIR = 'output/181201-gradient'  # where to look for npz files
+OUTPUT_DIR = 'output/181201-gradient'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
@@ -91,7 +91,7 @@ REMOVE_GLARE = True
 REMOVE_CUTS = True
 
 # Which scales to use
-SCALE_RANGE = (-2, 3.5); SCALE_TYPE = 'logarithmic'
+SCALE_RANGE = (-1.0, 3.5); SCALE_TYPE = 'logarithmic'
 #SCALE_RANGE = (.2, 12); SCALE_TYPE = 'linear'
 N_SCALES = 20
 
@@ -99,17 +99,16 @@ N_SCALES = 20
 SCALES = None
 #SCALE_RANGE = None, SCALE_TYPE == 'custom'
 
-# when showing "large scales only", this is where to start
-# (some index between 0 and N_SCALES)
 
 # Explicit Frangi Parameters (pass a scalar, array as long as scales)
 BETAS = 0.35
 GAMMAS = 0.5
 CS = None # pass scalar, array, or None
 ALPHAS = None # set custom alphas or calculate later
-FIXED_ALPHA = .4
+FIXED_ALPHA = .3
 
 RESCALE_FRANGI = True
+GRADIENT_FILTER = True
 
 
 # Scoring Decisions (don't need to touch these)
@@ -199,7 +198,8 @@ for i, filename in enumerate(placentas):
                                  kernel='discrete', dilate_per_scale=True,
                                  verbose=False, signed_frangi=SIGNED_FRANGI,
                                  generate_json=True, output_dir=OUTPUT_DIR,
-                                 rescale_frangi=RESCALE_FRANGI)
+                                 rescale_frangi=RESCALE_FRANGI,
+                                 gradient_filter=GRADIENT_FILTER)
 
         if MAKE_NPZ_FILES:
             npzfile = ".".join((outname("F").rsplit('.', maxsplit=1)[0], 'npz')
@@ -297,7 +297,7 @@ for i, filename in enumerate(placentas):
     #approx_rw, markers, margins_added = random_walk_fill(img, Fmax, .3, .01,
     #                                                     DARK_BG)
 
-    approx_rw = random_walk_scalewise(F, .4)
+    approx_rw, labs_rw = random_walk_scalewise(F, .4, return_labels=True)
     #confuse_margins = confusion(margins_added, trace, bg_mask=ucip_mask)
 
     high_alphas = np.array([nz_percentile(F[..., k], 98.0)
@@ -327,6 +327,11 @@ for i, filename in enumerate(placentas):
     save_colorbar = (i==0)
     scale_label_figure(labs, scales, crop=crop,
                        savefilename=outname('3_labeled'), image_only=True,
+                       save_colorbar_separate=save_colorbar,
+                       output_dir=OUTPUT_DIR)
+
+    scale_label_figure(labs_rw, scales, crop=crop,
+                       savefilename=outname('A_labeled_rw'), image_only=True,
                        save_colorbar_separate=save_colorbar,
                        output_dir=OUTPUT_DIR)
 
