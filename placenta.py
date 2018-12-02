@@ -101,9 +101,18 @@ def open_tracefile(base_filename, as_binary=True,
     else:
         return T
 
+def mimg_as_float(mimg):
+
+    if not ma.is_masked(mimg):
+
+        return img_as_float(ming)
+
+    else:
+        return ma.masked_array(img_as_float(mimg.data.filled(0)),
+                               mask=mimg.mask)
 
 def get_named_placenta(filename, sample_dir=None, masked=True,
-                       maskfile=None):
+                       maskfile=None, mode='L'):
     """
     This function is to be replaced by a more ingenious/natural
     way of accessing a database of unregistered and/or registered
@@ -141,7 +150,12 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
 
     full_filename = os.path.join(sample_dir, filename)
 
-    raw_img = imread(full_filename, mode='L')
+    if mode.lower() in ('g', 'green'):
+        # first channel of RGBA (or RGBA!)
+        raw_img = imread(full_filename)[...,1]
+
+    else:
+        raw_img = imread(full_filename, mode=mode)
 
     if maskfile is None:
         # try to open what the mask *should* be named

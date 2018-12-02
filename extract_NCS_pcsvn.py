@@ -45,7 +45,7 @@ from postprocessing import random_walk_fill, random_walk_scalewise
 # placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-placentas = list_by_quality(0)
+placentas = list_by_quality(0, N=1)
 #placentas = list()
 #placentas.extend(list_by_quality(1))
 #placentas.extend(list_by_quality(2))
@@ -63,8 +63,8 @@ placentas = list_by_quality(0)
 
 MAKE_NPZ_FILES = False # pickle frangi targets if you can
 USE_NPZ_FILES = False # use old npz files if you can
-NPZ_DIR = 'output/181201-gradient'  # where to look for npz files
-OUTPUT_DIR = 'output/181201-gradient'  # where to save outputs
+NPZ_DIR = 'output/181201-L'  # where to look for npz files
+OUTPUT_DIR = 'output/181201-L'  # where to save outputs
 
 # add in a meta switch for verbosity (or levels)
 #VERBOSE = False
@@ -87,6 +87,7 @@ SIGNED_FRANGI = False
 DILATE_PER_SCALE = True
 
 # Attempt to remove glare from sample (some are OK, some are bad)
+FLATTEN_MODE = 'L' # 'G' or 'L'
 REMOVE_GLARE = True
 REMOVE_CUTS = True
 
@@ -108,7 +109,7 @@ ALPHAS = None # set custom alphas or calculate later
 FIXED_ALPHA = .3
 
 RESCALE_FRANGI = True
-GRADIENT_FILTER = True
+GRADIENT_FILTER = False
 
 
 # Scoring Decisions (don't need to touch these)
@@ -149,7 +150,7 @@ for i, filename in enumerate(placentas):
 
     # --- Setup, Preprocessing, Frangi Filter (it's mixed up) -----------------
 
-    raw_img = get_named_placenta(filename)
+    raw_img = get_named_placenta(filename, mode=FLATTEN_MODE)
 
     ucip = open_typefile(filename, 'ucip')
 
