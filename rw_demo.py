@@ -19,20 +19,27 @@ import matplotlib as mpl
 
 from skimage.segmentation import random_walker
 
+INTERACTIVE = True
 filename = list_by_quality('good')[0]
+
 print('running rw_demo on', filename)
+
 cimg = open_typefile(filename, 'raw')
 img = get_named_placenta(filename)
 crop = cropped_args(img)
 
-plt.imsave('demo_output/rw_demo/rw_demo_base.png', cimg[crop])
-plt.show()
+if INTERACTIVE:
+    plt.imsave('demo_output/rw_demo/rw_demo_base.png', cimg[crop])
+else:
+    plt.show()
+
 plt.close('all')
+
 cm = mpl.cm.plasma
 cmscales = mpl.cm.Blues
 cm.set_bad('k', 1)  # masked areas are black, not white
 cmscales.set_bad('k', 1)
-#scales = [0.5, 1.5, 3.0, 6.0]
+
 scales =np.logspace(-1.5, 3.5, num=12, base=2)
 threshold = .4
 
@@ -60,7 +67,7 @@ for n, sigma in enumerate(scales):
     ax[1].axis('off')
     ax[1].set_title(r'$\sigma={:.3f}$'.format(sigma))
 
-    rw = random_walker(f.filled(0), markers)
+    rw = random_walker(f.filled(0), markers, beta=20)
     W[n] = (rw == 2)
 
     # set the new stuff to a higher number so you can see what was added
@@ -73,8 +80,11 @@ for n, sigma in enumerate(scales):
     ax[2].axis('off')
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.05, wspace=0.01)
-    #plt.show()
-    plt.savefig(f'demo_output/rw_demo/rw_demo_scale_{n:0{2}}.png')
+
+    if INTERACTIVE:
+        plt.show()
+    else:
+        plt.savefig(f'demo_output/rw_demo/rw_demo_scale_{n:0{2}}.png')
     plt.close('all')
 
 
@@ -83,10 +93,15 @@ for n, sigma in enumerate(scales):
 
 labs = np.argmax(W, axis=0) # returns the first index of boolean
 labs =ma.masked_where(labs==0, labs)
+
+fig, ax = plt.subplots(figsize=(10,10))
 plt.imshow(labs[crop], cmap=cmscales)
+plt.axis('off')
 # i should make this uniform with the rest but it looks like trash for some
 # reason
-plt.imsave('demo_output/rw_demo/rw_demo_labels.png', labs[crop],
-           cmap=cmscales)
-plt.axis('off')
-#plt.show()
+
+if INTERACTIVE:
+    plt.imsave('demo_output/rw_demo/rw_demo_labels.png', labs[crop],
+               cmap=cmscales)
+else:
+    plt.show()

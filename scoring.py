@@ -284,13 +284,21 @@ def confusion(test, truth, bg_mask=None, colordict=None, tint_mask=True):
 #            'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
 #            }
 #
+        #colordict = {
+        #    'TN': (49,49,49),  # true negative# 'f7f7f7'
+        #    'TP': (0, 0, 0),  # true positive  # '000000'
+        #    'FN': (201,53,108),  # false negative # 'f1a340' orange
+        #    'FP': (0,112,163),  # false positive # '998ec4' purple
+        #    'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
+        #    }
+
         colordict = {
-            'TN': (49,49,49),  # true negative# 'f7f7f7'
-            'TP': (0, 0, 0),  # true positive  # '000000'
-            'FN': (201,53,108),  # false negative # 'f1a340' orange
-            'FP': (0,112,163),  # false positive # '998ec4' purple
-            'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
-            }
+                     'TP': (0,0,0),
+                     'TN': (226,226,226),
+                     'FN': (201,80,80),
+                     'FP': (30,69,230),
+                     'mask': (209,209,209)
+                     }
     #TODO: else check if mask is specified and add it as color of TN otherwise
 
     true_neg_color = np.array(colordict['TN'], dtype='f')/255

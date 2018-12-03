@@ -55,7 +55,7 @@ def random_walk_scalewise(F, high_thresh=0.4, return_labels=False):
         # this could be a vector too
         markers[v > high_thresh] = 2
         # or 1-v
-        W[n] = (random_walker(v.filled(0), markers) == 2)
+        W[n] = (random_walker(v, markers) == 2)
     print()
     if not return_labels:
         return W.any(axis=0)
