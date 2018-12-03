@@ -14,8 +14,7 @@ import numpy as np
 
 def random_walk_fill(img, Fmax, high_thresh, low_thresh, dark_bg):
     """
-    there are a lot of decisions to make here but it's just a demo
-    so who cares
+    # this is deprecated, it's trash
     """
 
     s = sobel(img)
@@ -43,10 +42,11 @@ def random_walk_fill(img, Fmax, high_thresh, low_thresh, dark_bg):
 
     return approx_rw, markers, margins_added
 
-def random_walk_scalewise(F, high_thresh, return_labels=False):
 
+def random_walk_scalewise(F, high_thresh=0.4, return_labels=False):
+    """Random walker on each a multiscale Frangi result"""
     print('doing scalewise random walk', end=' ')
-    V = np.transpose(F, axes=(2,0,1))
+    V = np.transpose(F, axes=(2, 0, 1))
     W = np.zeros(V.shape, np.bool)
     for n, v in enumerate(V):
         print('σ', end='', flush=True)
@@ -54,9 +54,12 @@ def random_walk_scalewise(F, high_thresh, return_labels=False):
         markers[v == 0] = 1
         # this could be a vector too
         markers[v > high_thresh] = 2
-        W[n] = (random_walker(1-v, markers) == 2)
+        # or 1-v
+        W[n] = (random_walker(v.filled(0), markers) == 2)
     print()
-    if return_labels:
-        return W.any(axis=0), W.argmax(axis=0)
-    else:
+    if not return_labels:
         return W.any(axis=0)
+    else:
+        # argmax grabs the first scale where it was satisfied
+        # so this will grab the lowest scale that matches
+        return W.any(axis=0), W.argmax(axis=0)

@@ -21,6 +21,7 @@ from scipy.ndimage import imread
 
 from numpy.ma import is_masked
 from skimage.color import gray2rgb
+from skimage.util import img_as_float
 import matplotlib.pyplot as plt
 
 
@@ -105,10 +106,10 @@ def mimg_as_float(mimg):
 
     if not ma.is_masked(mimg):
 
-        return img_as_float(ming)
+        return img_as_float(mimg)
 
     else:
-        return ma.masked_array(img_as_float(mimg.data.filled(0)),
+        return ma.masked_array(img_as_float(mimg.data),
                                mask=mimg.mask)
 
 def get_named_placenta(filename, sample_dir=None, masked=True,
