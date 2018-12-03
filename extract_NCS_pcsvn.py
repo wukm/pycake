@@ -45,9 +45,8 @@ from postprocessing import random_walk_fill, random_walk_scalewise
 # placentas = list_placentas('T-BN')
 # load placentas from a certain quality category 0=good, 1=okay, 2=fair, 3=poor
 
-placentas = list_by_quality(0, N=6)
-#placentas = list()
-#placentas.extend(list_by_quality(1))
+placentas = list_by_quality(0)
+placentas.extend(list_by_quality(1))
 #placentas.extend(list_by_quality(2))
 #placentas.extend(list_by_quality(3))
 
@@ -308,6 +307,9 @@ for i, filename in enumerate(placentas):
 
 
     # --- Generating Visual Outputs--------------------------------------------
+
+    SCALE_CMAP = ('plasma', (1,1,1,1))
+
     crop = cropped_args(img)  # these indices crop out the mask significantly
 
     fmax_colors = plt.cm.plasma
@@ -319,14 +321,15 @@ for i, filename in enumerate(placentas):
     plt.imsave(outname('1_img'), img[crop].filled(0), cmap=plt.cm.gray)
 
     # save the maximum frangi output over all scales
-    plt.imsave(outname('2_fmax'), ma.masked_where(Fmax==0,Fmax)[crop], vmin=0, vmax=1.0,
-               cmap=fmax_colors)
+    plt.imsave(outname('2_fmax'), ma.masked_where(Fmax==0,Fmax)[crop], vmin=0,
+               vmax=1.0, cmap=fmax_colors)
 
     # only save the colorbar the first time
     save_colorbar = (i==0)
     scale_label_figure(labs, scales, crop=crop,
                        savefilename=outname('3_labeled'), image_only=True,
                        save_colorbar_separate=save_colorbar,
+                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
                        output_dir=OUTPUT_DIR)
 
     plt.imsave(outname('4_confusion'), confuse[crop])
@@ -334,6 +337,7 @@ for i, filename in enumerate(placentas):
     scale_label_figure(labs_rw, scales, crop=crop,
                        savefilename=outname('A_labeled_rw'), image_only=True,
                        save_colorbar_separate=save_colorbar,
+                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
                        output_dir=OUTPUT_DIR)
 
 
@@ -365,6 +369,7 @@ for i, filename in enumerate(placentas):
 
     scale_label_figure(labs_FA, scales, crop=crop,
                        savefilename=outname('6_labeled_FA'), image_only=True,
+                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
                        save_colorbar_separate=False, output_dir=OUTPUT_DIR)
 
     V = np.transpose(F, axes=(2, 0, 1))
@@ -379,6 +384,7 @@ for i, filename in enumerate(placentas):
 
     scale_label_figure(labs_S, scales, crop=crop,
                        savefilename=outname('D_labeled_S'), image_only=True,
+                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
                        save_colorbar_separate=False, output_dir=OUTPUT_DIR)
 
     plt.imsave(outname('E_confusion_S'), confuse_S[crop])
@@ -421,12 +427,12 @@ for i, filename in enumerate(placentas):
 
     scoretable = pandas.DataFrame(np.vstack((mccs[filename], pncs[filename],
                                             precisions[filename])),
-                                  columns=('percentile filtering (q=95)',
-                                  'fixed alpha (0.4)', 'per-scale RW',
-                                  'percentile sieve'),
-                        index=('MCC', '% skeltrace coverage', 'precision'))
+                                  columns=('PF', 'FA', 'RW', 'PS'),
+                        index=('MCC', 'skel coverage', 'precision'))
 
     print(scoretable)
+    print('\n\n')
+    print(scoretable.to_latex())
 
     ### THIS IS ALL A HORRIBLE MESS. FIX IT
     # why don't you just return the dict instead

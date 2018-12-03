@@ -62,7 +62,7 @@ def make_multiscale(img, scales, beta=0.5, gamma=0.5, c=None, dark_bg=True,
     print('finding multiscale targets ', end='')
     for i, (sigma, b, g, cx) in enumerate(zip(scales, beta, gamma, c)):
 
-        print('σ', end='')
+        print('σ', end='', flush=True)
 
         if dilate_per_scale:
             if sigma > 20:
