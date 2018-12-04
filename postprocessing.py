@@ -43,7 +43,8 @@ def random_walk_fill(img, Fmax, high_thresh, low_thresh, dark_bg):
     return approx_rw, markers, margins_added
 
 
-def random_walk_scalewise(F, high_thresh=0.4, return_labels=False):
+def random_walk_scalewise(F, high_thresh=0.4, rw_beta=130,
+                          return_labels=False):
     """Random walker on each a multiscale Frangi result"""
     print('doing scalewise random walk', end=' ')
     V = np.transpose(F, axes=(2, 0, 1))
@@ -55,7 +56,7 @@ def random_walk_scalewise(F, high_thresh=0.4, return_labels=False):
         # this could be a vector too
         markers[v > high_thresh] = 2
         # or 1-v
-        W[n] = (random_walker(v, markers) == 2)
+        W[n] = (random_walker(v, markers, rw_beta) == 2)
     print()
     if not return_labels:
         return W.any(axis=0)

@@ -6,7 +6,6 @@ from skimage.morphology import thin
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import numpy as np
 
 import itertools
 from collections import deque
@@ -299,7 +298,7 @@ def confusion(test, truth, bg_mask=None, colordict=None, tint_mask=True):
         colordict = {
                      'TP': (0,0,0),
                      'TN': (226,226,226),
-                     'FN': (201,80,80),
+                     'FN': (201,152,152),
                      'FP': (30,69,230),
                      'mask': (209,209,209)
                      }
