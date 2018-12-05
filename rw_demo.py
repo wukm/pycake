@@ -21,12 +21,15 @@ import matplotlib as mpl
 
 from skimage.segmentation import random_walker
 
+import json
+
+
 
 INTERACTIVE = True
-filenames = list_by_quality(0)
-filenames.extend(list_by_quality(1))
+filenames = list_by_quality(1)
 filenames.extend(list_by_quality(2))
 filenames.extend(list_by_quality(3))
+filenames.extend(list_by_quality(0))
 RW_BETA = 10
 THRESHOLD = .4
 
@@ -119,6 +122,7 @@ for N, filename in enumerate(filenames):
         fig.tight_layout()
         fig.subplots_adjust(hspace=0.00, wspace=0.01)
 
+        fig.savefig(f'./output/RWDEMO/{basename}_{n:{0}2}.png')
         if INTERACTIVE:
             plt.show()
 
@@ -196,15 +200,22 @@ for N, filename in enumerate(filenames):
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.05, wspace=0.01)
 
+    fig.savefig(f'./output/RWDEMO/{basename}_m.png')
+
     row = (basename, m_FA, p_FA, m, p, m_L, p_L)
 
-    if not INTERACTIVE:
-        plt.imsave('demo_output/rw_demo/rw_demo_labels.png', labs[crop],
-                cmap=cmscales)
-    else:
-        #plt.imshow(labs[crop], cmap=cmscales)
+    run_data.append(row)
+    if INTERACTIVE:
 
         plt.show()
 
-    if N > 2:
-        break
+    print(row)
+
+    # do this incrementally; i'm afraid
+    if (N % 25 == 0) and (N > 0):
+
+        with open(f'rw_demo_scores_{N//25}.json', 'w') as f:
+            json.dump(run_data, f)
+
+with open(f'rw_demo_scores_all.json', 'w') as f:
+        json.dump(run_data, f)
