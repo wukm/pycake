@@ -213,7 +213,7 @@ for N, filename in enumerate(filenames):
 
     # do this incrementally; i'm afraid
     if (N % 25 == 0) and (N > 0):
-
+        print('backing up data!')
         with open(f'rw_demo_scores_{N//25}.json', 'w') as f:
             json.dump(run_data, f)
 
