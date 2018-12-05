@@ -407,7 +407,7 @@ CYAN = [0, 255, 255]
 YELLOW = [255, 255, 0]
 
 
-def measure_ncs_markings(ucip_img=None, filename=None, verbose=True):
+def measure_ncs_markings(ucip_img=None, filename=None, verbose=False):
     """
     find location of ucip and resolution of image based on input
     (similar to perimeter layer in original NCS data set
