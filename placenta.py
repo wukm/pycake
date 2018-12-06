@@ -13,7 +13,6 @@ There is currently no support for color images.
 
 import numpy as np
 import numpy.ma as ma
-from skimage import segmentation, morphology
 import os.path
 import os
 import json
@@ -23,6 +22,10 @@ from numpy.ma import is_masked
 from skimage.color import gray2rgb
 from skimage.util import img_as_float
 import matplotlib.pyplot as plt
+from hfft import fft_gradient
+from skimage.segmentation import watershed
+from skimage.morphology import binary_erosion, disk
+import scipy.ndimage as ndi
 
 
 def open_typefile(filename, filetype, sample_dir=None, mode=None):
@@ -179,6 +182,16 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
         maskfile = os.path.join(sample_dir, maskfile)
         mask = imread(maskfile, mode='L')
 
+    if filename.startswith('T-BN'):
+        if filename not in FAILS:
+            print('tightening the mask')
+            raw = open_typefile(filename, 'raw')
+            plate = find_plate_in_raw(raw)
+
+            stuff = ma.masked_array(raw_img, mask=mask)
+            return ma.masked_array(stuff, mask=plate)
+        else:
+            print('leaving this mask as it is')
     return ma.masked_array(raw_img, mask=mask)
 
 
@@ -282,7 +295,7 @@ def check_filetype(filename, assert_png=True, assert_standard=False):
 
         return typestub
 
-def list_placentas(label=None, sample_dir=None):
+def list_placentas(label='T-BN', sample_dir=None):
     """
     label is the specifier, basically just ''.startswith()
 
@@ -406,7 +419,38 @@ def cropped_view(img, mask=None):
 CYAN = [0, 255, 255]
 YELLOW = [255, 255, 0]
 
+def find_plate_in_raw(raw, sigma=.01):
+    g = fft_gradient(raw[...,1],sigma=.01)
+    marks=np.zeros(g.shape, np.int32)
+    marks[0,0] = 1
+    marks[g > g.mean()] = 2
+    #marks[g > np.percentile(g,25)] = 2
+    w = watershed(g,marks)
 
+    eroded = binary_erosion(w==2, disk(15))
+
+    labeled, n_labs = ndi.label(eroded)
+
+    # get largest object (0 is gonna be background)
+    # sort labels by decreasing magnitude
+    labs_by_size = sorted(list(range(1,n_labs+1)),
+                          key=lambda l: np.sum(labeled==l), reverse=True)
+
+    # unless something went horribly wrong
+    plate_index = labs_by_size[0]
+
+    return ~(labeled == plate_index)
+
+
+FAILS = [
+    "T-BN0687730.png",
+    "T-BN1629357.png",
+    "T-BN2050224.png",
+    "T-BN6381701.png",
+    "T-BN7476220.png",
+    "T-BN7644170.png",
+    "T-BN7767693.png",
+]
 def measure_ncs_markings(ucip_img=None, filename=None, verbose=False):
     """
     find location of ucip and resolution of image based on input

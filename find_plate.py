@@ -1,48 +1,48 @@
 # coding: utf-8
-filename = 'T-BN4981652.png'
-img = get_named_placenta(filename)
-crop = cropped_args(img)
-plt.imshow(img)
-s = plt.show
-s()
-plt.imshow(img > .9*img.mask)
-plt.show()
-plt.imshow(img > .9*img.max())
-plt.show()
-plt.imshow(img > .8*img.max())
-plt.show()
-plt.imshow(img > .75*img.max())
-plt.show()
-from skimage.filters import sobel
-sobel(img)
-plt.imshow(_)
-plt.show()
-from skimage import filters
-filters.laplace(img)
-plt.imshow(_)
-plt.show()
-dilate_boundary(img, 20)
-plt.imshow(_)
-plt.show()
-filters.laplace(dilate_boundary(img, 30))
-plt.imshow(_)
-plt.show()
-filters.laplace(dilate_boundary(img, 30) == 0)
-plt.imshow(_)
-s()
-filters.laplace(dilate_boundary(img, 30))==0
-plt.imshow(_)
-plt.show()
-from skimage import morphology as mph
-from frangi import frangi_from_image
-fft_gradient(img, sigma=20)
-plt.imshow(_)
-plt.show()
-fft_gradient(img, sigma=15)
-plt.imshow(_)
-plt.show()
-raw_img
-rimg
+#filename = 'T-BN4981652.png'
+#img = get_named_placenta(filename)
+#crop = cropped_args(img)
+#plt.imshow(img)
+#s = plt.show
+#s()
+#plt.imshow(img > .9*img.mask)
+#plt.show()
+#plt.imshow(img > .9*img.max())
+#plt.show()
+#plt.imshow(img > .8*img.max())
+#plt.show()
+#plt.imshow(img > .75*img.max())
+#plt.show()
+#from skimage.filters import sobel
+#sobel(img)
+#plt.imshow(_)
+#plt.show()
+#from skimage import filters
+#filters.laplace(img)
+#plt.imshow(_)
+#plt.show()
+#dilate_boundary(img, 20)
+#plt.imshow(_)
+#plt.show()
+#filters.laplace(dilate_boundary(img, 30))
+#plt.imshow(_)
+#plt.show()
+#filters.laplace(dilate_boundary(img, 30) == 0)
+#plt.imshow(_)
+#s()
+#filters.laplace(dilate_boundary(img, 30))==0
+#plt.imshow(_)
+#plt.show()
+#from skimage import morphology as mph
+#from frangi import frangi_from_image
+#fft_gradient(img, sigma=20)
+#plt.imshow(_)
+#plt.show()
+#fft_gradient(img, sigma=15)
+#plt.imshow(_)
+#plt.show()
+#raw_img
+#rimg
 from placenta import open_typefile
 open_typefile(filename, 'raw')
 plt.imshow(_)
@@ -124,7 +124,7 @@ plt.show()
 labs, nlabs = ndi.label(eroded)
 for i in range(nlabs):
     print(i, np.sum(labs==i))
-    
+
 labs==1
 plt.imshow(_)
 plt.show()

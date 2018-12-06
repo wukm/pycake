@@ -154,8 +154,10 @@ for i, filename in enumerate(placentas):
     ucip = open_typefile(filename, 'ucip')
 
     if REMOVE_CUTS:
-        img, has_cut = mask_cuts_simple(raw_img, ucip, return_success=True)
-        img.data[img.mask] = 0 # actually zero out that area
+        #img, has_cut = mask_cuts_simple(raw_img, ucip, return_success=True)
+        #img.data[img.mask] = 0 # actually zero out that area
+        print("removing cuts doesn't do anything anymore")
+        pass
     else:
         img = raw_img.copy()
 
