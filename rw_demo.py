@@ -16,6 +16,7 @@ from merging import nz_percentile
 from plate_morphology import dilate_boundary
 import os.path, os
 from scoring import confusion, mcc
+from preprocessing import inpaint_hybrid
 
 import matplotlib as mpl
 
@@ -46,7 +47,8 @@ for N, filename in enumerate(filenames):
     img = get_named_placenta(filename)
     crop = cropped_args(img)
     ucip = open_typefile(filename, 'ucip')
-
+    img = inpaint_hybrid(img)
+    
     # make the size of figures more consistent
     if img[crop].shape[0] > img[crop].shape[1]:
         # and rotating it would be fix all this automatically
@@ -209,13 +211,13 @@ for N, filename in enumerate(filenames):
 
         plt.show()
 
-    print(row)
+    #print(row)
 
     # do this incrementally; i'm afraid
     if (N % 25 == 0) and (N > 0):
         print('backing up data!')
-        with open(f'rw_demo_scores_{N//25}.json', 'w') as f:
-            json.dump(run_data, f)
+        with open(f'rw_demo_scores_pp{N//25}.json', 'w') as f:
+            json.dump(run_data, f, indent=True)
 
-with open(f'rw_demo_scores_all.json', 'w') as f:
-        json.dump(run_data, f)
+with open(f'rw_demo_scores_all_pp.json', 'w') as f:
+        json.dump(run_data, f, indent=True)

@@ -8,7 +8,8 @@
 #       ... but it's annoying since you'll need a way to pass args to the
 #           particular strategy
 
-from skimage.morphology import binary_dilation, disk, remove_small_objects
+from skimage.morphology import (binary_dilation, disk, remove_small_objects,
+                                convex_hull_object)
 from skimage.restoration import inpaint_biharmonic
 import numpy as np
 import numpy.ma as ma
@@ -17,6 +18,8 @@ from skimage.util import img_as_float
 from skimage.segmentation import find_boundaries
 from plate_morphology import dilate_boundary
 
+import scipy.ndimage as ndi
+import matplotlib.pyplot as plt
 
 def inpaint_glare(img, threshold=175, window_size=15, mask=None):
     """
@@ -164,6 +167,65 @@ def mask_glare(img, threshold=175, mask_only=False):
         # both the original background *and* these new glared regions
         # are masked
         return ma.masked_array(img, mask=inp)
+
+
+def mask_stump(img, mask=None, mask_only=True):
+
+    if img.ndim < 3:
+        print('better to pass the raw image')
+        channel = img
+    else:
+        channel = img[...,0]
+    
+    C = channel.copy() 
+    if mask is not None:
+        C[mask] = 0
+    elif ma.is_masked(img):
+        C[img.mask] = 0
+        mask = img.mask
+    else:
+        mask = np.zeros(img.shape, np.bool)
+
+    thresh = (170/255)*C.max()
+    b = ndi.white_tophat(C > thresh, 90)
+    b = remove_small_objects(b, 1000)
+    b = convex_hull_object(b)
+    b[mask] = 0
+    
+    plt.imshow(b)
+    labs, n_labs = ndi.label(b)
+
+    # sort by size of object (largest first)
+
+#    incl_count = 0 #objects used
+#    mags = sorted(list(range(1,n_labs+1)), key=lambda lb: np.sum(labs==lb),
+#            reverse=True)
+#    print(mags)
+#    for l in mags:
+#        # big things get weird
+#        if np.sum(b==l) > 5000:
+#            print('skipping very large object')
+#            # get rid of it, whatever
+#            plt.imshow(b==l)
+#            b[b==l] = 0
+#        else:
+#            incl_count += 1
+#        
+#        if incl_count > 4:
+#            print('only removing a few things here')
+#            b[b==l] = 0
+#    
+#    print('b after')
+#    plt.imshow(b)
+#    b = ndi.binary_dilation(b, disk(15))
+#
+    if mask_only:
+        return b
+
+    else:
+        # will add to existing mask
+        return ma.masked_array(img, mask=b)
+
 
 
 DARK_RED = np.array([103, 15, 23]) / 255.

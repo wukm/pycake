@@ -11,6 +11,7 @@ from placenta import (get_named_placenta, list_by_quality, cropped_args,
                       mimg_as_float)
 
 from frangi import frangi_from_image
+import numpy.ma as ma
 from hfft import fft_gradient, fft_hessian, fft_gaussian
 from merging import nz_percentile
 from plate_morphology import dilate_boundary
