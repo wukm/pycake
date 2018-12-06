@@ -17,6 +17,7 @@ import os.path
 import os
 import json
 from scipy.ndimage import imread
+from skimage import morphology
 
 from numpy.ma import is_masked
 from skimage.color import gray2rgb

@@ -202,7 +202,7 @@ for N, filename in enumerate(filenames):
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.05, wspace=0.01)
 
-    fig.savefig(f'./output/RWDEMO/{basename}_m.png')
+    fig.savefig(f'./output/RWDEMO1206/{basename}_m.png')
 
     row = (basename, m_FA, p_FA, m, p, m_L, p_L)
 
@@ -216,8 +216,8 @@ for N, filename in enumerate(filenames):
     # do this incrementally; i'm afraid
     if (N % 25 == 0) and (N > 0):
         print('backing up data!')
-        with open(f'rw_demo_scores_pp{N//25}.json', 'w') as f:
+        with open(f'rw_demo_scores_1206{N//25}.json', 'w') as f:
             json.dump(run_data, f, indent=True)
 
-with open(f'rw_demo_scores_all_pp.json', 'w') as f:
+with open(f'rw_demo_scores_all_1206.json', 'w') as f:
         json.dump(run_data, f, indent=True)
