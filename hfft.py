@@ -49,6 +49,7 @@ def fft_gaussian(img,sigma, kernel=None):
         kern_x = discrete_gaussian_kernel(img.shape[0], sigma)
         kern_y = discrete_gaussian_kernel(img.shape[1], sigma)
     elif kernel == 'sampled':
+        # scaling factor for 1d gaussian (use it twice)
         A = 1 / (np.sqrt((2*np.pi)*sigma**2))
         kern_x = A*signal.gaussian(img.shape[0], sigma)
         kern_y = A*signal.gaussian(img.shape[1], sigma)
@@ -65,6 +66,8 @@ def discrete_gaussian_kernel(n_samples, sigma):
     will return a window centered a zero
     i.e. arange(-n_samples//2, n_samples//2+1)
 
+    not sure how to center it on zero though, since integers only
+
     note! to make this work similarly to fft_gaussian, this uses
     sigma = np.sqrt(t). Usually you'll find this in terms of t
 
@@ -73,6 +76,8 @@ def discrete_gaussian_kernel(n_samples, sigma):
     dom = np.arange(-(n_samples//2), (n_samples//2) + 1)
     #there should be a scaling parameter alpha but whatever
     #return np.exp(-t) * iv(dom,t)
+    if (n_samples % 2) == 0:
+        dom = dom[1:]
     return ive(dom,sigma**2)
 
 def fft_dgk(img,sigma,order=0,A=None):

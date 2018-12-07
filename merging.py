@@ -175,7 +175,7 @@ def sieve_scales(multiscale, high_percentile, low_percentile, min_size=None,
     print()
     return sieved
 
-def view_slices(multiscale, axis=0, scales=None, cmap='nipy_spectral',
+def view_slices(multiscale, axis=0, scales=None, crop=None, cmap='nipy_spectral',
                 vmin=0, vmax=1.0, outnames=None, show_colorbar=True):
     """ scales is just to use for a figure title
         crop before you get in here.
@@ -201,11 +201,18 @@ def view_slices(multiscale, axis=0, scales=None, cmap='nipy_spectral',
 
     plt.close('all')
     for v, sigma, outname in zip(V, scales, outnames):
-
+        
+        if crop is None:
+            viewable = v
+        else:
+            viewable = v[crop]
         if outname is None:
-            plt.imshow(v, cmap=cmap, vmin=vmin, vmax=vmax)
+
+            plt.imshow(viewable, cmap=cmap, vmin=vmin, vmax=vmax)
+
             mng = plt.get_current_fig_manager()
-            mng.window.showMaximized()
+            #mng.window.showMaximized()
+            mng.window.showFullScreen()
             plt.tight_layout()
             if sigma is not None:
                 plt.title(r'$\sigma={:.2f}$'.format(sigma))
@@ -218,5 +225,5 @@ def view_slices(multiscale, axis=0, scales=None, cmap='nipy_spectral',
 
         else:
             # save them non interactively with imsave
-            plt.imsave(outname, v, cmap=cmap, vmin=vmin, vmax=vmax)
+            plt.imsave(outname, viewable, cmap=cmap, vmin=vmin, vmax=vmax)
 
