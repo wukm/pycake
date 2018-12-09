@@ -77,7 +77,7 @@ DARK_BG = False
 # Along with the above, this will return "opposite" signed frangi scores.
 # if this is True, then DARK_BG controls the "polarity" of the filter.
 # See frangi.get_frangi_targets for details.
-SIGNED_FRANGI = False
+SIGNED_FRANGI = True
 
 # Do not calculate hessian scores close to the boundary (this is important
 # mainly in terms of ensuring that the hessian is very large on the edge of
@@ -90,7 +90,7 @@ REMOVE_GLARE = True
 REMOVE_CUTS = True
 
 # Which scales to use
-SCALE_RANGE = (-1.5, 3.5); SCALE_TYPE = 'logarithmic'
+SCALE_RANGE = (-1.5, 3.2); SCALE_TYPE = 'logarithmic'
 #SCALE_RANGE = (.2, 12); SCALE_TYPE = 'linear'
 N_SCALES = 20
 
@@ -112,8 +112,6 @@ GRADIENT_FILTER = False
 
 # Scoring Decisions (don't need to touch these)
 UCIP_RADIUS = 60  # area around the umbilical cord insertion point to ignore
-INV_SIGMA = 0.8
-# some other initializations, don't mind me
 
 
 
@@ -150,6 +148,7 @@ for i, filename in enumerate(placentas):
     # --- Setup, Preprocessing, Frangi Filter (it's mixed up) -----------------
 
     raw_img = get_named_placenta(filename, mode=FLATTEN_MODE)
+    cimg = open_typefile(filename, 'raw')
 
     ucip = open_typefile(filename, 'ucip')
 
@@ -209,7 +208,7 @@ for i, filename in enumerate(placentas):
             print("saving frangi targets to ", npzfile)
             np.savez_compressed(npzfile, F=F)
 
-    # --- Merging & Postprocessing --------------------------------------------
+    # - Multiscale Analysis, etc --------------------------------------------
 
     # This is the maximum frangi response over all scales at each location
     Fmax = F.max(axis=-1)
@@ -229,9 +228,8 @@ for i, filename in enumerate(placentas):
 
     print(table)
     # threshold the responses at each of these values and get labels of max
-    approx, labs = apply_threshold(F, ALPHAS, return_labels=True)
 
-    # --- Scoring and Outputs -------------------------------------------------
+    # --- Segmentation Postprocessing -------------------------------------------------
 
     # get the main (boolean) tracefile and the RGB tracefiles
     trace = open_tracefile(filename, as_binary=True)
@@ -269,28 +267,43 @@ for i, filename in enumerate(placentas):
     # trace_smaller_only = filter_widths(min_widths, min_width=3, max_width=17)
     # trace_smaller_only != 0
 
-    # use only some scales
-    #approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], ALPHAS[LO_offset:])
+
+    # -- Segmentation Strategies ---------------------------------------------
+    
+    # strawman
+    from skimage.filters import threshold_mean
+    approx_sm = threshold_mean(img.filled(img.compressed().mean()))
+
+    approx_PF, labs_PF = apply_threshold(F, ALPHAS, return_labels=True)
+    m_score_PF, counts_PF = mcc(approx_PF, trace, ucip_mask, return_counts=True)
+    confuse_PF = confusion(approx_PF, trace, bg_mask=ucip_mask)
+
     approx_FA, labs_FA = apply_threshold(F, FIXED_ALPHA)
-
-    # fix labels to incorporate offset
-    #labs_LO = (labs_LO != 0)*(labs_LO + LO_offset)
-
-    # confusion matrix against default trace
-    confuse = confusion(approx, trace, bg_mask=ucip_mask)
-    #confuse_LO = confusion(approx_LO, trace, bg_mask=ucip_mask)
+    m_score_FA, counts_FA = mcc(approx_FA, trace, ucip_mask, return_counts=True)
     confuse_FA = confusion(approx_FA, trace, bg_mask=ucip_mask)
 
-    m_score, counts = mcc(approx, trace, ucip_mask, return_counts=True)
-    m_score_FA, counts_FA = mcc(approx_FA, trace, ucip_mask,
-                                return_counts=True)
+    approx_rw, labs_rw = random_walk_scalewise(F, .4, return_labels=True)
+    confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
+    m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask, return_counts=True)
+    pnc_rw = (skeltrace & approx_rw).sum() / skeltrace.sum()
+    
+
+    # PUT MARGIN ADD IN HERE
+
+
+
+    # use only some scales
+    #approx_LO, labs_LO = apply_threshold(F[:,:, LO_offset:], ALPHAS[LO_offset:])
+    # fix labels to incorporate offset
+    #labs_LO = (labs_LO != 0)*(labs_LO + LO_offset)
+    #confuse_LO = confusion(approx_LO, trace, bg_mask=ucip_mask)
+
+    #TP, TN, FP, FN = counts
 
     # this all just verifies that the 4 categories were added up
     # correctly and match the total number of pixels in the reported
     # placental plate.
-    TP, TN, FP, FN = counts # return these for more analysis?
-
-    total = np.sum(~ucip_mask)
+    #total = np.sum(~ucip_mask)
     #print(f'TP: {TP}\t TN: {TN}\nFP: {FP}\tFN: {FN}')
     # just a sanity check
     #print(f'TP+TN+FP+FN={TP+TN+FP+FN}\ttotal pixels={total}')
@@ -299,79 +312,9 @@ for i, filename in enumerate(placentas):
     #approx_rw, markers, margins_added = random_walk_fill(img, Fmax, .3, .01,
     #                                                     DARK_BG)
 
-    approx_rw, labs_rw = random_walk_scalewise(F, .4, return_labels=True)
-
-    confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
-    m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask,
-                                return_counts=True)
-    pnc_rw = (skeltrace & approx_rw).sum() / skeltrace.sum()
-
-
-    # --- Generating Visual Outputs--------------------------------------------
-
-    SCALE_CMAP = ('plasma', (1,1,1,1))
-
-    crop = cropped_args(img)  # these indices crop out the mask significantly
-
-    fmax_colors = plt.cm.plasma
-    fmax_colors.set_bad('k', 1)
-    # save the raw, unaltered image
-    plt.imsave(outname('0_raw'), raw_img[crop].filled(0), cmap=plt.cm.gray)
-
-    # save the preprocessed image
-    plt.imsave(outname('1_img'), img[crop].filled(0), cmap=plt.cm.gray)
-
-    # save the maximum frangi output over all scales
-    plt.imsave(outname('2_fmax'), ma.masked_where(Fmax==0,Fmax)[crop], vmin=0,
-               vmax=1.0, cmap=fmax_colors)
-
-    # only save the colorbar the first time
-    save_colorbar = (i==0)
-    scale_label_figure(labs, scales, crop=crop,
-                       savefilename=outname('3_labeled'), image_only=True,
-                       save_colorbar_separate=save_colorbar,
-                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
-                       output_dir=OUTPUT_DIR)
-
-    plt.imsave(outname('4_confusion'), confuse[crop])
-
-    scale_label_figure(labs_rw, scales, crop=crop,
-                       savefilename=outname('A_labeled_rw'), image_only=True,
-                       save_colorbar_separate=save_colorbar,
-                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
-                       output_dir=OUTPUT_DIR)
-
-
-    plt.imsave(outname('7_confusion_FA'), confuse_FA[crop])
-    plt.imsave(outname('B_confusion_rw'), confuse_rw[crop])
-    #plt.imsave(outname('A_markers_rw'), markers[crop])
-    #plt.imsave(outname('9_margin_for_rw'), confuse_margins[crop])
     percent_covered = (skeltrace & approx).sum() / skeltrace.sum()
     percent_covered_FA = (skeltrace & approx_FA).sum() / skeltrace.sum()
 
-
-
-    st_colors = {
-        'TN': (79,79,79),  # true negative# 'f7f7f7'
-        'TP': (0, 0, 0),  # true positive  # '000000'
-        'FN': (201,53,108),  # false negative # 'f1a340' orange
-        'FP': (92,92,92),  # false positive
-        'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
-    }
-
-    plt.imsave(outname('5_coverage'), confusion(approx, skeltrace,
-                                                colordict=st_colors)[crop])
-    plt.imsave(outname('8_coverage_FA'), confusion(approx_FA, skeltrace,
-                                                   colordict=st_colors)[crop])
-    plt.imsave(outname('C_coverage_rw'), confusion(approx_rw, skeltrace,
-                                                   colordict=st_colors)[crop])
-
-    # make the graph that shows what scale the max was pulled from
-
-    scale_label_figure(labs_FA, scales, crop=crop,
-                       savefilename=outname('6_labeled_FA'), image_only=True,
-                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
-                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
 
     V = np.transpose(F, axes=(2, 0, 1))
 
@@ -383,19 +326,11 @@ for i, filename in enumerate(placentas):
     approx_S, labs_S = (sieved != 0), sieved
     confuse_S = confusion(approx_S, trace, bg_mask=ucip_mask)
 
-    scale_label_figure(labs_S, scales, crop=crop,
-                       savefilename=outname('D_labeled_S'), image_only=True,
-                       basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
-                       save_colorbar_separate=False, output_dir=OUTPUT_DIR)
-
-    plt.imsave(outname('E_confusion_S'), confuse_S[crop])
-
     m_score_S, counts_S = mcc(approx_S, trace, ucip_mask, return_counts=True)
     pnc_S = (skeltrace & approx_S).sum() / skeltrace.sum()
 
     mccs[filename] =  (m_score, m_score_FA, m_score_rw, m_score_S )
     pncs[filename] = (percent_covered, percent_covered_FA, pnc_rw, pnc_S)
-
 
     print('percentage of skeltrace covered:(percentile filtering)',
           f'{percent_covered:.2%}')
@@ -434,6 +369,82 @@ for i, filename in enumerate(placentas):
     print(scoretable)
     print('\n\n')
     print(scoretable.to_latex())
+    # --- Generating Visual Outputs--------------------------------------------
+    
+    # cmap and the "set bad" argument / mask color
+    SCALE_CMAP = ('plasma', (1,1,1,1))
+
+    crop = cropped_args(img)  # these indices crop out the mask significantly
+
+    fmax_colors = plt.cm.plasma
+    fmax_colors.set_bad('k', 1)
+
+    # save the raw, unaltered image
+    plt.imsave(outname('0_raw'), cimg[crop])
+
+    # save the preprocessed image
+    plt.imsave(outname('1_img'), img[crop].filled(0), cmap=plt.cm.gray)
+
+    # save the maximum frangi output over all scales
+    plt.imsave(outname('2_fmax'), ma.masked_where(Fmax==0,Fmax)[crop], vmin=0,
+               vmax=1.0, cmap=fmax_colors)
+
+    # only save the colorbar the first time
+    #save_colorbar = (i==0)
+    #scale_label_figure(labs, scales, crop=crop,
+    #                   savefilename=outname('3_labeled'), image_only=True,
+    #                   save_colorbar_separate=save_colorbar,
+    #                   basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
+    #                   output_dir=OUTPUT_DIR)
+
+    #plt.imsave(outname('4_confusion'), confuse[crop])
+
+    #scale_label_figure(labs_rw, scales, crop=crop,
+    #                   savefilename=outname('A_labeled_rw'), image_only=True,
+    #                   save_colorbar_separate=save_colorbar,
+    #                   basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
+    #                   output_dir=OUTPUT_DIR)
+
+
+    #plt.imsave(outname('7_confusion_FA'), confuse_FA[crop])
+    #plt.imsave(outname('B_confusion_rw'), confuse_rw[crop])
+    ##plt.imsave(outname('A_markers_rw'), markers[crop])
+    ##plt.imsave(outname('9_margin_for_rw'), confuse_margins[crop])
+
+
+
+    st_colors = {
+        'TN': (79,79,79),  # true negative# 'f7f7f7'
+        'TP': (0, 0, 0),  # true positive  # '000000'
+        'FN': (201,53,108),  # false negative # 'f1a340' orange
+        'FP': (92,92,92),  # false positive
+        'mask': (247, 200, 200)  # mask color (not used in MCC calculation)
+    }
+
+    #plt.imsave(outname('5_coverage'), confusion(approx, skeltrace,
+    #                                            colordict=st_colors)[crop])
+    #plt.imsave(outname('8_coverage_FA'), confusion(approx_FA, skeltrace,
+    #                                               colordict=st_colors)[crop])
+    #plt.imsave(outname('C_coverage_rw'), confusion(approx_rw, skeltrace,
+    #                                               colordict=st_colors)[crop])
+
+    # make the graph that shows what scale the max was pulled from
+
+    #scale_label_figure(labs_FA, scales, crop=crop,
+    #                   savefilename=outname('6_labeled_FA'), image_only=True,
+    #                   basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
+    #                   save_colorbar_separate=False, output_dir=OUTPUT_DIR)
+
+
+    #scale_label_figure(labs_S, scales, crop=crop,
+    #                   savefilename=outname('D_labeled_S'), image_only=True,
+    #                   basecolor=SCALE_CMAP[1], base_cmap=SCALE_CMAP[0],
+    #                   save_colorbar_separate=False, output_dir=OUTPUT_DIR)
+
+    #plt.imsave(outname('E_confusion_S'), confuse_S[crop])
+
+
+
 
     ### THIS IS ALL A HORRIBLE MESS. FIX IT
     # why don't you just return the dict instead
@@ -479,7 +490,7 @@ runlog = {
     'remove_glare': REMOVE_GLARE,
     'files': list(placentas),
     'MCCS': mccs,
-    'PNC': pncs,
+    'PNCS': pncs,
     'precisions': precisions
 }
 
