@@ -255,7 +255,7 @@ def skeletonize_trace(T, T2=None):
         return np.logical_or(thinned, thinned_2)
 
 
-def confusion(test, truth, bg_mask=None, colordict=None, tint_mask=True):
+def confusion(test, truth=None, bg_mask=None, colordict=None, tint_mask=True):
     """
     distinct coloration of false positives and negatives.
 
@@ -303,6 +303,8 @@ def confusion(test, truth, bg_mask=None, colordict=None, tint_mask=True):
                      'mask': (209,209,209)
                      }
     #TODO: else check if mask is specified and add it as color of TN otherwise
+    if truth is None:
+        truth = np.zeros_like(test)
 
     true_neg_color = np.array(colordict['TN'], dtype='f')/255
     true_pos_color = np.array(colordict['TP'], dtype='f')/255
@@ -378,7 +380,7 @@ def compare_trace(approx, trace=None, filename=None,
     return C
 
 
-def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
+def mcc(test, truth=None, bg_mask=None, score_bg=False, return_counts=False):
     """
     Matthews correlation coefficient
     returns a float between -1 and 1
@@ -399,6 +401,8 @@ def mcc(test, truth, bg_mask=None, score_bg=False, return_counts=False):
     false positives will be inflated.
 
     """
+    if truth is None:
+        truth = np.zeros_like(test)
 
     true_pos = ((test == truth) & truth)
     true_neg = ((test == truth) & ~truth)

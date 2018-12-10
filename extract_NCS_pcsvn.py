@@ -87,7 +87,6 @@ DILATE_PER_SCALE = True
 # Attempt to remove glare from sample (some are OK, some are bad)
 FLATTEN_MODE = 'L' # 'G' or 'L'
 REMOVE_GLARE = True
-REMOVE_CUTS = True
 
 # Which scales to use
 SCALE_RANGE = (-1.5, 3.2); SCALE_TYPE = 'logarithmic'
@@ -269,27 +268,68 @@ for i, filename in enumerate(placentas):
 
 
     # -- Segmentation Strategies ---------------------------------------------
-    
+
     # strawman
     from skimage.filters import threshold_mean
+    from functools import partial
+
+    confusion_matrix = partial(confusion, truth=trace, bg_mask=ucip_mask)
+    mcc_with_counts = partial(mcc, truth=trace, bg_mask=ucip_mask,
+                              return_counts=True)
+    percent_network_coverage = lambda a: np.sum(skeltrace&a)/np.sum(skeltrace)
+    precision = lambda t: int(t[0]) / int(t[0] + t[2])
+    V = np.transpose(F, axes=(2, 0, 1))
+
+
     approx_sm = threshold_mean(img.filled(img.compressed().mean()))
+    mcc_sm, counts_sm = mcc_with_counts(approx_sm)
+    prec_sm = precision(counts_sm)
+    confuse_sm = confusion_matrix(approx_sm)
+    pnc_sm = percent_network_coverage(approx_sm)
 
     approx_PF, labs_PF = apply_threshold(F, ALPHAS, return_labels=True)
-    m_score_PF, counts_PF = mcc(approx_PF, trace, ucip_mask, return_counts=True)
-    confuse_PF = confusion(approx_PF, trace, bg_mask=ucip_mask)
+    mcc_PF, counts_PF = mcc_with_counts(approx_PF)
+    confuse_PF = confusion_matrix(approx_PF)
+    pnc_PF = percent_network_coverage(approx_PF)
+    prec_PF = precision(counts_PF)
 
     approx_FA, labs_FA = apply_threshold(F, FIXED_ALPHA)
-    m_score_FA, counts_FA = mcc(approx_FA, trace, ucip_mask, return_counts=True)
-    confuse_FA = confusion(approx_FA, trace, bg_mask=ucip_mask)
+    mcc_FA, counts_FA = mcc(approx_FA, trace, ucip_mask, return_counts=True)
+    confuse_FA = confusion_matrix(approx_FA)
+    pnc_FA = percent_network_coverage(approx_FA)
+    prec_FA = precision(counts_FA)
 
-    approx_rw, labs_rw = random_walk_scalewise(F, .4, return_labels=True)
-    confuse_rw = confusion(approx_rw, trace, bg_mask=ucip_mask)
-    m_score_rw, counts_rw = mcc(approx_rw, trace, ucip_mask, return_counts=True)
-    pnc_rw = (skeltrace & approx_rw).sum() / skeltrace.sum()
-    
+    approx_RW, labs_RW = random_walk_scalewise(F, FIXED_ALPHA, return_labels=True)
+    confuse_RW = confusion_matrix(approx_RW)
+    mcc_RW, counts_RW = mcc_with_counts(approx_RW)
+    pnc_RW = percent_network_coverage(approx_RW)
+    prec_RW = precision(counts_RW)
+
+    sieved = sieve_scales(V, 98, 95)
+    approx_S, labs_S = (sieved != 0), sieved
+    confuse_S = confusion_matrix(approx_S)
+    mcc_S, counts_S = mcc_with_counts(approx_S)
+    pnc_S = percent_network_coverage(approx_S)
+    prec_S = precision(counts_S)
 
     # PUT MARGIN ADD IN HERE
+    #
+    #
+    #
+    #
 
+    mccs[filename] =  (mcc_PF, mcc_FA, mcc_RW, mcc_S, mcc_sm)
+    pncs[filename] = (pnc_PF, pnc_FA, pnc_RW, pnc_S, pnc_sm)
+    precisions[filename] = (prec_PF, prec_FA, prec_RW, prec_S, prec_sm)
+
+    scoretable = pandas.DataFrame(np.vstack((mccs[filename], pncs[filename],
+                                            precisions[filename])),
+                                  columns=('PF', 'FA', 'RW', 'PS', 'SM'),
+                                  index=('MCC', 'skel coverage', 'precision'))
+
+    print(scoretable)
+    print('\n\n')
+    print(scoretable.to_latex())
 
 
     # use only some scales
@@ -312,65 +352,13 @@ for i, filename in enumerate(placentas):
     #approx_rw, markers, margins_added = random_walk_fill(img, Fmax, .3, .01,
     #                                                     DARK_BG)
 
-    percent_covered = (skeltrace & approx).sum() / skeltrace.sum()
-    percent_covered_FA = (skeltrace & approx_FA).sum() / skeltrace.sum()
 
 
-    V = np.transpose(F, axes=(2, 0, 1))
 
     #view_slices(F[crop], axis=-1, scales=scales)
 
-    print('starting to sieve')
-    sieved = sieve_scales(V, 98, 95)
-
-    approx_S, labs_S = (sieved != 0), sieved
-    confuse_S = confusion(approx_S, trace, bg_mask=ucip_mask)
-
-    m_score_S, counts_S = mcc(approx_S, trace, ucip_mask, return_counts=True)
-    pnc_S = (skeltrace & approx_S).sum() / skeltrace.sum()
-
-    mccs[filename] =  (m_score, m_score_FA, m_score_rw, m_score_S )
-    pncs[filename] = (percent_covered, percent_covered_FA, pnc_rw, pnc_S)
-
-    print('percentage of skeltrace covered:(percentile filtering)',
-          f'{percent_covered:.2%}')
-    print('percentage of skeltrace covered (fixed alpha):',
-          f'{percent_covered_FA:.2%}')
-    print('percentage of skeltrace covered (random_walker):',
-          f'{pnc_rw:.2%}')
-    print('percentage of skeltrace covered (sieving):',
-          f'{pnc_S:.2%}')
-
-    print(f'mcc score of {m_score:.3} for percentile filtering')
-    print(f'mcc score of {m_score_FA:.3} with fixed alpha {FIXED_ALPHA}')
-    print(f'mcc score of {m_score_rw:.3} after random walker')
-    print(f'mcc score of {m_score_S:.3} after sieving')
-
-
-    precision_score = lambda t: int(t[0]) / int(t[0] + t[2])
-
-    precision = precision_score(counts)
-    precision_FA = precision_score(counts_FA)
-    precision_rw = precision_score(counts_rw)
-    precision_S = precision_score(counts_S)
-
-    precisions[filename] = (precision, precision_FA, precision_rw, precision_S)
-
-    print(f'precision of {precision:.3} for percentile filtering')
-    print(f'precision of {precision_FA:.3} for fixed alpha')
-    print(f'precision of {precision_rw:.3} for random walker')
-    print(f'precision of {precision_S:.3} for sieving')
-
-    scoretable = pandas.DataFrame(np.vstack((mccs[filename], pncs[filename],
-                                            precisions[filename])),
-                                  columns=('PF', 'FA', 'RW', 'PS'),
-                        index=('MCC', 'skel coverage', 'precision'))
-
-    print(scoretable)
-    print('\n\n')
-    print(scoretable.to_latex())
     # --- Generating Visual Outputs--------------------------------------------
-    
+
     # cmap and the "set bad" argument / mask color
     SCALE_CMAP = ('plasma', (1,1,1,1))
 

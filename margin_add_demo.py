@@ -19,6 +19,7 @@ from skimage.filters.rank import enhance_contrast_percentile as ecp
 from skimage.morphology import disk, binary_dilation, thin
 from scoring import confusion, mcc
 
+from postprocessing import margin_add
 placentas = list_by_quality(0)
 
 beta =0.35
@@ -68,7 +69,7 @@ for filename in placentas:
     p_PFA = precision_score(counts_PFA)
     p_FA = precision_score(counts_FA)
 
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(30,10))
+    fig, ax = plt.subplots(nrows=1, ncols=4, figsize=(30,10))
 
     ax[0].imshow(confusion(approx_FA, trace)[crop])
     ax[0].set_title(rf'   fixed $\alpha={THRESHOLD}$', loc='left')
@@ -85,6 +86,6 @@ for filename in placentas:
     ax[2].set_title(f'MCC: {m:.2f}\n'
                         f'precision: {p:.2%}', loc='right')
 
-    [a.axis('off') for a in ax] 
+    [a.axis('off') for a in ax]
 
     plt.show()

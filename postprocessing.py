@@ -5,12 +5,18 @@ doing things to the Frangi targets, i.e. feeding them into other algorithms
 """
 
 from skimage.filters import sobel
-from skimage.morphology import remove_small_holes, remove_small_objects, thin
+from skimage.morphology import (remove_small_objects, thin, disk,
+                                binary_dilation)
+
 from frangi import frangi_from_image
 from merging import apply_threshold, nz_percentile
 from plate_morphology import dilate_boundary
 from skimage.segmentation import random_walker
 import numpy as np
+
+from skimage.filters.rank import enhance_contrast_percentile as ecp
+from scipy.ndimage import distance_transform_edt as edt
+
 
 def random_walk_fill(img, Fmax, high_thresh, low_thresh, dark_bg):
     """
@@ -64,3 +70,44 @@ def random_walk_scalewise(F, high_thresh=0.4, rw_beta=130,
         # argmax grabs the first scale where it was satisfied
         # so this will grab the lowest scale that matches
         return W.any(axis=0), W.argmax(axis=0)
+
+
+def dilate_to_rim(spine, margin, thin_spine=False, max_radius=12,
+               return_radii=False):
+    """Grow spine region by dilating towards closest rim point of the trough.
+
+    Parameters:
+    -----------
+    thin_spine: bool, optional
+        Thin the spine before performing dilation. This makes it much faster
+        at the risk of giving an incomplete fill if the spine isn't in the
+        middle of the margins, also makes returning the labels more meaningful
+
+    Returns
+    -------
+    ...
+
+    """
+
+    D = np.ones(spine.shape, np.bool)
+    D[margins] = 0
+
+    spine_dists = edt(D)
+
+    # either thin first or don't, i dunno
+    if thin_spine:
+        spine_dists[~thin(spine)] = 0
+    else:
+        spine_dists[~spine] = 0
+
+    spine_radii = np.round(spine_dists).astype('int')
+
+    dilation_stack = np.stack([binary_dilation(spine_radii==r, selem=disk(r))
+                               for r in range(1,max_radius+1)])
+
+    approx = dilstack.any(axis=0)
+
+    if not return_radii:
+        return approx
+    else:
+        return approx, dilation_stack.argmax(axis=0)
