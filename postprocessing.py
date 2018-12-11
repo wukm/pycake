@@ -72,12 +72,14 @@ def random_walk_scalewise(F, high_thresh=0.4, rw_beta=130,
         return W.any(axis=0), W.argmax(axis=0)
 
 
-def dilate_to_rim(spine, margin, thin_spine=False, max_radius=12,
+def dilate_to_rim(spine, rim, thin_spine=False, max_radius=15,
                return_radii=False):
     """Grow spine region by dilating towards closest rim point of the trough.
 
     Parameters:
     -----------
+    spine, rim: 2D ndarray type bool
+        spine are points, dilate to rim
     thin_spine: bool, optional
         Thin the spine before performing dilation. This makes it much faster
         at the risk of giving an incomplete fill if the spine isn't in the
@@ -90,7 +92,7 @@ def dilate_to_rim(spine, margin, thin_spine=False, max_radius=12,
     """
 
     D = np.ones(spine.shape, np.bool)
-    D[margins] = 0
+    D[rim] = 0
 
     spine_dists = edt(D)
 
@@ -105,7 +107,7 @@ def dilate_to_rim(spine, margin, thin_spine=False, max_radius=12,
     dilation_stack = np.stack([binary_dilation(spine_radii==r, selem=disk(r))
                                for r in range(1,max_radius+1)])
 
-    approx = dilstack.any(axis=0)
+    approx = dilation_stack.any(axis=0)
 
     if not return_radii:
         return approx

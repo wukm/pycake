@@ -185,14 +185,16 @@ def get_named_placenta(filename, sample_dir=None, masked=True,
 
     if filename.startswith('T-BN'):
         if filename not in FAILS:
-            print('tightening the mask')
+            #print('tightening the mask')
             raw = open_typefile(filename, 'raw')
             plate = find_plate_in_raw(raw)
 
             stuff = ma.masked_array(raw_img, mask=mask)
             return ma.masked_array(stuff, mask=plate)
         else:
-            print('leaving this mask as it is')
+            #print('leaving this mask as it is')
+            pass
+
     return ma.masked_array(raw_img, mask=mask)
 
 
@@ -452,6 +454,7 @@ FAILS = [
     "T-BN7644170.png",
     "T-BN7767693.png",
 ]
+
 def measure_ncs_markings(ucip_img=None, filename=None, verbose=False):
     """
     find location of ucip and resolution of image based on input
