@@ -176,8 +176,8 @@ def mask_stump(img, mask=None, mask_only=True):
         channel = img
     else:
         channel = img[...,0]
-    
-    C = channel.copy() 
+
+    C = channel.copy()
     if mask is not None:
         C[mask] = 0
     elif ma.is_masked(img):
@@ -189,11 +189,8 @@ def mask_stump(img, mask=None, mask_only=True):
     thresh = (170/255)*C.max()
     b = ndi.white_tophat(C > thresh, 90)
     b = remove_small_objects(b, 1000)
-    b = convex_hull_object(b)
+    #b = convex_hull_object(b)
     b[mask] = 0
-    
-    plt.imshow(b)
-    labs, n_labs = ndi.label(b)
 
     # sort by size of object (largest first)
 
@@ -210,11 +207,11 @@ def mask_stump(img, mask=None, mask_only=True):
 #            b[b==l] = 0
 #        else:
 #            incl_count += 1
-#        
+#
 #        if incl_count > 4:
 #            print('only removing a few things here')
 #            b[b==l] = 0
-#    
+#
 #    print('b after')
 #    plt.imshow(b)
 #    b = ndi.binary_dilation(b, disk(15))

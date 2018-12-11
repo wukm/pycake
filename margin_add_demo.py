@@ -22,8 +22,9 @@ from scoring import confusion, mcc
 from skimage.exposure import rescale_intensity
 from postprocessing import dilate_to_rim
 from preprocessing import inpaint_hybrid
+import json
 
-placentas = list_by_quality(1)
+placentas = list_by_quality(0)
 
 beta =0.15
 gamma = .5
@@ -111,3 +112,7 @@ for filename in placentas:
 
     mccs.append((filename, m_FA, m_PFA, m, m2))
     precs.append((filename, p_FA, p_PFA, p, p2))
+
+runlog = { 'mccs': mccs, 'precs': precs}
+with open('181211-margin_add_demo_quality0.json', 'w') as f:
+    json.dump(runlog, f, indent=True)
