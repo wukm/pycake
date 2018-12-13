@@ -4,6 +4,7 @@ import numpy as np
 import numpy.ma as ma
 
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+from hfft import fft_hessian
 from numpy.linalg import eig
 
 
@@ -165,7 +166,7 @@ def principal_directions(img, sigma, H=None, mask=None):
     """
 
     if H is None:
-        H = hessian_matrix(img, sigma)
+        H = fft_hessian(img, sigma)
 
     Hxx, Hxy, Hyy = H
 

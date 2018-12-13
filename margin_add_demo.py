@@ -24,7 +24,7 @@ from postprocessing import dilate_to_rim
 from preprocessing import inpaint_hybrid
 import json
 
-placentas = list_by_quality(0)
+placentas = list_by_quality(0, N=1)
 
 beta =0.15
 gamma = .5
@@ -57,8 +57,8 @@ for filename in placentas:
     approx, radii = dilate_to_rim(bspine, nf > .05, thin_spine=True,
                                   return_radii=True)
 
-    approx2, radii2 = dilate_to_rim(spine > (THRESHOLD*255), nf > .05, thin_spine=True,
-                                  return_radii=True)
+    approx2, radii2 = dilate_to_rim(spine > (THRESHOLD*255), nf > .05,
+                                    thin_spine=True, return_radii=True)
 
     approx_FA = (spine > (THRESHOLD*255))
     approx_PFA = bspine
@@ -114,5 +114,5 @@ for filename in placentas:
     precs.append((filename, p_FA, p_PFA, p, p2))
 
 runlog = { 'mccs': mccs, 'precs': precs}
-with open('181211-margin_add_demo_quality0.json', 'w') as f:
-    json.dump(runlog, f, indent=True)
+#with open('181211-margin_add_demo_quality0.json', 'w') as f:
+#    json.dump(runlog, f, indent=True)
