@@ -181,7 +181,8 @@ def connect_iterative(arr, scores=None, max_iterations=10):
 def _euclidean_distance(p0,p1):
     return np.sqrt((p0[0]-p1[0])**2 + (p0[1]-p1[1])**2)
 
-def connect_iterative_by_label(arr, scores=None, max_iterations=10,
+
+def connect_iterative_by_label(arr, scores, max_iterations=10,
                                max_dist=None):
     """Lines that connect nearest endpoints, colored by the mean value of
         that line through the matrix scores
@@ -204,8 +205,9 @@ def connect_iterative_by_label(arr, scores=None, max_iterations=10,
     # into matchable but let's keep it separate
     dists = np.zeros(matchable.shape, dtype=np.float64)
     print(f'there are {len(endlist)} endpoints')
-    # check compatibility of labels
-
+    
+    print('checking compatibility of endpoints by labels and calculating distances')
+    
     for j, jlab in enumerate(endlabs):
 
         # still calculate the distances below
@@ -216,11 +218,11 @@ def connect_iterative_by_label(arr, scores=None, max_iterations=10,
             if jlab[0] != 1:
                 if jlab[0] == klab[0]:
                     matchable[j,k] = 0
-                    break
+                    continue
             if jlab[1] != 1:
                 if jlab[1] == klab[1]:
                     matchable[j,k] = 0
-                    break
+                    continue
             # if they are matchable, let's find the distance between them
             dist = _euclidean_distance(endlist[j], endlist[k])
             if max_dist is not None:
@@ -232,63 +234,90 @@ def connect_iterative_by_label(arr, scores=None, max_iterations=10,
                 dists[j,k] = dist
 
 
-
     lines = a.copy() # but type float
 
     print(f"removed {N_ends*(N_ends-1)/2 - matchable.sum():n} "
            "pairs of endpoints from consideration "
           f'(out of {N_ends*(N_ends-1) / 2:n} possible pairs)')
 
-    raise Exception
-    for i in range(max_iterations):
-        old_network_size = lines.sum()
+    size_before = matchable.sum()    
+    for j, pj in enumerate(endlist):
+        for k, pk in enumerate(endlist[j+1:], j+1):
+            if not matchable[j,k]:
+                continue
+            l = line(*pj, *pk)
+            # lines will have the two endpoints so sum is at least 2
+            if (lines[l].sum() > 2) or (scores[l]==0).any():
+                matchable[j,k] = 0
+                dists[j,k] = 0
+    
+    size_after = matchable.sum()
 
-        print(f"at start of {i}th iteration:")
-        print(f"\t{matchable.any(axis=1).sum()} unmatched endpoints")
-        print(f"\t{old_network_size} is the size of the network")
-
-        for j, p0 in enumerate(endlist):
-
-            if not matchable[k,:].any():
-                continue # we can't connect this endpoint or it's already
-                         # been connected to
-
-            for k, p in enumerate(endlist[j+1:],j+1):
-                if not matchable[j,k]:
-                    continue
-
-            if not candidates:
-                continue # this endpoint can't connect to anything anymore
-
-            for candidate in candidate:
-                pass
-            #nearest = candidates[np.argmin([
-            #                (p0[0]-p[0])**2 + (p0[1] - p[1])**2
-            #                if p0!=p else 10000 for p in candidates]
-            #                )]
-            #line_to_add = line(*p0, *nearest)
-
-            #if scores is None:
-            #    lines[line_to_add] = 1
-            #else:
-            #    mean_score = scores[line_to_add].mean()
-            #    if (mean_score < .3) or (scores[line_to_add]==0).any():
-            #        bad_pairs.append((p0,nearest))
-            #        continue
-            #    else:
-            #        lines[line_to_add] = 1
-            #    #print(scores[line_to_add].mean())
-        new_network_size = lines.sum()
-        size_diff =  new_network_size - old_network_size
-        print(f'after {i}th iteration,', size_diff, 'pixels were added')
-        if size_diff == 0:
-            break
-        else:
-            old_network_size = new_network_size
-    else:
-        print(f'returned after {max_iterations} iterations')
+    print(f"removed {size_before-size_after} more pairs.")
+    
+    for j, pj in enumerate(endlist):
+        mean_score = lambda p: scores[line(*pj,*p)].mean()
+        point_scores = [(k, pk, mean_score(pk))
+                        for k,pk in enumerate(endlist[j+1:], j+1)
+                        if matchable[j,k]]
+        if not point_scores:
+            continue
+        s = sorted(point_scores, key=lambda x: x[2])
+        p_best = s[-1][1]
+        lines[line(*pj, *p_best)] = 1
 
     return lines
+    #for i in range(max_iterations):
+    #    old_network_size = lines.sum()
+
+    #    print(f"at start of {i}th iteration:")
+    #    print(f"\t{matchable.any(axis=1).sum()} unmatched endpoints")
+    #    print(f"\t{old_network_size} is the size of the network")
+
+    #    for j, p0 in enumerate(endlist):
+
+    #        if not matchable[k,:].any():
+    #            continue # we can't connect this endpoint or it's already
+    #                     # been connected to
+
+    #        for k, p in enumerate(endlist[j+1:],j+1):
+    #            if not matchable[j,k]:
+    #                continue
+
+    #        if not candidates:
+    #            continue # this endpoint can't connect to anything anymore
+
+    #        for candidate in candidate:
+    #            pass
+    #        #nearest = candidates[np.argmin([
+    #        #                (p0[0]-p[0])**2 + (p0[1] - p[1])**2
+    #        #                if p0!=p else 10000 for p in candidates]
+    #        #                )]
+    #        #line_to_add = line(*p0, *nearest)
+
+    #        #if scores is None:
+    #        #    lines[line_to_add] = 1
+    #        #else:
+    #        #    mean_score = scores[line_to_add].mean()
+    #        #    if (mean_score < .3) or (scores[line_to_add]==0).any():
+    #        #        bad_pairs.append((p0,nearest))
+    #        #        continue
+    #        #    else:
+    #        #        lines[line_to_add] = 1
+    #        #    #print(scores[line_to_add].mean())
+    #    new_network_size = lines.sum()
+    #    size_diff =  new_network_size - old_network_size
+    #    print(f'after {i}th iteration,', size_diff, 'pixels were added')
+    #    if size_diff == 0:
+    #        break
+    #    else:
+    #        old_network_size = new_network_size
+    #else:
+    #    print(f'returned after {max_iterations} iterations')
+
+    #return lines
+
+
 def colored_connections_any_nonzero(arr, scores):
     """Lines that connect nearest endpoints, colored by the mean value of
         that line through the matrix scores
@@ -348,4 +377,83 @@ def colored_connections_max_path(arr, scores):
 
     return lines
 
+if __name__ == "__main__":
 
+
+
+    import matplotlib.pyplot as plt
+    from skimage.util import img_as_float
+    from skimage.io import imread
+    from placenta import (get_named_placenta, list_by_quality, cropped_args,
+                        mimg_as_float)
+
+    from frangi import frangi_from_image
+    import numpy.ma as ma
+    from hfft import fft_gradient, fft_hessian, fft_gaussian
+    from merging import nz_percentile
+    from plate_morphology import dilate_boundary
+    import os.path, os
+    from skimage.morphology import thin
+    from postprocessing import dilate_to_rim
+    from scoring import confusion, mcc
+    from placenta import open_tracefile, open_typefile  
+
+    filename = list_by_quality(N=1)[0]
+    name_stub = filename.rstrip('.png').strip('T-')
+    img = get_named_placenta(filename)
+    cimg = open_typefile(filename, 'raw')
+    crop = cropped_args(img)
+    trace = open_tracefile(filename) 
+    scales = np.logspace(-1.5, 3.5, num=20, base=2)
+    threshold = .15
+    neg_threshold = .001
+
+    F = np.stack([frangi_from_image(img, sigma, beta=0.15, gamma=1.0, dark_bg=False,
+                                    signed_frangi=True, dilation_radius=20,
+                                    rescale_frangi=True)
+                                    for sigma in scales])
+    # need to fix this in the signed_frangi logic
+    F = F*~dilate_boundary(None, mask=img.mask, radius=20)
+    
+    Fmax = (F*(F>0))[:-6].max(axis=0)
+    Fneg = -(F*(F<0))[:2].min(axis=0)
+
+    approx = Fmax > threshold
+    rim_approx = (Fneg > neg_threshold)
+    skel = thin(approx)
+    completed = connect_iterative_by_label(skel, Fmax, max_dist=100) 
+    completed_dilated = dilate_to_rim(completed, rim_approx, max_radius=10)
+    approx_dilated = dilate_to_rim(approx, rim_approx, max_radius=10)
+    
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(20,20))
+    A = ax.ravel()
+    
+
+    precision = lambda t: int(t[0]) / int(t[0] + t[2])
+
+    mcc_FA, counts_FA = mcc(approx, trace, bg_mask=img.mask, return_counts=True)
+    mcc_FAD, counts_FAD = mcc(approx_dilated, trace, bg_mask=img.mask, return_counts=True)
+    mcc_NCD, counts_NCD = mcc(completed_dilated, trace, bg_mask=img.mask, return_counts=True)
+
+    prec_FA = precision(counts_FA)
+    prec_FAD = precision(counts_FAD)
+    prec_NCD = precision(counts_NCD)
+    
+    A[0].imshow(cimg[crop])
+    A[0].set_title(name_stub)
+    A[1].imshow(confusion(approx, trace, bg_mask=img.mask)[crop])
+    A[1].set_title(fr'    fix $\alpha={threshold:.2f}$', loc='left')
+    A[1].set_title(f'MCC: {mcc_FA:.2f}\n'
+                   f'precision: {prec_FA:.2%}', loc='right')
+
+    A[2].imshow(confusion(approx_dilated, trace, bg_mask=img.mask)[crop])
+    A[2].set_title(fr'    dilate_to_rim $\alpha={threshold:.2f}$', loc='left')
+    A[2].set_title(f'MCC: {mcc_FAD:.2f}\n'
+                   f'precision: {prec_FAD:.2%}', loc='right')
+
+    A[3].imshow(confusion(completed_dilated, trace, bg_mask=img.mask)[crop])
+    A[3].set_title(fr'    network_completed, dilated', loc='left')
+    A[3].set_title(f'MCC: {mcc_NCD:.2f}\n'
+                   f'precision: {prec_NCD:.2%}', loc='right')
+    [a.axis('off') for a in A]
+    plt.tight_layout()

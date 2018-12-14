@@ -1,0 +1,8 @@
+
+running network_completion (if name is main code)
+
+scales = np.logspace(-1.5,3.5, num=20, base=2)
+threshold = .15
+neg_threshold = .001
+max_pos_scale = -6
+max_neg_scale = 2
