@@ -20,3 +20,8 @@ import os.path, os
 filename = list_by_quality(N=1)[0]
 img = get_named_placenta(filename)
 crop = cropped_args(img)
+
+
+b=.05; g=1.; sigma=0.5;
+ftest = frangi_from_image(img, sigma, beta=b, gamma=g, dark_bg=False, dilation_radius=20, rescale_frangi=True)[crop].filled(0)
+plt.imshow(ftest, cmap=plt.cm.magma, vmin=0, vmax=1)

@@ -6,3 +6,4 @@ threshold = .15
 neg_threshold = .001
 max_pos_scale = -6
 max_neg_scale = 2
+gamma, beta = 1, .05
