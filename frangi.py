@@ -284,7 +284,10 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=0.5, c=None,
     # finally, reapply the mask if the inputs came with one
     if numpy.ma.is_masked(K1):
         F = numpy.ma.masked_array(F, mask=K1.mask)
-
+        # zero out masked region (there can be issues here if the output is
+        # signed, just makes stacking easier
+        F[K1.mask] = 0
+            
     return F
 
 

@@ -254,6 +254,33 @@ def skeletonize_trace(T, T2=None):
 
         return np.logical_or(thinned, thinned_2)
 
+def precision(counts):
+
+    return int(t[0]) / int(t[0] + t[2])
+
+
+def integrate_score(score, truth, mask=None):
+    """Integrate/sum a probability-like score over a ground truth subset.
+    Truth is a binary matrix
+    """
+    
+    if mask is None:
+        if ma.is_masked(score):
+            plate = score.filled(0)
+        else:
+            plate = score
+
+        ground_truth = truth
+
+    else:
+        plate = score*(~mask)
+        ground_truth = truth*(~mask)
+
+    subset_sum = score[truth].sum()
+    total_sum = score.sum()
+
+    return subset_sum / total_sum
+    
 
 def confusion(test, truth=None, bg_mask=None, colordict=None, tint_mask=True):
     """
@@ -348,6 +375,38 @@ def confusion(test, truth=None, bg_mask=None, colordict=None, tint_mask=True):
 
     return output
 
+def binary_counts(test, truth, bg_mask=None, score_bg=False):
+    """returns TP,TN,FP,FN"""
+
+    true_pos = ((test == truth) & truth)
+    true_neg = ((test == truth) & ~truth)
+    false_neg = (truth & ~test)
+    false_pos = (test & ~truth)
+
+    if score_bg:
+        # take the classifications above as they are (nothing is masked)
+        pass
+    else:
+        # if no specified mask, check the test array itself?
+        if bg_mask is None:
+            try:
+                bg_mask = test.mask
+            except AttributeError:
+                # no mask is specified, we're done.
+                bg_mask = np.zeros_like(test)
+
+        # only get stats in the plate
+        true_pos[bg_mask] = 0
+        true_neg[bg_mask] = 0
+        false_pos[bg_mask] = 0
+        false_neg[bg_mask] = 0
+
+    # now tally
+    TP = true_pos.sum()
+    TN = true_neg.sum()
+    FP = false_pos.sum()
+    FN = false_neg.sum()
+
 
 def compare_trace(approx, trace=None, filename=None,
                   sample_dir=None, colordict=None):
@@ -404,43 +463,10 @@ def mcc(test, truth=None, bg_mask=None, score_bg=False, return_counts=False):
     if truth is None:
         truth = np.zeros_like(test)
 
-    true_pos = ((test == truth) & truth)
-    true_neg = ((test == truth) & ~truth)
-    false_neg = (truth & ~test)
-    false_pos = (test & ~truth)
+    TP, TN, FP, FN = binary_counts(test, truth, bg_mask=bg_mask,
+                                   score_bg=score_bg)
 
-    if score_bg:
-        # take the classifications above as they are (nothing is masked)
-        pass
-    else:
-        # if no specified mask, check the test array itself?
-        if bg_mask is None:
-            try:
-                bg_mask = test.mask
-            except AttributeError:
-                # no mask is specified, we're done.
-                bg_mask = np.zeros_like(test)
 
-        # only get stats in the plate
-        true_pos[bg_mask] = 0
-        true_neg[bg_mask] = 0
-        false_pos[bg_mask] = 0
-        false_neg[bg_mask] = 0
-
-    # now tally
-    TP = true_pos.sum()
-    TN = true_neg.sum()
-    FP = false_pos.sum()
-    FN = false_neg.sum()
-
-    if not score_bg:
-        total = np.sum(~bg_mask)
-    else:
-        total = test.size
-
-    #print('TP: {}\t TN: {}\nFP: {}\tFN: {}'.format(TP,TN,FP,FN))
-    #print('TP+TN+FN+FP={}\ntotal pixels={}'.format(TP+TN+FP+TN,total))
-    # prevent potential overflow
     denom = np.sqrt(TP+FP)*np.sqrt(TP+FN)*np.sqrt(TN+FP)*np.sqrt(TN+FN)
 
     if denom == 0:
