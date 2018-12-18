@@ -22,14 +22,19 @@ from preprocessing import inpaint_hybrid
 from placenta import measure_ncs_markings, add_ucip_to_mask
 
 
-STRICT = {'label':'strict', 'beta':0.10, 'gamma':1.0, 'alpha':.15 }
 
-STANDARD = {'label':'standard', 'beta':0.5, 'gamma':0.5, 'alpha':.4}
 
-SEMISTRICT = {'label':'semistrict', 'beta':0.35, 'gamma':0.5, 'alpha':.4}
+STRICT = {'label':'strict', 'beta':0.10, 'gamma':1.0}
+SEMISTRICT_BETA = {'label':'semistrict-beta', 'beta':0.10, 'gamma':0.5}
+SEMISTRICT_GAMMA = {'label':'semistrict-gamma', 'beta':0.5, 'gamma':1.0}
 
-LOOSE = {'label':'loose', 'beta':1.0, 'gamma':0.5, 'alpha':.8}
+STANDARD = {'label':'standard', 'beta':0.5, 'gamma':0.5}
 
+SEMILOOSE_BETA = {'label':'semiloose-beta', 'beta':1.0, 'gamma':0.5}
+SEMILOOSE_GAMMA = {'label':'semiloose-gamma', 'beta':0.5, 'gamma':0.30}
+LOOSE = {'label':'loose', 'beta':1.0, 'gamma':0.30}
+STRUCTURENESS = {'label':'Structureness Factor', 'beta':np.inf, 'gamma':0.5}
+ANISOTROPY = {'label':'Anisotropy Factor', 'beta':0.10, 'gamma':0}
 cm = mpl.cm.plasma
 #cmscales = mpl.cm.magma
 cm.set_bad('k', 1)  # masked areas are black, not white
@@ -67,13 +72,22 @@ for filename in list_by_quality(0):
 
     F_demos = list()
     integrals = list()
-    PARAMS = [LOOSE, SEMISTRICT, STANDARD, STRICT]
+    PARAMS = [STANDARD, LOOSE, STRICT,
+              ANISOTROPY, SEMILOOSE_BETA, SEMISTRICT_BETA,
+              STRUCTURENESS, SEMILOOSE_GAMMA, SEMISTRICT_GAMMA]
 
     for params in PARAMS:
         print(f"running {params['label']} Frangi on {name_stub}")
+
+        if params['gamma'] == 0:
+            rescale = False
+        else:
+            rescale = True
+
         F_demo = np.stack([frangi_from_image(img, sigma, beta=params['beta'],
                                             gamma=params['gamma'], dark_bg=False,
-                                            dilation_radius=20, rescale_frangi=True)
+                                            dilation_radius=20,
+                                             rescale_frangi=rescale)
                                             for sigma in scales])
 
         F_max = F_demo.max(axis=0)
@@ -86,26 +100,28 @@ for filename in list_by_quality(0):
         del F_demo
 
 
-    fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(20,12))
-    A = ax.T.ravel()
+    fig, ax = plt.subplots(nrows=3, ncols=3, figsize=(20,20))
+    A = ax.ravel()
 
-    A[0].imshow(cimg[crop])
-    A[0].set_title(name_stub)
+    #A[0].imshow(cimg[crop])
+    #A[0].set_title(name_stub)
 
-    A[1].imshow(ctrace[crop])
-    A[1].set_title('ground truth')
+    #A[1].imshow(ctrace[crop])
+    #A[1].set_title('ground truth')
 
-    for i, (Fmax, integral, params) in enumerate(zip(F_demos, integrals, PARAMS), 2):
+    for i, (Fmax, integral, params) in enumerate(zip(F_demos, integrals,
+                                                     PARAMS)):
         beta = params['beta']
         gamma = params['gamma']
         label = params['label']
         A[i].imshow(ma.masked_where(Fmax==0,Fmax)[crop], cmap=cm, vmin=0, vmax=1)
         A[i].set_title(rf'    $V_{{\max}}$ ({label})'+'\n'+
-                       rf'    $\beta={beta:.2f}, \gamma={gamma:.3f}$', loc='left')
-        A[i].set_title(rf'CVR: {integral:3f}', loc='right')
+                       rf'    $\beta={beta:.2f}, \gamma={gamma:.2f}$', loc='left')
+        A[i].set_title(rf'CVR: {integral:.3f}', loc='right')
 
     [a.axis('off') for a in A]
     fig.tight_layout()
+    fig.subplots_adjust(wspace=0.1, hspace=0.1)
     plt.show()
 
     integral_scores.append((name_stub, integrals))

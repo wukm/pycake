@@ -79,7 +79,7 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
     # calculate principal curvatures with |k1| <= |k2|
 
 
-        
+
     k1, k2 = principal_curvatures(img, sigma, H=hesh)
 
     if dilation_radius is not None:
@@ -158,14 +158,14 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
 
     if gradient_filter:
         # obviously you could compute this at the same time as the hessian :/
-        
+
         g = fft_gradient(img, sigma)
         g = dilate_boundary(g, radius=20, mask=img.mask)
 
         # you could technically pass a function to switch between these
         # behaviors
         low_g = (g < nz_percentile(g, 50)).filled(0)
-        
+
         targets[~low_g] = 0
 
     if not return_debug_info:
@@ -255,7 +255,11 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=0.5, c=None,
             # more like will not
             print('c was set to an arbitrary value. cannot rescale')
         else:
-            max_theoretical = (1 - np.exp(-1/(2*gamma**2)))
+            if gamma==0:
+                # prevent division by zero
+                max_theoretical = 1
+            else:
+                max_theoretical = (1 - np.exp(-1/(2*gamma**2)))
             F = F / max_theoretical
 
     # now just filter/ change sign as appropriate.
@@ -287,7 +291,7 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=0.5, c=None,
         # zero out masked region (there can be issues here if the output is
         # signed, just makes stacking easier
         F[K1.mask] = 0
-            
+
     return F
 
 
@@ -336,10 +340,10 @@ def anisotropy(K1,K2, beta=0.5):
     A = (K1 / K2) ** 2
     #print(f'inside anisotropy, β={beta}')
     if beta == 0:
-        return np.zeros_like(A)  # the limiting case as beta -> 0
+        return np.full(A.shape, np.inf)  # the limiting case as beta -> 0
 
     elif beta == 'inf' or np.isinf(beta):
-        return np.ones_like(A)  # the limiting case as beta -> inf
+        return np.zeros_like(A)  # the limiting case as beta -> inf
 
     elif beta is None:
         return A  # just return the A**2 part (why though)
@@ -361,10 +365,10 @@ def structureness(K1, K2, gamma=0.5, c=None):
     #print(f'inside structureness, γ={gamma}, c={c}')
 
     if c == 0:
-        return np.zeros_like(S)
+        return np.full(S.shape, np.inf)
 
     elif c == 'inf' or np.isinf(c):
-        return np.ones_like(S)
+        return np.zeros_like(S)
 
     elif c is None:
         return S
