@@ -263,7 +263,7 @@ def integrate_score(score, truth, mask=None):
     """Integrate/sum a probability-like score over a ground truth subset.
     Truth is a binary matrix
     """
-    
+
     if mask is None:
         if ma.is_masked(score):
             plate = score.filled(0)
@@ -280,7 +280,7 @@ def integrate_score(score, truth, mask=None):
     total_sum = score.sum()
 
     return subset_sum / total_sum
-    
+
 
 def confusion(test, truth=None, bg_mask=None, colordict=None, tint_mask=True):
     """
@@ -407,6 +407,7 @@ def binary_counts(test, truth, bg_mask=None, score_bg=False):
     FP = false_pos.sum()
     FN = false_neg.sum()
 
+    return TP, TN, FP, FN
 
 def compare_trace(approx, trace=None, filename=None,
                   sample_dir=None, colordict=None):
