@@ -36,8 +36,8 @@ gamma = .5
 THRESHOLD = .4
 scales = np.logspace(-1.5, 3.5, base=2, num=20)
 
-mccs = list()
-precs = list()
+mccs = list() # store MCC scores
+precs = list() # store precision scores
 for filename in placentas:
     basename = filename.rstrip('.png')
     basename = basename.strip('T-')
