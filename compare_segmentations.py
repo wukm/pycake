@@ -47,12 +47,13 @@ OUTPUT_DIR = 'output/190130-margin_add_demo'
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-beta =0.15
-gamma = .5
+beta =0.10
+gamma = 0.5
 N_scales = 20
 THRESHOLD = .4
+MARGIN_THRESHOLD = 0.01
 
-scales = np.logspace(-1.5, 3.5, base=2, num=N_scales)
+scales = np.logspace(-1.5, 3.2, base=2, num=N_scales)
 
 mccs = list()
 precs = list()
@@ -83,12 +84,15 @@ for filename in placentas:
                                     for sigma in scales])
 
     # this is Vmax(+) for all except the 4 largest scales
-    f = F[:-4].max(axis=0)
+    #f = F[:-4].max(axis=0)
+    f = F.max(axis=0)
 
     # this is Vmax(-) for the first twelve scales
     nf = ((-F*(F<0))[:12]).max(axis=0)
     nf = dilate_boundary(nf, mask=img.mask, radius=20).filled(0)
 
+    # display purposes
+    fboth = f - nf
     # this is for a
     spine = dilate_boundary(f, mask=img.mask, radius=20).filled(0)
     spine = rescale_intensity(spine, in_range=(0,1), out_range='uint8')
@@ -97,11 +101,12 @@ for filename in placentas:
 
 
     # trough filling with ECP prefilter
-    approx, radii = dilate_to_rim(bspine, nf > .05, thin_spine=False,
-                                  return_radii=True)
+    approx, radii = dilate_to_rim(bspine, nf > MARGIN_THRESHOLD,
+                                  thin_spine=False, return_radii=True)
 
-    approx2, radii2 = dilate_to_rim(spine > (THRESHOLD*255), nf > .05,
-                                    thin_spine=False, return_radii=True)
+    approx2, radii2 = dilate_to_rim(spine > (THRESHOLD*255),
+                                    nf > MARGIN_THRESHOLD, thin_spine=False,
+                                    return_radii=True)
 
     # fixed threshold
     approx_FA = (spine > (THRESHOLD*255))
@@ -145,7 +150,7 @@ for filename in placentas:
                           return_counts=True)
     p_PF = precision_score(counts_PF)
 
-    fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(25,15))
+    fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(25,15))
 
     ax[0,0].imshow(img[crop], cmap=plt.cm.gray)
     ax[0,0].set_title(basename)
@@ -180,6 +185,10 @@ for filename in placentas:
     ax[1,2].set_title(f'MCC: {m:.2f}\n'
                         f'precision: {p:.2%}', loc='right')
 
+    ax[0,3].imshow(fboth[crop], vmin=-1.0, vmax=1.0, cmap='seismic')
+    ax[0,3].set_title(rf'V_max (signed), \beta={beta}, \gamma={gamma}')
+
+    ax[1,3].imshow(trace[crop])
     #fig.subplots_adjust(right=0.9, wspace=0.05, hspace=0.1)
     #cbar_ax = fig.add_axes([0.9, 0.15, 0.05, 0.7])
     #fig.colorbar(im, cax=cbar_ax, shrink=0.5)
