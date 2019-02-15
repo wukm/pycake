@@ -17,8 +17,6 @@ for a fixed gamma, beta, and range of sigma
 
 import numpy as np
 import matplotlib.pyplot as plt
-#from skimage.util import img_as_float, img_as_int
-#from skimage.io import imread
 from placenta import (get_named_placenta, list_by_quality, cropped_args,
                       mimg_as_float, open_typefile, open_tracefile)
 
@@ -40,6 +38,32 @@ from postprocessing import dilate_to_rim
 from preprocessing import inpaint_hybrid
 import json
 
+def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
+                              mask=None):
+    """
+    F is the frangi stack where the first dimension is the scale space.
+    transposing it would be easier.
+
+    if negative_range is given, then only scales within that range are
+    accumulated 
+
+    will return Vmax(+) and Vmin(-)
+    """
+        
+    if negative_range is None:
+        negative_range = (0, F.shape[-1])
+    
+    if positive_range is None:
+        positive_range = (0, F.shape[-1])
+    
+    f = F[positive_range[0]:positive_range[1]].max(axis=0)
+    nf = ((-F*(F<0))[negative_range[0]:negative_range[1]]).max(axis=0)
+
+    if mask is not None:
+        nf[mask] = 0
+    
+    return f, nf
+
 placentas = list_by_quality(0, N=1)
 
 OUTPUT_DIR = 'output/190130-margin_add_demo'
@@ -58,6 +82,7 @@ scales = np.logspace(-1.5, 3.2, base=2, num=N_scales)
 mccs = list()
 precs = list()
 for filename in placentas:
+
     # get the name of the sample (like 'BN#######')
     basename = filename.rstrip('.png')
     basename = basename.strip('T-')
@@ -67,11 +92,14 @@ for filename in placentas:
     # this calls find_plate_in_raw for all files not in placenta.FAILS
     # in an attempt to improve upon nthe border
 
+    # load sample and do pre-processing
     img = get_named_placenta(filename)
     img = inpaint_hybrid(img)
-
+    
+    # load trace
     crop = cropped_args(img)
     trace = open_tracefile(filename)
+    bigmask = dilate_boundary(mask, radius=20) # check that this works
 
     # threshold according to ISODATA threshold for a strawman
     straw = img.filled(0) < threshold_isodata(img.filled(0))
@@ -82,43 +110,48 @@ for filename in placentas:
                                     dilation_radius=20, rescale_frangi=True,
                                     signed_frangi=True).filled(0)
                                     for sigma in scales])
+    
+    f, nf = split_signed_frangi_stack(F, positive_range=None,
+                                      negative_range=(1,12), mask=bigmask)
 
-    # this is Vmax(+) for all except the 4 largest scales
-    #f = F[:-4].max(axis=0)
-    f = F.max(axis=0)
+    # just in case Vmax(+) and Vmax(-) are both nonzero at the same pixel, we
+    # will prioritize Vmax if it is above THRESHOLD, otherwise Vmin if it is
+    # above MARGIN threshold, otherwise, Vmax(+)
+    # not sure what i really want to show here, maybe just Vmax(+) or just a
+    # each over thresholds (i.e. a 3 color map)
 
-    # this is Vmax(-) for the first twelve scales
-    nf = ((-F*(F<0))[:12]).max(axis=0)
-    nf = dilate_boundary(nf, mask=img.mask, radius=20).filled(0)
+    recolor_with_negative = (f <= THRESHOLD) & (nf > MARGIN_THRESHOLD)
 
-    # display purposes
-    fboth = f - nf
-    # this is for a
+    fboth = f.copy()
+    fboth[recolor_with_negative] = nf[recolor_with_negative]
+
     spine = dilate_boundary(f, mask=img.mask, radius=20).filled(0)
-    spine = rescale_intensity(spine, in_range=(0,1), out_range='uint8')
-    spine = spine.astype('uint8')
-    bspine = ecp(spine, disk(3)) > (THRESHOLD*255)
+    ecp_spine = rescale_intensity(spine, in_range=(0,1), out_range='uint8')
+    ecp_spine = ecp_spine.astype('uint8')
+    ecp_spine = ecp(spine, disk(3)) > (THRESHOLD*255)
 
+    margins = nf > MARGIN_THRESHOLD
 
     # trough filling with ECP prefilter
-    approx, radii = dilate_to_rim(bspine, nf > MARGIN_THRESHOLD,
-                                  thin_spine=False, return_radii=True)
+    approx_td_ecp, radii = dilate_to_rim(ecp_spine, margins, thin_spine=False, return_radii=True)
 
-    approx2, radii2 = dilate_to_rim(spine > (THRESHOLD*255),
-                                    nf > MARGIN_THRESHOLD, thin_spine=False,
-                                    return_radii=True)
+    approx2, radii2 = dilate_to_rim(spine > THRESHOLD, margins, return_radii=True)
 
     # fixed threshold
-    approx_FA = (spine > (THRESHOLD*255))
+    approx_FA = (spine > THRESHOLD)
 
     # fixed threshold after ECP prefilter
-    approx_PFA = bspine
+    approx_PFA = ecp_spine
 
     # find alphas of each scale (NOTE: THIS DOES *NOT* omit the last 4 scales)
     # scalewise for 95th percentile
     ALPHAS = np.array([nz_percentile(F[k], 95.0)
                        for k in range(len(scales))])
+    ALPHAS_98 = np.array([nz_percentile(F[k], 98.0)
+                       for k in range(len(scales))])
     approx_PF = apply_threshold(np.transpose(F,(1,2,0)), ALPHAS,
+                                return_labels=False)
+    approx_PF98 = apply_threshold(np.transpose(F,(1,2,0)), ALPHAS_98,
                                 return_labels=False)
 
     precision_score = lambda t: int(t[0]) / int(t[0] + t[2])
@@ -127,8 +160,9 @@ for filename in placentas:
     m_st, counts_st = mcc(straw, trace, bg_mask=img.mask, return_counts=True)
     p_st = precision_score(counts_st)
 
-    # mcc, counts, precision for trough_fillings with ECP prefilter
-    m, counts = mcc(approx, trace, bg_mask=img.mask, return_counts=True)
+    # mcc, counts, precision f
+    #trough_fillings with ECP prefilter
+    m_td_ecp, counts_td_ecp = mcc(approx_td_ecp, trace, bg_mask=img.mask, return_counts=True)
     p = precision_score(counts)
 
     # mcc, counts, precision for trough_fillings w/o ECP prefilter
@@ -149,6 +183,10 @@ for filename in placentas:
     m_PF, counts_PF = mcc(approx_PF, trace, bg_mask=img.mask,
                           return_counts=True)
     p_PF = precision_score(counts_PF)
+
+    m_PF98, counts_PF98 = mcc(approx_PF98, trace, bg_mask=img.mask,
+                          return_counts=True)
+    p_PF98 = precision_score(counts_PF)
 
     fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(25,15))
 
@@ -186,7 +224,7 @@ for filename in placentas:
                         f'precision: {p:.2%}', loc='right')
 
     ax[0,3].imshow(fboth[crop], vmin=-1.0, vmax=1.0, cmap='seismic')
-    ax[0,3].set_title(rf'V_max (signed), \beta={beta}, \gamma={gamma}')
+    ax[0,3].set_title(rf'V_max (signed), $\beta={beta}, \gamma={gamma}$')
 
     ax[1,3].imshow(trace[crop])
     #fig.subplots_adjust(right=0.9, wspace=0.05, hspace=0.1)
