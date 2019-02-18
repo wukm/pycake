@@ -13,6 +13,7 @@ for a fixed gamma, beta, and range of sigma
 4. Frangi nz-percentile (high percentile)
 5. Frangi nz-percentile (lower percentile)
 6. Margin Add
+
 """
 
 import numpy as np
@@ -45,23 +46,23 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
     transposing it would be easier.
 
     if negative_range is given, then only scales within that range are
-    accumulated 
+    accumulated
 
     will return Vmax(+) and Vmin(-)
     """
-        
+
     if negative_range is None:
         negative_range = (0, F.shape[-1])
-    
+
     if positive_range is None:
         positive_range = (0, F.shape[-1])
-    
+
     f = F[positive_range[0]:positive_range[1]].max(axis=0)
     nf = ((-F*(F<0))[negative_range[0]:negative_range[1]]).max(axis=0)
 
     if mask is not None:
         nf[mask] = 0
-    
+
     return f, nf
 
 placentas = list_by_quality(0, N=1)
@@ -95,7 +96,7 @@ for filename in placentas:
     # load sample and do pre-processing
     img = get_named_placenta(filename)
     img = inpaint_hybrid(img)
-    
+
     # load trace
     crop = cropped_args(img)
     trace = open_tracefile(filename)
@@ -110,7 +111,7 @@ for filename in placentas:
                                     dilation_radius=20, rescale_frangi=True,
                                     signed_frangi=True).filled(0)
                                     for sigma in scales])
-    
+
     f, nf = split_signed_frangi_stack(F, positive_range=None,
                                       negative_range=(1,12), mask=bigmask)
 
@@ -126,11 +127,11 @@ for filename in placentas:
     fboth[recolor_with_negative] = nf[recolor_with_negative]
 
     spine = dilate_boundary(f, mask=img.mask, radius=20).filled(0)
-    ecp_spine = rescale_intensity(spine, in_range=(0,1), out_range='uint8')
-    ecp_spine = ecp_spine.astype('uint8')
-    ecp_spine = ecp(spine, disk(3)) > (THRESHOLD*255)
+    spine = rescale_intensity(spine, in_range=(0,1), out_range='uint8')
+    ecp_spine = spine.astype('uint8')
+    ecp_spine = ecp(ecp_spine, disk(3)) > (THRESHOLD*255)
 
-    margins = nf > MARGIN_THRESHOLD
+    margins = (nf > MARGIN_THRESHOLD)
 
     # trough filling with ECP prefilter
     approx_td_ecp, radii = dilate_to_rim(ecp_spine, margins, thin_spine=False, return_radii=True)
@@ -149,6 +150,7 @@ for filename in placentas:
                        for k in range(len(scales))])
     ALPHAS_98 = np.array([nz_percentile(F[k], 98.0)
                        for k in range(len(scales))])
+
     approx_PF = apply_threshold(np.transpose(F,(1,2,0)), ALPHAS,
                                 return_labels=False)
     approx_PF98 = apply_threshold(np.transpose(F,(1,2,0)), ALPHAS_98,
@@ -240,5 +242,6 @@ for filename in placentas:
     precs.append((filename, p_FA, p_PF, p_PFA, p, p2, p_st))
 
 runlog = { 'mccs': mccs, 'precs': precs}
+
 #with open(os.path.join(OUTPUT_DIR,'runlog.json'), 'w') as f:
 #    json.dump(runlog, f, indent=True)
