@@ -63,6 +63,7 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
 
     if mask is not None:
         nf[mask] = 0
+        f[mask] = 0
 
     return f, nf
 
@@ -144,7 +145,7 @@ for filename in placentas:
 
     # trough filling with ECP prefilter
     approx_td_ecp, radii = dilate_to_rim(ecp_spine, margins, thin_spine=False, return_radii=True)
-    approx2, radii2 = dilate_to_rim(spine > THRESHOLD, margins, return_radii=True)
+    approx2, radii2 = dilate_to_rim(f>THRESHOLD, margins, return_radii=True)
 
 
     fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(25,15))
@@ -152,6 +153,8 @@ for filename in placentas:
     ax[0,1].imshow(f[crop], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
     ax[0,2].imshow(-nf[crop], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
     ax[1,0].imshow(markers[crop], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
+    ax[1,1].imshow(radii2[crop])
+    ax[1,2].imshow(confusion(approx2,trace)[crop])
 
     [a.axis('off') for a in ax.ravel()]
     fig.subplots_adjust(wspace=0.05, hspace=0.1)
