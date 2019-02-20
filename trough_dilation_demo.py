@@ -78,10 +78,10 @@ if not os.path.exists(OUTPUT_DIR):
 
 # overall strict Frangi parameters
 beta =0.15
-gamma = 0.5
+gamma = 1.0
 log_range = (-1.5, 3.2)
 N_scales = 20
-THRESHOLD = .4
+THRESHOLD = .3
 MARGIN_THRESHOLD = 0.01
 NEGATIVE_RANGE = (0,6)
 
@@ -137,75 +137,44 @@ for filename in placentas:
     ecp_spine = spine.astype('uint8')
     ecp_spine = ecp(ecp_spine, disk(3)) > (THRESHOLD*255)
 
+    fixed = f > THRESHOLD
     margins = (nf > MARGIN_THRESHOLD)
     # just make two different colored markers, this is hacky
     markers = np.zeros_like(spine)
-    markers[f > THRESHOLD] = 0.5
+    markers[fixed] = 0.5
     markers[margins] = -0.5
 
     # trough filling with ECP prefilter
-    approx_td_ecp, radii = dilate_to_rim(ecp_spine, margins, thin_spine=False, return_radii=True)
-    approx2, radii2 = dilate_to_rim(f>THRESHOLD, margins, return_radii=True)
+    #approx_td_ecp, radii = dilate_to_rim(ecp_spine, margins, thin_spine=False, return_radii=True)
+    approx, radii = dilate_to_rim(fixed, margins, thin_spine=True, return_radii=True)
+    approx2, radii2 = dilate_to_rim(fixed, margins, return_radii=True)
 
-
-    fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(25,15))
+    fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(25,15), sharex=True,
+                           sharey=True)
     ax[0,0].imshow(img[crop], cmap=plt.cm.gray)
     ax[0,1].imshow(f[crop], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
     ax[0,2].imshow(-nf[crop], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
     ax[1,0].imshow(markers[crop], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
-    ax[1,1].imshow(radii2[crop])
-    ax[1,2].imshow(confusion(approx2,trace)[crop])
+    ax[1,1].imshow(confusion(approx2,trace)[crop])
+    ax[1,2].imshow(confusion(approx2 & ~fixed,trace)[crop])
 
     [a.axis('off') for a in ax.ravel()]
     fig.subplots_adjust(wspace=0.05, hspace=0.1)
-#    plt.savefig(os.path.join(OUTPUT_DIR, ''.join(('fig-', basename, '.png'))))
+    plt.savefig(os.path.join(OUTPUT_DIR, ''.join(('fig-', basename, '.png'))))
     plt.show()
 
-#
-#    ax[0,0].imshow(img[crop], cmap=plt.cm.gray)
-#    ax[0,0].set_title(basename)
-#
-#    ax[1,0].imshow(fboth)
-#    ax[1,0].set_title(rf'   ISODATA threshold (Frangi-less)', loc='left')
-#
-#    ax[0,1].imshow(confusion(approx_FA, trace)[crop])
-#    ax[0,1].set_title(rf'   fixed $\alpha={THRESHOLD}$', loc='left')
-#    ax[0,1].set_title(f'MCC: {m_FA:.2f}\n'
-#                        f'precision: {p_FA:.2%}', loc='right')
-#
-#    #ax[1,1].imshow(confusion(bspine,trace)[crop])
-#    #ax[1,1].set_title(rf'   local percentile $\alpha={THRESHOLD}$', loc='left')
-#    #ax[1,1].set_title(f'MCC: {m_PFA:.2f}\n'
-#    #                    f'precision: {p_PFA:.2%}', loc='right')
-#
-#    ax[1,1].imshow(confusion(approx_PF,trace)[crop])
-#    ax[1,1].set_title(rf'   nz-percentile threshold (p=95)', loc='left')
-#    ax[1,1].set_title(f'MCC: {m_PF:.2f}\n'
-#                        f'precision: {p_PF:.2%}', loc='right')
-#
-#    ax[0,2].imshow(confusion(approx2,trace)[crop])
-#    ax[0,2].set_title(rf'   trough filling', loc='left')
-#    ax[0,2].set_title(f'MCC: {m2:.2f}\n'
-#                        f'precision: {p2:.2%}', loc='right')
-#
-#    ax[1,2].imshow(confusion(approx,trace)[crop])
-#    ax[1,2].set_title(rf'   trough filling w/ ECP prefilter', loc='left')
-#    ax[1,2].set_title(f'MCC: {m:.2f}\n'
-#                        f'precision: {p:.2%}', loc='right')
-#
-#    ax[0,3].imshow(fboth[crop], vmin=-1.0, vmax=1.0, cmap='seismic')
-#    ax[0,3].set_title(rf'V_max (signed), $\beta={beta}, \gamma={gamma}$')
-#
-#    ax[1,3].imshow(trace[crop])
-#    #fig.subplots_adjust(right=0.9, wspace=0.05, hspace=0.1)
-#    #cbar_ax = fig.add_axes([0.9, 0.15, 0.05, 0.7])
-#    #fig.colorbar(im, cax=cbar_ax, shrink=0.5)
-#
-#
-#    mccs.append((filename, m_FA, m_PF, m_PFA, m, m2, m_st))
-#    precs.append((filename, p_FA, p_PF, p_PFA, p, p2, p_st))
-#
-#runlog = { 'mccs': mccs, 'precs': precs}
-#
-##with open(os.path.join(OUTPUT_DIR,'runlog.json'), 'w') as f:
-##    json.dump(runlog, f, indent=True)
+    plt.close()
+    inset = np.s_[151:486,147:653]
+    fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(25,15), sharex=True,
+                           sharey=True)
+    ax[0,0].imshow(img[crop][inset], cmap=plt.cm.gray)
+    ax[0,1].imshow(f[crop][inset], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
+    ax[0,2].imshow(-nf[crop][inset], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
+    ax[1,0].imshow(markers[crop][inset], vmax=1.0, vmin=-1.0, cmap=plt.cm.seismic_r)
+    ax[1,1].imshow(confusion(approx2,trace)[crop][inset])
+    ax[1,2].imshow(confusion(approx2 & ~fixed,trace)[crop][inset])
+
+    [a.axis('off') for a in ax.ravel()]
+    fig.subplots_adjust(wspace=0.05, hspace=0.1)
+    plt.savefig(os.path.join(OUTPUT_DIR, ''.join(('fig-inset', basename, '.png'))))
+    plt.show()
