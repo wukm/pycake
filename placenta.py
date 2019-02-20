@@ -75,6 +75,12 @@ def open_typefile(filename, filetype, sample_dir=None, mode=None):
     return img
 
 
+def strip_ncs_name(filename):
+    """
+    turns a filename like T-BN0143569.png into BN0143569
+    """
+    basename = filename.rstrip('.png')
+    return basename.strip('T-')
 def open_tracefile(base_filename, as_binary=True,
                    sample_dir=None):
 

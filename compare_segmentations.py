@@ -19,7 +19,8 @@ for a fixed gamma, beta, and range of sigma
 import numpy as np
 import matplotlib.pyplot as plt
 from placenta import (get_named_placenta, list_by_quality, cropped_args,
-                      mimg_as_float, open_typefile, open_tracefile)
+                      mimg_as_float, open_typefile, open_tracefile,
+                      strip_ncs_name)
 
 from frangi import frangi_from_image
 import numpy.ma as ma
@@ -38,6 +39,7 @@ from skimage.exposure import rescale_intensity
 from postprocessing import dilate_to_rim
 from preprocessing import inpaint_hybrid
 import json
+
 
 def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
                               mask=None):
@@ -67,32 +69,31 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
 
 placentas = list_by_quality(0, N=1)
 
-OUTPUT_DIR = 'output/190130-margin_add_demo'
+OUTPUT_DIR = 'output/190220-segmentation_demo'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-beta =0.10
-gamma = 0.5
+beta =0.15
+gamma = 1.0
 N_scales = 20
-THRESHOLD = .4
-MARGIN_THRESHOLD = 0.01
-
-scales = np.logspace(-1.5, 3.2, base=2, num=N_scales)
+THRESHOLD = .3  # \alpha^{(+)}
+MARGIN_THRESHOLD = 0.01  # \alpha^{(-)}
+NEGATIVE_RANGE = (0,6)
+log_range = (-1.5, 3.2)
+scales = np.logspace(*log_range, base=2, num=N_scales)
 
 mccs = list()
 precs = list()
 for filename in placentas:
 
     # get the name of the sample (like 'BN#######')
-    basename = filename.rstrip('.png')
-    basename = basename.strip('T-')
-
+    basename = strip_ncs_name(filename)
 
     print(basename, '*'*30)
+
     # this calls find_plate_in_raw for all files not in placenta.FAILS
     # in an attempt to improve upon nthe border
-
     # load sample and do pre-processing
     img = get_named_placenta(filename)
     img = inpaint_hybrid(img)
@@ -100,11 +101,11 @@ for filename in placentas:
     # load trace
     crop = cropped_args(img)
     trace = open_tracefile(filename)
-    bigmask = dilate_boundary(mask, radius=20) # check that this works
+    bigmask = dilate_boundary(None, mask=img.mask, radius=20)
 
     # threshold according to ISODATA threshold for a strawman
     straw = img.filled(0) < threshold_isodata(img.filled(0))
-    straw[img.mask] = False
+    straw[img.mask] = False  # apply the mask
 
     # make a MxNxN_scales matrix of Frangi outputs (where (M,N) == img.shape)
     F = np.stack([frangi_from_image(img, sigma, beta, gamma, dark_bg=False,

@@ -8,7 +8,7 @@ algorithm based on morphology and the frangi filter
 import numpy as np
 import matplotlib.pyplot as plt
 from placenta import (list_by_quality, cropped_args, mimg_as_float,
-                      open_typefile, open_tracefile)
+                      open_typefile, open_tracefile, strip_ncs_name)
 
 # rename this elsewhere
 from placenta import get_named_placenta as prepare_placenta
@@ -30,14 +30,6 @@ from skimage.exposure import rescale_intensity
 from postprocessing import dilate_to_rim
 from preprocessing import inpaint_hybrid
 import json
-
-
-def strip_ncs_name(filename):
-    """
-    turns a filename like T-BN0143569.png into BN0143569
-    """
-    basename = filename.rstrip('.png')
-    return basename.strip('T-')
 
 
 def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
