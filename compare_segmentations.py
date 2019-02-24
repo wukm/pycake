@@ -69,7 +69,7 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
     return f, nf
 
 
-placentas = list_by_quality(0)
+placentas = list_by_quality(0, N=3)
 
 OUTPUT_DIR = 'output/190223-segmentation_demo'
 
@@ -245,7 +245,8 @@ for filename in placentas:
     #fig.subplots_adjust(wspace=0.05, hspace=0.1)
     fig.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, ''.join(('fig-', basename, '.png'))))
-    plt.show()
+    #plt.show()
+    plt.close()
 
     mccs.append((filename, m_FA_high, m_FA_low, m_PF95, m_PF98, m_st))
     precs.append((filename, p_FA_high, p_FA_low, p_PF95, p_PF98, p_st))
@@ -254,3 +255,23 @@ runlog = { 'mccs': mccs, 'precs': precs}
 
 with open(os.path.join(OUTPUT_DIR,'runlog.json'), 'w') as f:
     json.dump(runlog, f, indent=True)
+
+M = np.array([m[1:] for m in mccs])
+P = np.array([p[1:] for p in precs])
+
+labels = [
+    rf'fixed $\alpha={THRESHOLD}$',
+    rf'fixed $\alpha={THRESHOLD_LOW}$',
+    'nz-percentile (p=95)',
+    'nz-percentile (p=98)',
+    'ISODATA threshold'
+]
+
+fig, ax = plt.subplots()
+ax.boxplot(M, labels=labels)
+axl = plt.setp(ax, xticklabels=labels)
+plt.setp(axl, rotation=90)
+
+# you have to manually prevent clipping of these, amazing
+plt.subplots_adjust(bottom=0.20)
+plt.show()
