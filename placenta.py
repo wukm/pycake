@@ -429,11 +429,23 @@ CYAN = [0, 255, 255]
 YELLOW = [255, 255, 0]
 
 def find_plate_in_raw(raw, sigma=.01):
+
+    # this is introducing an ugly underflow error i think
     g = fft_gradient(raw[...,1],sigma=.01)
     marks=np.zeros(g.shape, np.int32)
     marks[0,0] = 1
+
+
+    # prevent a mean of empty slice runtime warning
+    # need to check if this works before using this
+    #if np.isnan(g).all():
+    #    raise
+    #    marks[:] = 2
+    #else:
+    #    marks[g > g.mean()] = 2
+
     marks[g > g.mean()] = 2
-    #marks[g > np.percentile(g,25)] = 2
+
     w = watershed(g,marks)
 
     eroded = binary_erosion(w==2, disk(15))

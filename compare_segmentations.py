@@ -68,10 +68,10 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
 
     return f, nf
 
+quality_name = 'good'
+placentas = list_by_quality(0, N=2)
 
-placentas = list_by_quality(0, N=3)
-
-OUTPUT_DIR = 'output/190223-segmentation_demo'
+OUTPUT_DIR = 'output/190225-segmentation_demo'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -248,8 +248,8 @@ for filename in placentas:
     #plt.show()
     plt.close()
 
-    mccs.append((filename, m_FA_high, m_FA_low, m_PF95, m_PF98, m_st))
-    precs.append((filename, p_FA_high, p_FA_low, p_PF95, p_PF98, p_st))
+    mccs.append((filename, m_FA_high, m_FA_low, m_PF95, m_PF98, m_st, m_tf))
+    precs.append((filename, p_FA_high, p_FA_low, p_PF95, p_PF98, p_st, p_tf))
 
 runlog = { 'mccs': mccs, 'precs': precs}
 
@@ -259,19 +259,40 @@ with open(os.path.join(OUTPUT_DIR,'runlog.json'), 'w') as f:
 M = np.array([m[1:] for m in mccs])
 P = np.array([p[1:] for p in precs])
 
+M_medians = np.median(M, axis=0)
+P_medians = np.median(P, axis=0)
+
 labels = [
     rf'fixed $\alpha={THRESHOLD}$',
     rf'fixed $\alpha={THRESHOLD_LOW}$',
-    'nz-percentile (p=95)',
-    'nz-percentile (p=98)',
-    'ISODATA threshold'
+    'scalewise nz-p\n(p=95)',
+    'scalewise nz-p\n(p=98)',
+    'ISODATA',
+    'trough filling'
 ]
 
-fig, ax = plt.subplots()
-ax.boxplot(M, labels=labels)
-axl = plt.setp(ax, xticklabels=labels)
-plt.setp(axl, rotation=90)
+for scorename, data, medians in [('MCC', M, M_medians),
+                                 ('precision', P, P_medians)]:
 
-# you have to manually prevent clipping of these, amazing
-plt.subplots_adjust(bottom=0.20)
-plt.show()
+    # would like to combine these into the same plot, but was very annoying to
+    # figure out
+    fig, ax = plt.subplots()
+    boxplot_dict = ax.boxplot(data, labels=labels)
+    axl = plt.setp(ax, xticklabels=labels)
+    plt.setp(axl, rotation=90)
+    ax.set_xlabel('segmentation method')
+    ax.set_title(f'{scorename} scores of various segmentation methods (good samples)')
+    ax.set_ylabel(scorename)
+
+    # label medians, from https://stackoverflow.com/a/18861734
+    for line, med in zip(boxplot_dict['medians'], medians):
+        x, y = line.get_xydata()[1] # right of median line
+        plt.text(x, y, '%.2f' % med, verticalalignment='center')
+
+    # you have to manually prevent clipping of rotated labels, amazing
+    plt.subplots_adjust(bottom=0.30)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTPUT_DIR, ''.join((quality_name,'-',
+                                                  scorename,'-boxplot','.png'))))
+    plt.show()
+    plt.close()
