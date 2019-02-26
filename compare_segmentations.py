@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from placenta import (get_named_placenta, list_by_quality, cropped_args,
                       mimg_as_float, open_typefile, open_tracefile,
-                      strip_ncs_name)
+                      strip_ncs_name, list_placentas)
 
 from frangi import frangi_from_image
 import numpy.ma as ma
@@ -68,16 +68,19 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
 
     return f, nf
 
-quality_name = 'good'
-placentas = list_by_quality(0, N=2)
+#quality_name = 'good'
+#placentas = list_by_quality(0)
 
-OUTPUT_DIR = 'output/190225-segmentation_demo'
+quality_name = 'all'
+placentas = list_placentas()
+
+OUTPUT_DIR = 'output/190225-segmentation_demo_all_standard'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-beta =0.15
-gamma = 1.0
+beta =0.5
+gamma = 0.5
 N_scales = 20
 THRESHOLD = .3  # \alpha^{(+)}
 THRESHOLD_LOW = .2  # \alpha^{(+)}
@@ -101,10 +104,22 @@ for filename in placentas:
     img = get_named_placenta(filename)
     img = inpaint_hybrid(img)
 
+
     # load trace
     crop = cropped_args(img)
+    cimg = open_typefile(filename, 'raw')
+    ctrace = open_typefile(filename, 'ctrace')
     trace = open_tracefile(filename)
     bigmask = dilate_boundary(None, mask=img.mask, radius=20)
+
+    if img[crop].shape[0] > img[crop].shape[1]:
+        # and rotating it would be fix all this automatically
+        cimg = np.rot90(cimg)
+        ctrace = np.rot90(ctrace)
+        trace = np.rot90(trace)
+        img = np.rot90(img)
+        crop = cropped_args(img)
+        bigmask = dilate_boundary(None, mask=img.mask, radius=20)
 
     # threshold according to ISODATA threshold for a strawman
     straw = img.filled(0) < threshold_isodata(img.filled(0))
@@ -281,7 +296,7 @@ for scorename, data, medians in [('MCC', M, M_medians),
     axl = plt.setp(ax, xticklabels=labels)
     plt.setp(axl, rotation=90)
     ax.set_xlabel('segmentation method')
-    ax.set_title(f'{scorename} scores of various segmentation methods (good samples)')
+    ax.set_title(f'{scorename} scores of various segmentation methods ({quality_name} samples)')
     ax.set_ylabel(scorename)
 
     # label medians, from https://stackoverflow.com/a/18861734
