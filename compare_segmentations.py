@@ -2,9 +2,10 @@
 
 """
 this is the main result in which we compare the segmentations across all
-samples.
+samples. rerun this code changing beta & gamma to get outputs for different
+segmentations.
 
-segmentation strategies include:
+segmentation strategies used here are:
 
 for a fixed gamma, beta, and range of sigma
 1. ISODATA (Frangiless)
@@ -12,8 +13,7 @@ for a fixed gamma, beta, and range of sigma
 3. Frangi simple threshold (low thresh)
 4. Frangi nz-percentile (high percentile)
 5. Frangi nz-percentile (lower percentile)
-6. Margin Add
-
+6. trough-filling
 """
 
 import numpy as np
@@ -22,21 +22,17 @@ import seaborn as sns
 from placenta import (get_named_placenta, list_by_quality, cropped_args,
                       mimg_as_float, open_typefile, open_tracefile,
                       strip_ncs_name, list_placentas)
-
 from frangi import frangi_from_image
-import numpy.ma as ma
-from hfft import fft_gradient, fft_hessian, fft_gaussian
 from merging import nz_percentile, apply_threshold
 from plate_morphology import dilate_boundary
-import os.path, os
+import os.path
+import os
 
-from scipy.ndimage import distance_transform_edt as edt
-from skimage.filters.rank import enhance_contrast_percentile as ecp
-from skimage.morphology import disk, binary_dilation, thin
+# from scipy.ndimage import distance_transform_edt as edt
+# from skimage.filters.rank import enhance_contrast_percentile as ecp
 from scoring import confusion, mcc
 
 from skimage.filters import threshold_isodata
-from skimage.exposure import rescale_intensity
 from postprocessing import dilate_to_rim
 from preprocessing import inpaint_hybrid
 import json
@@ -44,7 +40,8 @@ import json
 
 def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
                               mask=None):
-    """
+    """Get Vmax+ and Vmax- from Frangi stack
+
     F is the frangi stack where the first dimension is the scale space.
     transposing it would be easier.
 
@@ -52,6 +49,8 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
     accumulated
 
     will return Vmax(+) and Vmin(-)
+
+    should redo this so that it returns V_{\Sigma}^{(+)} and V_{\Sigma}^{(-)}
     """
 
     if negative_range is None:
@@ -61,15 +60,16 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
         positive_range = (0, F.shape[-1])
 
     f = F[positive_range[0]:positive_range[1]].max(axis=0)
-    nf = ((-F*(F<0))[negative_range[0]:negative_range[1]]).max(axis=0)
+    nf = ((-F*(F < 0))[negative_range[0]:negative_range[1]]).max(axis=0)
 
     if mask is not None:
         nf[mask] = 0
 
     return f, nf
 
-#quality_name = 'good'
-#placentas = list_by_quality(0)
+
+# quality_name = 'good'
+# placentas = list_by_quality(0)
 
 quality_name = 'all'
 placentas = list_placentas()
@@ -79,13 +79,14 @@ OUTPUT_DIR = 'output/190225-segmentation_demo_all_standard'
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-beta =0.5
-gamma = 0.5
+beta, gamma = 0.5, 0.5
+parametrization_name = "standard"
+
 N_scales = 20
 THRESHOLD = .3  # \alpha^{(+)}
 THRESHOLD_LOW = .2  # \alpha^{(+)}
 MARGIN_THRESHOLD = 0.01  # \alpha^{(-)}
-NEGATIVE_RANGE = (0,6)
+NEGATIVE_RANGE = (0, 6)
 log_range = (-1.5, 3.2)
 scales = np.logspace(*log_range, base=2, num=N_scales)
 
@@ -104,7 +105,6 @@ for filename in placentas:
     img = get_named_placenta(filename)
     img = inpaint_hybrid(img)
 
-
     # load trace
     crop = cropped_args(img)
     cimg = open_typefile(filename, 'raw')
@@ -112,6 +112,7 @@ for filename in placentas:
     trace = open_tracefile(filename)
     bigmask = dilate_boundary(None, mask=img.mask, radius=20)
 
+    # rotate the image so it's hotdog not hamburger
     if img[crop].shape[0] > img[crop].shape[1]:
         # and rotating it would be fix all this automatically
         cimg = np.rot90(cimg)
@@ -129,39 +130,30 @@ for filename in placentas:
     F = np.stack([frangi_from_image(img, sigma, beta, gamma, dark_bg=False,
                                     dilation_radius=20, rescale_frangi=True,
                                     signed_frangi=True).filled(0)
-                                    for sigma in scales])
+                 for sigma in scales])
 
-    Fpos = np.clip(F, 0, None) # replace negative values with 0
-    Fneg = np.clip(F, None, 0) # replace negative values with 0
+    # Fneg still has negative direction but these are now separated
+    Fpos = np.clip(F, 0, None)  # replace negative values with 0
+    Fneg = np.clip(F, None, 0)  # replace positive values with 0
 
-    # makes Vmaxpos and Vmaxneg
+    # makes Vmaxpos and Vmaxneg (could also take max of Fpos and -Fneg above
     f, nf = split_signed_frangi_stack(F, positive_range=None,
                                       negative_range=NEGATIVE_RANGE,
                                       mask=bigmask)
 
-    # just in case Vmax(+) and Vmax(-) are both nonzero at the same pixel, we
-    # will prioritize Vmax if it is above THRESHOLD, otherwise Vmin if it is
-    # above MARGIN threshold, otherwise, Vmax(+)
-    # not sure what i really want to show here, maybe just Vmax(+) or just a
-    # each over thresholds (i.e. a 3 color map)
-
-
+    # everything in the following section needs a better name :/
     spine = dilate_boundary(f, mask=img.mask, radius=20).filled(0)
-
-
     spineseeds = (spine > THRESHOLD)
     margins = (nf > MARGIN_THRESHOLD)
 
-
+    # trough-filling segmentation
     approx_tf, radii = dilate_to_rim(spineseeds > THRESHOLD, margins,
-                                    return_radii=True)
+                                     return_radii=True)
 
     # fixed threshold
     approx_FA_high = (spine > THRESHOLD)
     approx_FA_low = (spine > THRESHOLD_LOW)
 
-
-    # find alphas of each scale (NOTE: THIS DOES *NOT* omit the last 4 scales)
     # scalewise for 95th percentile
     ALPHAS_95 = np.array([nz_percentile(Fpos[k], 95.0)
                        for k in range(len(scales))])
@@ -225,10 +217,14 @@ for filename in placentas:
     ax[0,2].set_title(rf'   fixed $\alpha={THRESHOLD_LOW}$', loc='left')
     ax[0,2].set_title(f'MCC: {m_FA_low:.2f}\n'
                         f'precision: {p_FA_low:.2%}', loc='right')
-    #ax[1,1].imshow(confusion(bspine,trace)[crop])
-    #ax[1,1].set_title(rf'   local percentile $\alpha={THRESHOLD}$', loc='left')
-    #ax[1,1].set_title(f'MCC: {m_PFA:.2f}\n'
-    #                    f'precision: {p_PFA:.2%}', loc='right')
+
+    ax[0,3].imshow(confusion(straw,trace)[crop])
+    ax[0,3].set_title(f'   ISODATA threshold\n   (Frangi-less)', loc='left')
+    ax[0,3].set_title(f'MCC: {m_st:.2f}\n'
+                        f'precision: {p_st:.2%}', loc='right')
+
+    ax[1,0].imshow(f[crop], cmap='nipy_spectral', vmax=1.0, vmin=0.0)
+    ax[1,0].set_title(rf'V_max $\beta={beta}, \gamma={gamma}$')
 
     ax[1,1].imshow(confusion(approx_PF95,trace)[crop])
     ax[1,1].set_title(f'   scalewise nz-percentile\n   (p=95)', loc='left')
@@ -244,13 +240,7 @@ for filename in placentas:
     ax[1,3].set_title(f'MCC: {m_tf:.2f}\n'
                         f'precision: {p_tf:.2%}', loc='right')
 
-    ax[0,3].imshow(confusion(straw,trace)[crop])
-    ax[0,3].set_title(f'   ISODATA threshold\n   (Frangi-less)', loc='left')
-    ax[0,3].set_title(f'MCC: {m_st:.2f}\n'
-                        f'precision: {p_st:.2%}', loc='right')
 
-    ax[1,0].imshow(f[crop], cmap='nipy_spectral', vmax=1.0, vmin=0.0)
-    ax[1,0].set_title(rf'V_max $\beta={beta}, \gamma={gamma}$')
 
     #fig.subplots_adjust(right=0.9, wspace=0.05, hspace=0.1)
     #cbar_ax = fig.add_axes([0.9, 0.15, 0.05, 0.7])
@@ -271,32 +261,36 @@ runlog = { 'mccs': mccs, 'precs': precs}
 with open(os.path.join(OUTPUT_DIR,'runlog.json'), 'w') as f:
     json.dump(runlog, f, indent=True)
 
+# get rid of sample labels
 M = np.array([m[1:] for m in mccs])
 P = np.array([p[1:] for p in precs])
 
-M_medians = np.median(M, axis=0)
-P_medians = np.median(P, axis=0)
+M_medians = np.median(M, axis=0)  # what the actual medians are (for labeling)
+P_medians = np.median(P, axis=0)  # what the actual medians are (for labeling)
 
+# segmentation strategy labels
 labels = [
-    rf'fixed $\alpha={THRESHOLD}$',
-    rf'fixed $\alpha={THRESHOLD_LOW}$',
+    rf'thresh-high $\alpha={THRESHOLD}$',
+    rf'thresh-low $\alpha={THRESHOLD_LOW}$',
     'scalewise nz-p\n(p=95)',
     'scalewise nz-p\n(p=98)',
     'ISODATA',
-    'trough filling'
+    'trough-filling'
 ]
 
+# make a bunch of boxplots
 for scorename, data, medians in [('MCC', M, M_medians),
                                  ('precision', P, P_medians)]:
 
-    # would like to combine these into the same plot, but was very annoying to
-    # figure out
+    # would like to combine these into the same plot
+    # easier to do with xarray, maybe just do processing in a different script
     fig, ax = plt.subplots()
     boxplot_dict = ax.boxplot(data, labels=labels)
     axl = plt.setp(ax, xticklabels=labels)
     plt.setp(axl, rotation=90)
     ax.set_xlabel('segmentation method')
-    ax.set_title(f'{scorename} scores of various segmentation methods ({quality_name} samples)')
+    ax.set_title(f'{scorename} scores of various segmentation methods'
+                 f'({quality_name} samples)')
     ax.set_ylabel(scorename)
 
     # label medians, from https://stackoverflow.com/a/18861734
@@ -308,6 +302,7 @@ for scorename, data, medians in [('MCC', M, M_medians),
     plt.subplots_adjust(bottom=0.30)
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, ''.join((quality_name,'-',
-                                                  scorename,'-boxplot','.png'))))
+                                                  scorename,'-boxplot','.png'))
+                             ))
     plt.show()
     plt.close()
