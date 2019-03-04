@@ -431,7 +431,7 @@ YELLOW = [255, 255, 0]
 def find_plate_in_raw(raw, sigma=.01):
 
     # this is introducing an ugly underflow error i think
-    g = fft_gradient(raw[...,1],sigma=.01)
+    g = fft_gradient(raw[...,1],sigma=sigma)
     marks=np.zeros(g.shape, np.int32)
     marks[0,0] = 1
 
@@ -463,6 +463,8 @@ def find_plate_in_raw(raw, sigma=.01):
     return ~(labeled == plate_index)
 
 
+# these are placentas where largest object watershedding didn't work
+# this is pretty hackish
 FAILS = [
     "T-BN0687730.png",
     "T-BN1629357.png",

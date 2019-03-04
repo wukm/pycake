@@ -68,26 +68,29 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
     return f, nf
 
 
-# quality_name = 'good'
-# placentas = list_by_quality(0)
+#quality_name = 'good'
+#placentas = list_by_quality(0, N=2)
 
 quality_name = 'all'
 placentas = list_placentas()
 
-OUTPUT_DIR = 'output/190225-segmentation_demo_all_standard'
+
+#beta, gamma, parametrization_name = 0.15, 1.0, "strict"
+#beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
+beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
+#beta, gamma, parametrization_name = 0.5, 0.5, "standard"
+
+OUTPUT_DIR = f'output/190304-segmentation_demo_{quality_name}_{parametrization_name}'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
-
-beta, gamma = 0.5, 0.5
-parametrization_name = "standard"
 
 N_scales = 20
 THRESHOLD = .3  # \alpha^{(+)}
 THRESHOLD_LOW = .2  # \alpha^{(+)}
 MARGIN_THRESHOLD = 0.01  # \alpha^{(-)}
 NEGATIVE_RANGE = (0, 6)
-log_range = (-1.5, 3.2)
+log_range = (-1, 3.2)
 scales = np.logspace(*log_range, base=2, num=N_scales)
 
 mccs = list()
@@ -219,36 +222,37 @@ for filename in placentas:
                         f'precision: {p_FA_low:.2%}', loc='right')
 
     ax[0,3].imshow(confusion(straw,trace)[crop])
-    ax[0,3].set_title(f'   ISODATA threshold\n   (Frangi-less)', loc='left')
+    ax[0,3].set_title(f'   ISODATA\n   (Frangi-less)', loc='left')
     ax[0,3].set_title(f'MCC: {m_st:.2f}\n'
                         f'precision: {p_st:.2%}', loc='right')
 
     ax[1,0].imshow(f[crop], cmap='nipy_spectral', vmax=1.0, vmin=0.0)
-    ax[1,0].set_title(rf'V_max $\beta={beta}, \gamma={gamma}$')
+    ax[1,0].set_title(r'$\mathcal{V}_{\max}$  '
+                      fr'$\beta={beta}, \gamma={gamma}$')
 
     ax[1,1].imshow(confusion(approx_PF95,trace)[crop])
-    ax[1,1].set_title(f'   scalewise nz-percentile\n   (p=95)', loc='left')
+    ax[1,1].set_title(f'   scalewise nz-p\n   (p=95)', loc='left')
     ax[1,1].set_title(f'MCC: {m_PF95:.2f}\n'
                         f'precision: {p_PF95:.2%}', loc='right')
 
     ax[1,2].imshow(confusion(approx_PF98,trace)[crop])
-    ax[1,2].set_title(f'   scalewise nz-percentile\n   (p=98)', loc='left')
+    ax[1,2].set_title(f'   scalewise nz-p\n   (p=98)', loc='left')
     ax[1,2].set_title(f'MCC: {m_PF98:.2f}\n'
                         f'precision: {p_PF98:.2%}', loc='right')
     ax[1,3].imshow(confusion(approx_tf,trace)[crop])
-    ax[1,3].set_title(rf'   trough filling', loc='left')
+    ax[1,3].set_title( '   trough-fill\n'
+                      r'    $\alpha^{(+)}=$'
+                      fr'${THRESHOLD}$', loc='left')
     ax[1,3].set_title(f'MCC: {m_tf:.2f}\n'
                         f'precision: {p_tf:.2%}', loc='right')
 
 
 
-    #fig.subplots_adjust(right=0.9, wspace=0.05, hspace=0.1)
-    #cbar_ax = fig.add_axes([0.9, 0.15, 0.05, 0.7])
-    #fig.colorbar(im, cax=cbar_ax, shrink=0.5)
 
     [a.axis('off') for a in ax.ravel()]
-    #fig.subplots_adjust(wspace=0.05, hspace=0.1)
     fig.tight_layout()
+    fig.subplots_adjust(right=1.0, left=0, top=0.95, bottom=0.,
+                        wspace=0.0, hspace=0.05)
     plt.savefig(os.path.join(OUTPUT_DIR, ''.join(('fig-', basename, '.png'))))
     #plt.show()
     plt.close()
@@ -272,10 +276,10 @@ P_medians = np.median(P, axis=0)  # what the actual medians are (for labeling)
 labels = [
     rf'thresh-high $\alpha={THRESHOLD}$',
     rf'thresh-low $\alpha={THRESHOLD_LOW}$',
-    'scalewise nz-p\n(p=95)',
-    'scalewise nz-p\n(p=98)',
+    'snz-p\n(p=95)',
+    'snz-p\n(p=98)',
     'ISODATA',
-    'trough-filling'
+    'trough-fill'
 ]
 
 # make a bunch of boxplots
@@ -289,8 +293,9 @@ for scorename, data, medians in [('MCC', M, M_medians),
     axl = plt.setp(ax, xticklabels=labels)
     plt.setp(axl, rotation=90)
     ax.set_xlabel('segmentation method')
-    ax.set_title(f'{scorename} scores of various segmentation methods'
-                 f'({quality_name} samples)')
+    ax.set_title(f'{scorename} scores of segmentation methods'
+                 f'({quality_name} samples),'
+                 f'{parametrization_name} parametrization')
     ax.set_ylabel(scorename)
 
     # label medians, from https://stackoverflow.com/a/18861734
@@ -301,8 +306,8 @@ for scorename, data, medians in [('MCC', M, M_medians),
     # you have to manually prevent clipping of rotated labels, amazing
     plt.subplots_adjust(bottom=0.30)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, ''.join((quality_name,'-',
-                                                  scorename,'-boxplot','.png'))
-                             ))
+    boxplot_name = '-'.join((quality_name, scorename, "boxplot",
+                             parametrization_name))
+    plt.savefig(os.path.join(OUTPUT_DIR, boxplot_name + '.png'))
     plt.show()
     plt.close()

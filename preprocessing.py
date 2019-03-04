@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
-# TODO: refactor this so inpaint glare is the main function that takes
-#       a keyword argument strategy='hybrid' or whatever then you can run
-#       >>>for s in ['mean_window', 'median_boundary', 'biharmonic', 'hybrid']:
-#           timeit.timeit('inpaint_glare(img, strategy=s))', globals=globals())
-#
-#       ... but it's annoying since you'll need a way to pass args to the
-#           particular strategy
+"""
+When you run this as a first level script, you get a demonstration
+of the different glare inpainting techniques
+"""
 
 from skimage.morphology import (binary_dilation, disk, remove_small_objects,
                                 convex_hull_object)
@@ -20,6 +17,7 @@ from plate_morphology import dilate_boundary
 
 import scipy.ndimage as ndi
 import matplotlib.pyplot as plt
+
 
 def inpaint_glare(img, threshold=175, window_size=15, mask=None):
     """
@@ -86,6 +84,7 @@ def inpaint_with_boundary_median(img, threshold=175, mask=None):
 
     return new_img
 
+
 def nz_median(A):
 
     if ma.is_masked(A):
@@ -124,6 +123,7 @@ def inpaint_hybrid(img, threshold=175, min_size=64, boundary_radius=10):
     # put on old image mask
     return ma.masked_array(hybrid, mask=img.mask)
 
+
 def inpaint_with_biharmonic(img, threshold=175):
     """
     use biharmonic inpainting *all* glare
@@ -135,6 +135,7 @@ def inpaint_with_biharmonic(img, threshold=175):
         return ma.masked_array(inpainted, mask=img.mask)
     else:
         return inpainted
+
 
 def mask_glare(img, threshold=175, mask_only=False):
     """
@@ -178,6 +179,7 @@ def mask_stump(img, mask=None, mask_only=True):
         channel = img[...,0]
 
     C = channel.copy()
+
     if mask is not None:
         C[mask] = 0
     elif ma.is_masked(img):
@@ -224,8 +226,8 @@ def mask_stump(img, mask=None, mask_only=True):
         return ma.masked_array(img, mask=b)
 
 
-
 DARK_RED = np.array([103, 15, 23]) / 255.
+
 
 # test it on a particularly bad sample
 if __name__ == "__main__":
