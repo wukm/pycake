@@ -80,9 +80,9 @@ placentas = list_placentas()
 
 
 #beta, gamma, parametrization_name = 0.15, 1.0, "strict"
-beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
+#beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
 #beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
-#beta, gamma, parametrization_name = 0.5, 0.5, "standard"
+beta, gamma, parametrization_name = 0.5, 0.5, "standard"
 
 OUTPUT_DIR = (f'output/190304-segmentation_demo_'
               f'{quality_name}_{parametrization_name}-ucip')
