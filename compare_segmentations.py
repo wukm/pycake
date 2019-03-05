@@ -21,7 +21,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from placenta import (get_named_placenta, list_by_quality, cropped_args,
                       mimg_as_float, open_typefile, open_tracefile,
-                      strip_ncs_name, list_placentas)
+                      strip_ncs_name, list_placentas, measure_ncs_markings,
+                      add_ucip_to_mask)
+
 from frangi import frangi_from_image
 from merging import nz_percentile, apply_threshold
 from plate_morphology import dilate_boundary
@@ -31,6 +33,8 @@ import os
 # from scipy.ndimage import distance_transform_edt as edt
 # from skimage.filters.rank import enhance_contrast_percentile as ecp
 from scoring import confusion, mcc
+
+from skimage.color import grey2rgb
 
 from skimage.filters import threshold_isodata
 from postprocessing import dilate_to_rim
@@ -76,11 +80,12 @@ placentas = list_placentas()
 
 
 #beta, gamma, parametrization_name = 0.15, 1.0, "strict"
-#beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
-beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
+beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
+#beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
 #beta, gamma, parametrization_name = 0.5, 0.5, "standard"
 
-OUTPUT_DIR = f'output/190304-segmentation_demo_{quality_name}_{parametrization_name}'
+OUTPUT_DIR = (f'output/190304-segmentation_demo_'
+              f'{quality_name}_{parametrization_name}-ucip')
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -107,6 +112,9 @@ for filename in placentas:
     # load sample and do pre-processing
     img = get_named_placenta(filename)
     img = inpaint_hybrid(img)
+    ucip, res = measure_ncs_markings(filename=filename)
+    old_mask = img.mask.copy()
+    img.mask = add_ucip_to_mask(ucip, radius=50, mask=img.mask)
 
     # load trace
     crop = cropped_args(img)
@@ -124,6 +132,7 @@ for filename in placentas:
         img = np.rot90(img)
         crop = cropped_args(img)
         bigmask = dilate_boundary(None, mask=img.mask, radius=20)
+        old_mask = np.rot90(old_mask)
 
     # threshold according to ISODATA threshold for a strawman
     straw = img.filled(0) < threshold_isodata(img.filled(0))
@@ -207,7 +216,11 @@ for filename in placentas:
     sns.set(font_scale=0.8)
     fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(13,7))
 
-    ax[0,0].imshow(img[crop], cmap=plt.cm.gray)
+    I = grey2rgb(img.data)  # three channels (based on img old data)
+    I[old_mask] = (1.,1.,1.)  # make old BG white not black
+    I[img.mask] *= (1.0, 0.8, 0.8)  # overlay red on ucip mask
+    #ax[0,0].imshow(img[crop], cmap=plt.cm.gray)
+    ax[0,0].imshow(I[crop])
     ax[0,0].set_title(basename)
 
 
