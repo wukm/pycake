@@ -24,6 +24,9 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         Scaling factor for the structureness parameter of the Frangi
         filter. The structureness parameter will be set to gamma * maximum
         of the hessian norm. (Default is 0.5)
+        if gamma is 0, then this effectively sets the structurness factor
+        (1 - exp(-S**2 /(2(gamma*S_max))**2)) to 1, i.e. the anisotropy factor
+        only is returned.
     c: float or None, optional
         The strutureness parameter of the Frangi filter. If this is set then
         gamma is ignored. (Default is None).
@@ -246,7 +249,13 @@ def get_frangi_targets(K1, K2, beta=0.5, gamma=0.5, c=None,
     S = structureness(K1, K2, gamma=gamma, c=c)
 
     anisotropy_factor = np.exp(-A)
-    structureness_factor = (1 - np.exp(-S))
+
+    # this should have been fixed earlier but i want to set it directly
+    if gamma == 0:
+        structureness_factor = np.ones_like(anisotropy_factor)
+    else:
+        structureness_factor = (1 - np.exp(-S))
+
 
     F = anisotropy_factor * structureness_factor
 
