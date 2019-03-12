@@ -45,6 +45,13 @@ import json
 def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
                               mask=None):
     """Get Vmax+ and Vmax- from Frangi stack
+    Note: This is a convenience function but it has been pretty much superseded
+    by the more straightforward method below, which is simply
+    np.clip(F, 0, None)
+    -np.clip(F. None, 0)
+
+    in fact, we could replace this with a function that splits it just like
+    that, and then simply take argmax and range filtering of each outside.
 
     F is the frangi stack where the first dimension is the scale space.
     transposing it would be easier.
@@ -64,6 +71,9 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
         positive_range = (0, F.shape[-1])
 
     f = F[positive_range[0]:positive_range[1]].max(axis=0)
+
+    # this is Vmaxpos. The max of the negative Frangi stack within the
+    # specified range
     nf = ((-F*(F < 0))[negative_range[0]:negative_range[1]]).max(axis=0)
 
     if mask is not None:
@@ -72,13 +82,14 @@ def split_signed_frangi_stack(F, negative_range=None, positive_range=None,
     return f, nf
 
 
+# Uncomment one of the data subsets
 #quality_name = 'good'
 #placentas = list_by_quality(0, N=2)
 
 quality_name = 'all'
 placentas = list_placentas()
 
-
+# Uncomment one of the parametrizatons
 #beta, gamma, parametrization_name = 0.15, 1.0, "strict"
 #beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
 #beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
@@ -90,16 +101,19 @@ OUTPUT_DIR = (f'output/190304-segmentation_demo_'
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
+# Other basic setup
 N_scales = 20
 THRESHOLD = .3  # \alpha^{(+)}
 THRESHOLD_LOW = .2  # \alpha^{(+)}
 MARGIN_THRESHOLD = 0.01  # \alpha^{(-)}
-NEGATIVE_RANGE = (0, 6)
-log_range = (-1, 3.2)
-scales = np.logspace(*log_range, base=2, num=N_scales)
+NEGATIVE_RANGE = (0, 6) # minimum and maximum range to use for Vmaxneg
+log_range = (-1, 3.2) # minimum and maximum scale, log base 2
+scales = np.logspace(*log_range, base=2, num=N_scales) # construct scales
 
+# empty lists to store outputs
 mccs = list()
 precs = list()
+
 for filename in placentas:
 
     # get the name of the sample (like 'BN#######')
@@ -108,8 +122,7 @@ for filename in placentas:
     print(basename, '*'*30)
 
     # this calls find_plate_in_raw for all files not in placenta.FAILS
-    # in an attempt to improve upon nthe border
-    # load sample and do pre-processing
+    # in an attempt to improve upon the border
     img = get_named_placenta(filename)
     img = inpaint_hybrid(img)
     ucip, res = measure_ncs_markings(filename=filename)
@@ -154,6 +167,7 @@ for filename in placentas:
                                       mask=bigmask)
 
     # everything in the following section needs a better name :/
+    # a lot of this terminology is from when i did ecp filtering
     spine = dilate_boundary(f, mask=img.mask, radius=20).filled(0)
     spineseeds = (spine > THRESHOLD)
     margins = (nf > MARGIN_THRESHOLD)
@@ -162,11 +176,11 @@ for filename in placentas:
     approx_tf, radii = dilate_to_rim(spineseeds > THRESHOLD, margins,
                                      return_radii=True)
 
-    # fixed threshold
+    # fixed thresholded Frangi (high and low threshold)
     approx_FA_high = (spine > THRESHOLD)
     approx_FA_low = (spine > THRESHOLD_LOW)
 
-    # scalewise for 95th percentile
+    # scalewise for 95th and 98th percentile
     ALPHAS_95 = np.array([nz_percentile(Fpos[k], 95.0)
                        for k in range(len(scales))])
     ALPHAS_98 = np.array([nz_percentile(Fpos[k], 98.0)
@@ -183,7 +197,7 @@ for filename in placentas:
     m_st, counts_st = mcc(straw, trace, bg_mask=img.mask, return_counts=True)
     p_st = precision_score(counts_st)
 
-    # mcc, counts, precision for fixed threshold w/o prefilter
+    # mcc, counts, precision all the segmentation methods
     m_FA_low, counts_FA_low = mcc(approx_FA_low, trace, bg_mask=img.mask,
                             return_counts=True)
     p_FA_low = precision_score(counts_FA_low)
@@ -201,11 +215,9 @@ for filename in placentas:
                           return_counts=True)
     p_PF98 = precision_score(counts_PF98)
 
-    #mcc, counts, precision for trough_fillings w/o ECP prefilter
-    m_tf, counts_tf = mcc(approx_tf, trace, bg_mask=img.mask, return_counts=True)
+    m_tf, counts_tf = mcc(approx_tf, trace, bg_mask=img.mask,
+                          return_counts=True)
     p_tf = precision_score(counts_tf)
-
-
 
 
     # this is just used for visualization, not very meaningful though
@@ -213,13 +225,14 @@ for filename in placentas:
     #fboth = f.copy()
     #fboth[recolor_with_negative] = nf[recolor_with_negative]
 
+
     sns.set(font_scale=0.8)
     fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(13,7))
 
     I = grey2rgb(img.data)  # three channels (based on img old data)
-    I[old_mask] = (1.,1.,1.)  # make old BG white not black
+    I[old_mask] = (1.,1.,1.)  # make old BG (background only) white not black
     I[img.mask] *= (1.0, 0.8, 0.8)  # overlay red on ucip mask
-    #ax[0,0].imshow(img[crop], cmap=plt.cm.gray)
+
     ax[0,0].imshow(I[crop])
     ax[0,0].set_title(basename)
 
@@ -260,19 +273,23 @@ for filename in placentas:
                         f'precision: {p_tf:.2%}', loc='right')
 
 
-
-
+    # don't label axes for any of the subplots above
     [a.axis('off') for a in ax.ravel()]
+
+    # matplotlib is a pain
     fig.tight_layout()
     fig.subplots_adjust(right=1.0, left=0, top=0.95, bottom=0.,
                         wspace=0.0, hspace=0.05)
+
     plt.savefig(os.path.join(OUTPUT_DIR, ''.join(('fig-', basename, '.png'))))
-    #plt.show()
+
+    #plt.show()  # if interactive, show this
     plt.close()
 
     mccs.append((filename, m_FA_high, m_FA_low, m_PF95, m_PF98, m_st, m_tf))
     precs.append((filename, p_FA_high, p_FA_low, p_PF95, p_PF98, p_st, p_tf))
 
+# dictionary to store (but should add runtime parameters too)
 runlog = { 'mccs': mccs, 'precs': precs}
 
 with open(os.path.join(OUTPUT_DIR,'runlog.json'), 'w') as f:
@@ -285,7 +302,7 @@ P = np.array([p[1:] for p in precs])
 M_medians = np.median(M, axis=0)  # what the actual medians are (for labeling)
 P_medians = np.median(P, axis=0)  # what the actual medians are (for labeling)
 
-# segmentation strategy labels
+# segmentation strategy labels (for graphs, etc)
 labels = [
     rf'thresh-high $\alpha={THRESHOLD}$',
     rf'thresh-low $\alpha={THRESHOLD_LOW}$',
@@ -295,7 +312,8 @@ labels = [
     'trough-fill'
 ]
 
-# make a bunch of boxplots
+# make a bunch of boxplots (should ideally merge these with other
+# segmentations)
 for scorename, data, medians in [('MCC', M, M_medians),
                                  ('precision', P, P_medians)]:
 
