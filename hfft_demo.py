@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+this compares the runtime of calculating the hessian via FFT vs. standard
+convolution on the old barium sample. for a sequence fo larger scales
+"""
+
 import numpy as np
 from skimage.data import camera
 from skimage.io import imread

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+"""
+do a visual demo of the scalewise random walker demo with percent filtering
+"""
 import numpy as np
 import numpy.ma as ma
 
@@ -91,7 +94,7 @@ for N, filename in enumerate(filenames):
         #ax[0].set_title(rf'$V_{{\sigma_{{{n}}}}},\;'
                         #rf'\sigma_{{{n}}}={sigma:.3f}$')
         ax[0].set_title(rf'Frangi score, $(\sigma_{{{n}}}={sigma:.3f})$')
-        p = nz_percentile(f, P_THRESHOLD)     
+        p = nz_percentile(f, P_THRESHOLD)
         p_alphas[n] = p
         hi_marks = (f > p).filled(0)
         markers = np.zeros(img.shape, np.int32)
@@ -128,11 +131,11 @@ for N, filename in enumerate(filenames):
         fig.savefig(f'./output/RWPFDEMO/{basename}_{n:{0}2}.png')
         if INTERACTIVE:
             plt.show()
-    
+
     Vmax, Vargmax = V.max(axis=0), V.argmax(axis=0)
     Vmax = ma.masked_where(Vmax==0, Vmax)
     #Vargmax = ma.masked_where(~trace, Vargmax)
-    
+
     approx_FA, labs_FA = apply_threshold(np.transpose(V, axes=(1,2,0)), p_alphas)
     #labs_FA = Vargmax*(hi_marks)
     #approx_FA =  labs_FA!=0

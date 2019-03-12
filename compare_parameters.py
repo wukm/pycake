@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+"""
+visual output comparing parametrizations of the Frangi filter. this produces
+a 3x3 visual grid of 9 different parametrizations. also outputs
+
+should make this a demonstration as well with a well-chosen inset of a sample
+(maybe the same as the frangi scalesweep demos).
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl

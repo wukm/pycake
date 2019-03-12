@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+
+"""
+this file contains the frangi filter logic. frangi_from_image is essentially
+standalone.
+
+todo:
+    * recreate/document large commented out block, which documents all the
+    different styles for calculating Frangi "c" structureness parameter
+
+    * change anisotropy factor and structureness factor functions to
+    be anisotropy_measure and differentiate it from anisotropy factor, which
+    has the np.exp and parameter.
+
+    * probably other stuff
+
+"""
 import numpy as np
 import numpy.ma
 from hfft import fft_hessian, fft_gradient

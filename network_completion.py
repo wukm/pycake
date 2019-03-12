@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+this is a program to do simple (non-predictive) non-predictive network
+completion. this method is resource intensive and generally not the right way
+to do it, but it's an example.
+"""
+
 from skimage.filters.rank import sum as local_count
 from skimage.draw import line
 import numpy as np
@@ -207,9 +213,9 @@ def connect_iterative_by_label(arr, scores, max_iterations=10,
     # into matchable but let's keep it separate
     dists = np.zeros(matchable.shape, dtype=np.float64)
     print(f'there are {len(endlist)} endpoints')
-    
+
     print('checking compatibility of endpoints by labels and calculating distances')
-    
+
     for j, jlab in enumerate(endlabs):
 
         # still calculate the distances below
@@ -242,7 +248,7 @@ def connect_iterative_by_label(arr, scores, max_iterations=10,
            "pairs of endpoints from consideration "
           f'(out of {N_ends*(N_ends-1) / 2:n} possible pairs)')
 
-    size_before = matchable.sum()    
+    size_before = matchable.sum()
     for j, pj in enumerate(endlist):
         for k, pk in enumerate(endlist[j+1:], j+1):
             if not matchable[j,k]:
@@ -252,12 +258,12 @@ def connect_iterative_by_label(arr, scores, max_iterations=10,
             if (lines[l].sum() > 2) or (scores[l]==0).any():
                 matchable[j,k] = 0
                 dists[j,k] = 0
-    
+
     size_after = matchable.sum()
 
     print(f"removed {size_before-size_after:n} more pairs",
            "by avoiding crossings/zero score paths")
-    
+
     for j, pj in enumerate(endlist):
         mean_score = lambda p: scores[line(*pj,*p)].mean()
         point_scores = [(k, pk, mean_score(pk))
@@ -400,10 +406,10 @@ if __name__ == "__main__":
     from skimage.morphology import thin
     from postprocessing import dilate_to_rim
     from scoring import confusion, mcc
-    from placenta import open_tracefile, open_typefile  
+    from placenta import open_tracefile, open_typefile
     from preprocessing import inpaint_hybrid
     from placenta import measure_ncs_markings, add_ucip_to_mask
-    
+
     import json
 
     mccs = list()
@@ -421,7 +427,7 @@ if __name__ == "__main__":
     #cmscales = mpl.cm.magma
     cm.set_bad('k', 1)  # masked areas are black, not white
     #cmscales.set_bad('w', 1)
-    
+
     QUALITY = 3
     for filename in list_by_quality(QUALITY):
 
@@ -432,7 +438,7 @@ if __name__ == "__main__":
         crop = cropped_args(img)
         ucip = open_typefile(filename, 'ucip')
         img = inpaint_hybrid(img)
-        
+
         # make the size of figures more consistent
         if img[crop].shape[0] > img[crop].shape[1]:
             # and rotating it would be fix all this automatically
@@ -455,18 +461,18 @@ if __name__ == "__main__":
                                         for sigma in scales])
         # need to fix this in the signed_frangi logic
         F = F*~dilate_boundary(None, mask=img.mask, radius=20)
-        
+
         Fmax = (F*(F>0))[:max_pos_scale].max(axis=0)
         Fneg = -(F*(F<0))[:max_neg_scale].min(axis=0)
 
         approx = Fmax > threshold
         rim_approx = (Fneg > neg_threshold)
         skel = thin(approx)
-        completed = connect_iterative_by_label(skel, Fmax, max_dist=100) 
+        completed = connect_iterative_by_label(skel, Fmax, max_dist=100)
         completed_dilated = dilate_to_rim(completed, rim_approx, max_radius=10)
         approx_dilated = dilate_to_rim(approx, rim_approx, max_radius=10)
-        
-        network = np.maximum(skel*3., (completed & ~skel)*2) 
+
+        network = np.maximum(skel*3., (completed & ~skel)*2)
         network = np.maximum(network, rim_approx*1.)
 
 
@@ -491,10 +497,10 @@ if __name__ == "__main__":
 
         A[1].imshow(ma.masked_where(Fmax==0,Fmax)[crop], cmap=cm, vmin=0, vmax=1)
         A[1].set_title(rf'$V_{{\max}}, \beta={beta:.2f}, \gamma={gamma:.3f}$')
-        
+
         A[2].imshow(network[crop], cmap=plt.cm.magma)
         A[2].set_title('skeleton, completed network, and rim_approx')
-        
+
         A[3].imshow(confusion(approx, trace, bg_mask=img.mask)[crop])
         A[3].set_title(fr'    fixed $\alpha={threshold:.2f}$', loc='left')
         A[3].set_title(f'MCC: {mcc_FA:.2f}\n'

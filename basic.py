@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-THIS IS A BASIC SET UP TO EXPLORE, PLAY AROUND A BIT
+This is a basic setup for testing. Opens a sample and calculates a
+single scale Frangi filter. run it with ipython in interactive mode
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,5 +24,7 @@ crop = cropped_args(img)
 
 
 b=.05; g=1.; sigma=0.5;
-ftest = frangi_from_image(img, sigma, beta=b, gamma=g, dark_bg=False, dilation_radius=20, rescale_frangi=True)[crop].filled(0)
+ftest = frangi_from_image(img, sigma, beta=b, gamma=g, dark_bg=False,
+                          dilation_radius=20,
+                          rescale_frangi=True)[crop].filled(0)
 plt.imshow(ftest, cmap=plt.cm.magma, vmin=0, vmax=1)

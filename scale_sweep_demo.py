@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+visual demonstration of the Frangi filter's dependence on scale size.
+This is shown for two paticular placental samples for the entire placenta
+as well as a predetermined inset.
+"""
+
 from placenta import (get_named_placenta, list_placentas, _cropped_bounds,
                       cropped_view, cropped_args, show_mask)
 from frangi import frangi_from_image

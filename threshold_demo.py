@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+this seems like a demonstration of network completion. i don't know
+where it came from.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl

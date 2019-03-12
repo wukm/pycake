@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 """
-here you want to show  the accuracy of hfft.py
+visual/tabular demonstration of how different implementations of
+calculating the hessian filter compare
+"""
 
 BOILERPLATE
 

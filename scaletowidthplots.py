@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+maybe this got merged into scoring and is obsolete? check
+"""
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np

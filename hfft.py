@@ -13,11 +13,15 @@ import matplotlib.pyplot as plt
 from skimage.data import camera
 from skimage.util import img_as_float
 from skimage.measure import compare_mse, compare_nrmse
-"""
-hfft.py is the implementation of calculating the hessian of a real
 
-image based in frequency space (rather than direct convolution with a gaussian
-as is standard in scipy, for example).
+"""
+hfft.py is the implementation of calculating the hessian of a real image based
+in frequency space (rather than direct convolution with a gaussian, as is
+standard in scipy, for example). This file also contains implementations of the
+discrete gaussian kernel, and a visual demonstration of the "semigroup
+property" of each implementation.
+
+"""
 
 TODO: PROVIDE MAIN USAGE NOTES
 """
@@ -60,6 +64,7 @@ def fft_gaussian(img,sigma, kernel=None):
 
     return signal.fftconvolve(img, kernel, mode='same')
 
+
 def discrete_gaussian_kernel(n_samples, sigma):
     """
     sigma is the scale, n_samples is the number of samples to compute
@@ -80,6 +85,7 @@ def discrete_gaussian_kernel(n_samples, sigma):
         dom = dom[1:]
     return ive(dom,sigma**2)
 
+
 def fft_dgk(img,sigma,order=0,A=None):
     """
     This is the discrete gaussian kernel which is supposedly less crappy
@@ -91,6 +97,7 @@ def fft_dgk(img,sigma,order=0,A=None):
                       discrete_gaussian_kernel(n,sigma**2))
 
     return signal.fftconvolve(img, kernel, mode='same')
+
 
 def fft_fdgk(img,sigma):
     """
@@ -212,6 +219,7 @@ def demo(img=None):
 
     plt.tight_layout()
     plt.show()
+
 
 def compare_mae(arr1, arr2):
 

@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+
+"""
+this is a visual demonstration of the'trough-filling" method, as it's now
+called. uses percentile filtering.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.util import img_as_float, img_as_int

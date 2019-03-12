@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+this module contains many functions and helper functions that aid in
+interpreting the trace/colortrace of an NCS sample and comparing a
+segmentation to them
+"""
+
 import numpy as np
 from placenta import open_typefile, open_tracefile
 from skimage.morphology import thin

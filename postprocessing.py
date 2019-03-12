@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-doing things to the Frangi targets, i.e. feeding them into other algorithms
+Contains some of the nontrivial segmentation methods.
 """
 
 from skimage.filters import sobel

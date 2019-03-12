@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+do a visual demonstration of the scalewise random walker method
+"""
+
 import numpy as np
 import numpy.ma as ma
 
@@ -36,7 +40,7 @@ def rw_demo(filename, rw_beta, threshold, output_dir=None):
     crop = cropped_args(img)
     ucip = open_typefile(filename, 'ucip')
     img = inpaint_hybrid(img)
-    
+
     # make the size of figures more consistent
     if img[crop].shape[0] > img[crop].shape[1]:
         # and rotating it would be fix all this automatically
@@ -190,7 +194,7 @@ def rw_demo(filename, rw_beta, threshold, output_dir=None):
 
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.05, wspace=0.01)
-    
+
     if output_dir is not None:
         fig.savefig(f'./output/{output_dir}/{basename}_m.png')
 

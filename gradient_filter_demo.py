@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+this was a brief visual demonstration of using a gradient prefilter on a
+sample, i.e. making sure that gradient is low in places where Frangi is
+calculated.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.util import img_as_float

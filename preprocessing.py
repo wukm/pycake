@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 """
+This module contains a lot of logic for noise removal. Some similar functions
+might be contained instead inside placenta or plate_morphology.
+
 When you run this as a first level script, you get a demonstration
 of the different glare inpainting techniques
 """
@@ -171,7 +174,9 @@ def mask_glare(img, threshold=175, mask_only=False):
 
 
 def mask_stump(img, mask=None, mask_only=True):
-
+    """
+    this returns all large objects, not just the mask
+    """
     if img.ndim < 3:
         print('better to pass the raw image')
         channel = img
@@ -211,7 +216,7 @@ def mask_stump(img, mask=None, mask_only=True):
 #            incl_count += 1
 #
 #        if incl_count > 4:
-#            print('only removing a few things here')
+            print('only removing a few things here')
 #            b[b==l] = 0
 #
 #    print('b after')

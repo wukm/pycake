@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 
 """
-NOTE THIS IS THE OLD CODE (FOR BAD PARAMETER FRANGI).
-IT'S HERE FOR LEGACY OR POSSIBLE DEMONSTRATION
-some function / file names have changed and this code probably won't
-work anymore without minor alterations
+This is extremely obsolete code. This is my filter for fixing the old (slow)
+Frangi filter result using a rotating box filter. Here for historical purposes.
+
+given the obsolesence of this code, most external code/ filenames have changed
+and this code probably won't work anymore without minor alterations.
+
+If this code is fixed, it should be merged into post_processing.
+
+Alternatively, the Frangi filter+postprocessing techniques demonstrated here
+could be added as standalone functions in this module, along with the
+'strawman filter' etc.
 """
 
 import scipy.ndimage as ndi
@@ -135,6 +142,7 @@ def get_frangi_targets(K1,K2, beta=0.5, c=15, dark_bg=True, threshold=None):
         return F < threshold
     else:
         return F
+
 
 def get_targets(K1,K2, method='F', threshold=True):
     """

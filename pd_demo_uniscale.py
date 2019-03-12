@@ -1,3 +1,8 @@
+"""
+visual demonstration of the angle of principal directions in a placental
+sample at a specified scale
+"""
+
 #!/usr/bin/env python3
 
 import numpy as np
@@ -43,7 +48,6 @@ vm = ma.masked_array(v2, mask=f<.05)
 # this colormap doesn't have any black in it!
 cmap = mpl.cm.hsv
 # so set the mask to black
-
 cmap.set_bad(color=(0,0,0), alpha=1)
 
 fig, ax = plt.subplots()

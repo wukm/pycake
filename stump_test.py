@@ -1,4 +1,13 @@
+"""
+demonstrate the success failure of an automated way to remove the
+umbilical stump from each image. the method, which can be found in
+preprocessing.mask_stump, works by threshold on the image (170/255) and then
+performing a white top hat.
+
+another method,
+"""
 #!/usr/bin/env python3
+
 
 from placenta import (get_named_placenta, list_placentas, open_typefile,
                       show_mask, measure_ncs_markings)

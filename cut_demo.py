@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+this was a method of masking cutmarks by identifying their place in the
+original tracing file. the functionality of this program has been eclipsed by
+the function find_plate, which attempts to grab the entire perimeter of the
+plate, cut and all, and does not require the mask at all.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 

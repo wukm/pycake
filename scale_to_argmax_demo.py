@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 """
-show the scale to argmax demo
+This tries to show the relationship between the measured vessel width
+associated with a pixel and the scale at which Vmax occurs.
+
+There was another demo (which is currently lost) which attempted to show a
+similar result.
 """
 import numpy as np
 import matplotlib.pyplot as plt

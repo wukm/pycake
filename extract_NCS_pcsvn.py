@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 """
-This is the main program. It approximates the PCSVN of a list of samples.
-It does not do network completion.
+Most of this is obsolete. This was the main progam for approximating
+PCSVN network. It is no longer used mostly because there are too many methods
+of segmentation with no clear victor. the script that replaces this one is
+probably compare_segmenations
 
 """
 

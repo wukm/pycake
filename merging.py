@@ -6,6 +6,11 @@ from scipy.ndimage import label
 from skimage.morphology import remove_small_objects
 import matplotlib.pyplot as plt
 
+"""
+this module contains implementations of several (simple) strategies of
+turning a  Frangi stack into a single image, i.e. simple segmentation methods.
+Also some older functions which aren't being used now, such as "view_slices"
+"""
 def nz_percentile(A, q, axis=None, interpolation='linear'):
     """calculate np.percentile(...,q) on an array's nonzero elements only
 
@@ -201,7 +206,7 @@ def view_slices(multiscale, axis=0, scales=None, crop=None, cmap='nipy_spectral'
 
     plt.close('all')
     for v, sigma, outname in zip(V, scales, outnames):
-        
+
         if crop is None:
             viewable = v
         else:

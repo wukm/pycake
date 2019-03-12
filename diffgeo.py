@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+methods of estimating principal curvatures, principal directions, etc.
+"""
+
 import numpy as np
 import numpy.ma as ma
 
@@ -215,85 +219,3 @@ def principal_directions(img, sigma, H=None, mask=None):
         trailing_thetas = ma.masked_array(trailing_thetas, mask)
 
     return trailing_thetas, leading_thetas
-
-
-if __name__ == "__main__":
-
-    pass
-
-    #from get_base import get_preprocessed
-    #import matplotlib.pyplot as plt
-    #from functools import partial
-    #from fpd import get_targets
-    #b = partial(plt.imshow, cmap=plt.cm.Blues)
-    #sp = partial(plt.imshow, cmap=plt.cm.spectral)
-    #s = plt.show
-
-    #import time
-
-    #img = get_preprocessed(mode='G')
-
-    #for sigma in [0.5, 1, 2, 3, 5, 10]:
-
-    #    print('-'*80)
-    #    print('σ=',sigma)
-    #    print('calculating hessian H')
-
-    #    tic = time.time()
-    #    H = hessian_matrix(img, sigma=sigma)
-
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)
-    #    tic = time.time()
-    #    print('calculating hessian via FFT (F)')
-    #    h = fft_hessian(img, sigma)
-
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)
-    #    tic = time.time()
-    #    print('calculating principal curvatures for σ={}'.format(sigma))
-    #    K1,K2 = principal_curvatures(img, sigma=sigma, H=H)
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)
-    #    tic = time.time()
-    #    print('calculating principal curvatures for σ={} (fast)'.format(sigma))
-    #    k1,k2 = principal_curvatures(img, sigma=sigma, H=h)
-
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)
-    #    tic = time.time()
-
-    #    #####
-
-    #    print('calculating targets for σ={}'.format(sigma))
-    #    T = get_targets(K1,K2, threshold=False)
-
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)
-    #    tic = time.time()
-
-    #    print('calculating targets for σ={} (fast)'.format(sigma))
-    #    t = get_targets(k1,k2, threshold=False)
-
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)
-
-    #    ######
-
-    #    print('extending masks')
-
-    #    # extend mask over nontargets items
-    #    img1 = ma.masked_where( T < T.mean(), img)
-    #    img2 = ma.masked_where( t < t.mean(), img)
-
-    #    tic = time.time()
-    #    print('calculating principal directions for σ={}'.format(sigma))
-    #    T1,T2 = principal_directions(img1, sigma=sigma, H=H)
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)
-    #    tic = time.time()
-
-    #    print('calculating principal directions for σ={} (fast)'.format(sigma))
-    #    t1,t2 = principal_directions(img2, sigma=sigma, H=h)
-    #    toc = time.time()
-    #    print('time elapsed: ', toc - tic)

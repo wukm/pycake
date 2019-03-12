@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+this module namely contains dilate_boundary and, when run as a script,
+generates the dilate_boundary demo
+"""
+
+
 from skimage.morphology import (disk, binary_erosion, binary_dilation,
                                 convex_hull_image, thin)
 from skimage.segmentation import find_boundaries, watershed

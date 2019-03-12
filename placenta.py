@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 """
-Get registered, unpreprocessed placental images.  No automatic registration
-(i.e. segmentation of placental plate) takes place here. The background,
-however, *is* masked.
+This module contains all the logic for loading placental samples.
+Unfortunately, some functions here assume NCS samples, whereas others are
+nonspecific to a fault. There are calls here to functions in the preprocessing
+(and maybe plate_morphology)  modules
 
-Again, there is no support for unregistered placental pictures.
-A mask file must be provided.
-
-There is currently no support for color images.
+TODO:
+    Ideally, the whole placenta itself would a well defined object with
+    different views, rather than each file, wanting all access to a sample's
+    related files, needing to load so many different images.
 """
 
 import numpy as np

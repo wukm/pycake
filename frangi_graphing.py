@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+
+"""
+This is a visual demonstration of the Frangi filter as a function.
+The output is a sequence of 3D graphs, varying the parameters beta and gamma
+"""
+
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt

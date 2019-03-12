@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 """
-the contents of this file should be split up between frangi (multiscale)
-and scoring/output
+most of this has been obsoleted in favor of more custom scripts that take
+advantage of using list comprehensions involving frangi_from_image()
 """
 from placenta import get_named_placenta
 from diffgeo import principal_directions

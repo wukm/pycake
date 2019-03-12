@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+this is analogous to scale_sweep_demo.py. should do the same thing but
+for signed Frangi
+"""
+
 from placenta import (get_named_placenta, list_placentas, _cropped_bounds,
                       cropped_view, cropped_args, show_mask)
 from frangi import frangi_from_image

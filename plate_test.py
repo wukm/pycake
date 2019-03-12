@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+currently obsolete. this code has been merged into preprocessing.
+this file should ideally produce a visual montage (or individual files)
+showing the success/failure of find_plate_in_raw
+"""
 from placenta import (get_named_placenta, list_placentas, open_typefile,
                       show_mask)
 import numpy as np
