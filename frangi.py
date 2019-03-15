@@ -2,7 +2,8 @@
 
 """
 this file contains the frangi filter logic. frangi_from_image is essentially
-standalone.
+standalone. all principal curvature approxes are calculated in diffgeo,
+not here)
 
 todo:
     * recreate/document large commented out block, which documents all the
