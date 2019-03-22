@@ -21,7 +21,6 @@ standard in scipy, for example). This file also contains implementations of the
 discrete gaussian kernel, and a visual demonstration of the "semigroup
 property" of each implementation.
 
-"""
 
 TODO: PROVIDE MAIN USAGE NOTES
 """

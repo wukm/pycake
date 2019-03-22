@@ -216,7 +216,7 @@ def mask_stump(img, mask=None, mask_only=True):
 #            incl_count += 1
 #
 #        if incl_count > 4:
-            print('only removing a few things here')
+#            print('only removing a few things here')
 #            b[b==l] = 0
 #
 #    print('b after')

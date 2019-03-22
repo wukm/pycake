@@ -231,7 +231,7 @@ for filename in placentas:
 
     I = grey2rgb(img.data)  # three channels (based on img old data)
     I[old_mask] = (1.,1.,1.)  # make old BG (background only) white not black
-    I[img.mask] *= (1.0, 0.8, 0.8)  # overlay red on ucip mask
+    I[img.mask] *= (0.8, 1.0, 0.8)  # overlay red on ucip mask
 
     ax[0,0].imshow(I[crop])
     ax[0,0].set_title(basename)

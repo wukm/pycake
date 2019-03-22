@@ -14,7 +14,7 @@ import matplotlib as mpl
 from skimage.util import img_as_float
 from skimage.io import imread
 from placenta import (get_named_placenta, list_by_quality, cropped_args,
-                    mimg_as_float)
+                      mimg_as_float, list_placentas)
 
 from frangi import frangi_from_image
 import numpy.ma as ma
@@ -32,7 +32,7 @@ from placenta import measure_ncs_markings, add_ucip_to_mask
 import seaborn as sns
 import json
 
-OUTPUT_DIR = (f'demo_output/compare_parametrizations')
+OUTPUT_DIR = (f'demo_output/compare_parametrizations-all-ucip-190322')
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -49,6 +49,9 @@ SEMILOOSE_BETA = {'label':'semiloose-beta', 'beta':1.0, 'gamma':0.5}
 SEMILOOSE_GAMMA = {'label':'semiloose-gamma', 'beta':0.5, 'gamma':0.30}
 STRUCTURENESS = {'label':'Structureness Factor', 'beta':np.inf, 'gamma':0.5}
 
+#placentas = list_by quality(0)
+placentas = list_placentas()
+
 #cm = mpl.cm.plasma
 #cm.set_bad('k', 1)  # masked areas are black, not white
 cm = mpl.cm.nipy_spectral
@@ -58,7 +61,7 @@ scales = np.logspace(-1.5, 3.2, num=12, base=2)
 
 integral_scores = list()
 
-for filename in list_by_quality(0):
+for filename in placentas:
 
     cimg = open_typefile(filename, 'raw')
     ctrace = open_typefile(filename, 'ctrace')
@@ -80,7 +83,8 @@ for filename in list_by_quality(0):
 
     ucip_midpoint, resolution = measure_ncs_markings(ucip)
     ucip_mask = add_ucip_to_mask(ucip_midpoint, radius=50, mask=img.mask)
-    #img.mask = add_ucip_to_mask(ucip_midpoint, radius=50, mask=img.mask)
+    old_mask = img.mask.copy()
+    img.mask = ucip_mask
 
     name_stub = filename.rstrip('.png').strip('T-')
 
@@ -159,7 +163,7 @@ plt.setp(axl, rotation=90)
 ax.set_xlabel('Frangi parametrization type')
 
 ax.set_ylabel('Cumulative Vesselness Ratio (CVR)')
-ax.set_title(r'Incidence of Vesselness Score along Traced Vessels (25 samples)')
+ax.set_title(r'Incidence of Vesselness Score along Traced Vessels (all samples)')
 
 # label the median line
 for line, med in zip(boxplot_dict['medians'], I_medians.squeeze()):
