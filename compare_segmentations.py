@@ -91,22 +91,22 @@ placentas = list_placentas()
 
 # Uncomment one of the parametrizatons
 #beta, gamma, parametrization_name = 0.15, 1.0, "strict"
-#beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
+beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
 #beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
-beta, gamma, parametrization_name = 0.5, 0.5, "standard"
+#beta, gamma, parametrization_name = 0.5, 0.5, "standard"
 
-OUTPUT_DIR = (f'output/190304-segmentation_demo_'
+OUTPUT_DIR = (f'output/190326-segmentation_demo_'
               f'{quality_name}_{parametrization_name}-ucip')
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
 # Other basic setup
-N_scales = 20
+N_scales = 12
 THRESHOLD = .3  # \alpha^{(+)}
 THRESHOLD_LOW = .2  # \alpha^{(+)}
 MARGIN_THRESHOLD = 0.01  # \alpha^{(-)}
-NEGATIVE_RANGE = (0, 6) # minimum and maximum range to use for Vmaxneg
+NEGATIVE_RANGE = (0, 4) # minimum and maximum range to use for Vmaxneg
 log_range = (-1, 3.2) # minimum and maximum scale, log base 2
 scales = np.logspace(*log_range, base=2, num=N_scales) # construct scales
 
@@ -231,7 +231,7 @@ for filename in placentas:
 
     I = grey2rgb(img.data)  # three channels (based on img old data)
     I[old_mask] = (1.,1.,1.)  # make old BG (background only) white not black
-    I[img.mask] *= (0.8, 1.0, 0.8)  # overlay red on ucip mask
+    I[img.mask] *= (0.6, 1.0, 0.6)  # overlay green on ucip mask
 
     ax[0,0].imshow(I[crop])
     ax[0,0].set_title(basename)
@@ -289,6 +289,8 @@ for filename in placentas:
     mccs.append((filename, m_FA_high, m_FA_low, m_PF95, m_PF98, m_st, m_tf))
     precs.append((filename, p_FA_high, p_FA_low, p_PF95, p_PF98, p_st, p_tf))
 
+
+# META ANALYSIS
 # dictionary to store (but should add runtime parameters too)
 runlog = { 'mccs': mccs, 'precs': precs}
 
