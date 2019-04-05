@@ -18,7 +18,7 @@ todo:
 """
 import numpy as np
 import numpy.ma
-from hfft import fft_hessian, fft_gradient
+from hfft import fft_hessian, fft_gradient, fft_weingarten_eigs
 from diffgeo import principal_curvatures
 from plate_morphology import dilate_boundary
 from merging import nz_percentile
@@ -26,7 +26,8 @@ from merging import nz_percentile
 def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                       dilation_radius=None, kernel=None, signed_frangi=False,
                       return_debug_info=False, verbose=False,
-                      rescale_frangi=False, gradient_filter=False):
+                      rescale_frangi=False, gradient_filter=False,
+                      use_real_weingarten_map=False):
     """Calculate the (uniscale) Frangi vesselness measure on a grayscale image
 
     Parameters
@@ -78,6 +79,11 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
                       'k2': k2,
                       'border_radius': dilation_radius
                       }
+    use_real_weingarten_map: bool, optional
+        calculate the eigenvalues of the *actual* Weingarten map of the graph
+        (i.e. the "real" principal curvatures) rather than the Hessian
+        (default is False)
+
     Returns
     -------
     ...
@@ -96,12 +102,13 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
 
     Frangi structureness factor is (1 - exp((-S**2)/(2*c**2))
     """
-    hesh = fft_hessian(img, sigma, kernel=kernel)  # the triple (Hxx,Hxy,Hyy)
-    # calculate principal curvatures with |k1| <= |k2|
+    if use_real_weingarten_map:
+        k1, k2 = fft_weingarten_eigs(img, sigma=sigma, kernel=kernel)
 
-
-
-    k1, k2 = principal_curvatures(img, sigma, H=hesh)
+    else:
+        hesh = fft_hessian(img, sigma, kernel=kernel)  # elems (Hxx,Hxy,Hyy)
+        # calculate principal curvatures with |k1| <= |k2|
+        k1, k2 = principal_curvatures(img, sigma, H=hesh)
 
     if dilation_radius is not None:
         # pass None to just get the mask back
@@ -110,9 +117,6 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         # get rid of "bad" K values before you calculate gamma and Frangi
         k1[collar] = 0
         k2[collar] = 0
-        hesh[0][collar] = 0
-        hesh[1][collar] = 0
-        hesh[2][collar] = 0
     else:
         collar = img.mask.copy()
 

@@ -7,6 +7,8 @@ from scipy.special import iv, ive
 from scipy.ndimage import gaussian_filter
 from itertools import combinations_with_replacement
 
+from numpy.linalg import eigvals
+
 # for demos
 import matplotlib.pyplot as plt
 
@@ -109,6 +111,55 @@ def fft_fdgk(img,sigma):
     # see formula 22 of lindeberg discrete paper
 
     pass
+
+
+def fft_weingarten_eigs(img, sigma=1., kernel=None):
+    """
+    Compute eigenvalues actual weingarten map. This isn't general use,
+    works only with grayscale masked arrays
+    """
+
+    gaussian_filtered = fft_gaussian(img, sigma=sigma, kernel=kernel)
+
+    gradients = np.gradient(gaussian_filtered)
+
+    hx, hy = gradients
+
+    axes = range(img.ndim)
+
+    hxx, hxy, hyy = [np.gradient(gradients[ax0], axis=ax1)
+                    for ax0, ax1 in combinations_with_replacement(axes, 2)]
+
+    gf = (1 + hx**2 + hy**2)**(-1.5)
+
+    # each of these will have shape (2,2, *img.shape)
+
+    G = np.array([[ 1 + hy**2 , -hx*hy],
+                  [ -hx*hy, 1 + hx**2]])
+
+    H = np.array([[hxx,hxy],
+                 [hxy, hyy]])
+
+    # where to store eigenvalues
+    K2 = np.zeros_like(img, dtype='float64')
+    K1 = np.zeros_like(img, dtype='float64')
+
+    # build the 2x2 weingarten map at each pixel and find its eigvals
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            if img.mask[i,j]:
+                continue # don't bother with things outside the masked region
+            L = eigvals(gf[i,j]*(H[...,i,j] @ G[...,i,j]))
+
+            K1[i,j], K2[i,j] = L
+
+    # same thing as reorder_eigs
+    L = np.stack((K1,K2))
+    mag = np.argsort(np.abs(L), axis=0)
+    K1, K2 = np.take_along_axis(L, mag, axis=0)
+
+    return K1, K2
+
 
 def fft_hessian(image, sigma=1., kernel=None):
     """
