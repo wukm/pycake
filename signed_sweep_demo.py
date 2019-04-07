@@ -23,6 +23,15 @@ from itertools import product
 demo1 = 'BN2315363', np.s_[370:670, 530:930]
 demo2 = 'BN5280796', np.s_[150:450, 530:930]
 
+#scales = np.logspace(-3, 4, num=8, base=2)
+#scales = [0.2, 0.8, 1.0, 2.0, 4.0, 6.0, 8.0, 16.0]
+scales = [0.25, 0.5, 0.8, 1.2, 2.0, 4.0, 6.0, 8.0]
+#CMAP = plt.cm.Spectral
+CMAP = plt.cm.PuOr
+rescale, cmin, cmax = False, -0.4, 0.4
+#rescale, cmin, cmax = True, -1.0, 1.0
+
+
 for sample_name, inset_slice in (demo1, demo2):
     img = get_named_placenta(f'T-{sample_name}.png')
 
@@ -30,15 +39,13 @@ for sample_name, inset_slice in (demo1, demo2):
 
     F, fi = list(), list() # make some empty lists to store for inspection
 
-    #scales = np.logspace(-3, 4, num=8, base=2)
-    scales = [0.2, 0.8, 1.0, 2.0, 4.0, 6.0, 8.0, 16.0]
-    CMAP = plt.cm.Spectral
-    cmin, cmax = (-0.4, 0.4)
 
     for n, sigma in enumerate(scales):
-        R = max(int(sigma*3), 10)
+        #R = max(int(sigma*3), 10)
+        R = 20
         target = frangi_from_image(img, sigma, dark_bg=False,
-                                   signed_frangi=True, dilation_radius=R)
+                                   signed_frangi=True, dilation_radius=R,
+                                   rescale_frangi=rescale)
         plate = target[crop].filled(0)
         inset = target[inset_slice].filled(0)
         F.append(plate)
@@ -89,36 +96,21 @@ for sample_name, inset_slice in (demo1, demo2):
             plt.setp(axes[i,j].get_xticklabels(), visible=False)
             plt.setp(axes[i,j].get_yticklabels(), visible=False)
 
-        #for i in range(5):
-        #    fig.tight_layout()
-
-        #fig.subplots_adjust(right=0.8)
-        #cax = fig.add_axes([.85,.15,.05,.7])
-        #c = fig.colorbar(im, ax=cax)
 
         fig.subplots_adjust(top=0.954, bottom=0.025, left=0.010,
                             right=0.989, hspace=0.0, wspace=0.0)
 
-        plt.savefig(f'demo_output/signsweep_stitch_{sample_name}_{label}.png',
+        plt.savefig(f'demo_output/signsweep_stitch_{sample_name}_{label}_alt.png',
                     dpi=300)
 
-        cfile = 'demo_output/signsweep_colorbar.png'
+        cfile = 'demo_output/signsweep_colorbar_alt.png'
+
         if os.path.isfile(cfile):
             continue # no need to make another
-
-        fig = plt.figure(figsize=(figsize[0],2))
-        ax1 = fig.add_axes([0.15, 0.25, 0.75, 0.5])
-        cbar = mpl.colorbar.ColorbarBase(ax1, cmap=CMAP,
-                                        norm=mpl.colors.Normalize(cmin,cmax),
-                                        orientation='horizontal')
-        plt.savefig(cfile, dpi=300)
-        #top = np.concatenate(L[:4],axis=1)
-        #bottom = np.concatenate(L[4:],axis=1)
-        #stitched = np.concatenate((top,bottom),axis=0)
-        #imga = plt.imshow(stitched, cmap=CMAP)
-        #plt.imsave(f'demo_output/signsweep_stitch_{sample_name}_{label}.png',
-        #        stitched, cmap=CMAP, vmin=cmin, vmax=cmax)
-
-        # also save the original pic
-        #plt.imsave(f'demo_output/signsweep_{sample_name}_{label}_raw',
-        #        imgview, cmap=plt.cm.gray)
+        else:
+            fig = plt.figure(figsize=(figsize[0],2))
+            ax1 = fig.add_axes([0.15, 0.25, 0.75, 0.5])
+            cbar = mpl.colorbar.ColorbarBase(ax1, cmap=CMAP,
+                                            norm=mpl.colors.Normalize(cmin,cmax),
+                                            orientation='horizontal')
+            plt.savefig(cfile, dpi=300)
