@@ -27,6 +27,10 @@ ax = fig.gca(projection='3d')
 X = np.arange(-2, 2, .05)
 Y = np.arange(-2, 2, .05)
 
+n_theta = 50
+n_phi = 200
+
+r = 1
 r = 1 # radius of trough
 X, Y = np.meshgrid(X,Y)
 
