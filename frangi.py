@@ -114,11 +114,17 @@ def frangi_from_image(img, sigma, beta=0.5, gamma=0.5, c=None, dark_bg=True,
         # pass None to just get the mask back
         collar = dilate_boundary(None, radius=dilation_radius, mask=img.mask)
 
-        # get rid of "bad" K values before you calculate gamma and Frangi
-        k1[collar] = 0
-        k2[collar] = 0
     else:
         collar = img.mask.copy()
+
+    # get rid of "bad" K values before you calculate gamma and Frangi
+    k1[collar] = 0
+    k2[collar] = 0
+
+    #import matplotlib.pyplot as plt
+    #plt.imshow(k1)
+    #plt.imshow(k2)
+    #plt.show()
 
 
     # no need to set gamma or c anymore. will be set inside get_frangi_targets

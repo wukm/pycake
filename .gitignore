@@ -5,6 +5,7 @@
 *.pyc
 *.swp # although these shouldn't exist anyway
 *.py.swp
+tags
 
 __pycache__
 .ropeproject

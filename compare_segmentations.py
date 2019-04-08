@@ -39,6 +39,7 @@ from skimage.color import grey2rgb
 from skimage.filters import threshold_isodata
 from postprocessing import dilate_to_rim
 from preprocessing import inpaint_hybrid
+import datetime
 import json
 
 
@@ -90,13 +91,15 @@ quality_name = 'all'
 placentas = list_placentas()
 
 # Uncomment one of the parametrizatons
-#beta, gamma, parametrization_name = 0.15, 1.0, "strict"
-beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
+beta, gamma, parametrization_name = 0.15, 1.0, "strict"
+#beta, gamma, parametrization_name = 0.15, 0.5, "semistrict"
 #beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
 #beta, gamma, parametrization_name = 0.5, 0.5, "standard"
 
-OUTPUT_DIR = (f'output/190326-segmentation_demo_'
+today = f"{datetime.datetime.now():%y%m%d}"
+OUTPUT_DIR = (f'output/{today}-segmentation_demo_'
               f'{quality_name}_{parametrization_name}-ucip')
+
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -118,7 +121,6 @@ for filename in placentas:
 
     # get the name of the sample (like 'BN#######')
     basename = strip_ncs_name(filename)
-
     print(basename, '*'*30)
 
     # this calls find_plate_in_raw for all files not in placenta.FAILS
@@ -281,9 +283,9 @@ for filename in placentas:
     fig.subplots_adjust(right=1.0, left=0, top=0.95, bottom=0.,
                         wspace=0.0, hspace=0.05)
 
-    plt.savefig(os.path.join(OUTPUT_DIR, ''.join(('fig-', basename, '.png'))))
+    plt.savefig(os.path.join(OUTPUT_DIR,
+                             f'{today}-{parametrization_name}-{basename}.png'))
 
-    #plt.show()  # if interactive, show this
     plt.close()
 
     mccs.append((filename, m_FA_high, m_FA_low, m_PF95, m_PF98, m_st, m_tf))
@@ -327,8 +329,7 @@ for scorename, data, medians in [('MCC', M, M_medians),
     plt.setp(axl, rotation=90)
     ax.set_xlabel('segmentation method')
     ax.set_title(f'{scorename} scores of segmentation methods'
-                 f'({quality_name} samples),'
-                 f'{parametrization_name} parametrization')
+                 fr' $(\beta={beta}, \gamma={gamma})$')
     ax.set_ylabel(scorename)
 
     # label medians, from https://stackoverflow.com/a/18861734
