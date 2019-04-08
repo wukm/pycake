@@ -16,6 +16,7 @@ from scipy.ndimage import gaussian_filter
 
 from scipy.linalg import norm
 import timeit
+import seaborn as sns
 
 #img = camera() / 255.
 img = imread('samples/barium1.png', as_grey=True) / 255.
@@ -32,6 +33,8 @@ sigmas = np.logspace(0,m, num=N, base=2)
 
 fft_results = list()
 std_results = list()
+
+sns.set()
 
 for sigma in sigmas:
     # test statements to compare (fft-based gaussian vs convolution-based)
@@ -60,7 +63,7 @@ for sigma in sigmas:
     print(sigma, diff.max(), raw_diff.max())
 
 lines = plt.plot(sigmas, fft_results, 'go', sigmas, std_results, 'bo')
-plt.xlabel('sigma (gaussian blur parameter)')
+plt.xlabel('sigma (GFaussian blur parameter)')
 plt.ylabel('run time (seconds)')
-plt.legend(lines, ('fft-gaussian', 'conv-gaussian'))
+plt.legend(lines, ('fft-based', 'standard convolution'))
 plt.title('Comparision of Gaussian Blur Implementations')
