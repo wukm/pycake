@@ -48,13 +48,13 @@ basename = strip_ncs_name(filename) # get the name of the sample ( 'BN#######')
 print(basename, '*'*30)
 
 # Uncomment one of the parametrizatons
-#beta, gamma, parametrization_name = 0.15, 1.0, "strict"
-beta, gamma, parametrization_name = 0.35, 0.5, "semistrict"
+beta, gamma, parametrization_name = 0.25, 1.0, "strict"
+#beta, gamma, parametrization_name = 0.35, 0.5, "semistrict"
 #beta, gamma, parametrization_name = 0.5, 1.0, 'semistrict-gamma'
 #beta, gamma, parametrization_name = 0.5, 0.5, "standard"
 
 today = f"{datetime.datetime.now():%y%m%d}"
-OUTPUT_DIR = (f'demo_output/{today}-width_to_scale_response_demo-unscaled')
+OUTPUT_DIR = (f'demo_output/{today}-width_to_scale_response_demo-unscaled-less-strict')
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -117,7 +117,7 @@ for n, sigma in enumerate(scales,1):
     print(f'{n}:\t{sigma:.02}', end='\t', flush=True)
     v = frangi_from_image(img, sigma, beta, gamma, dark_bg=False,
                           dilation_radius=20, rescale_frangi=False)
-    fname = os.path.join(OUTPUT_DIR, f'{basename}-Vsigma-{n:02}-unscaled.png')
+    fname = os.path.join(OUTPUT_DIR, f'{basename}-Vsigma-{n:02}-unscaled-strict.png')
     plt.imsave(fname, v[crop].filled(0),
                cmap=plt.cm.nipy_spectral, vmin=0, vmax=1)
     # throw out things that aren't part of the ground truth
@@ -150,7 +150,7 @@ for w in range(3,20,2):
     # skel)
     V_argmax = ma.masked_array(V_local.argmax(axis=0), mask=~skel)
     #plt.imshow(V_argmax[crop])
-    fname = os.path.join(OUTPUT_DIR, f'{basename}-Vlocal_max-{w:02}-unscaled.png')
+    fname = os.path.join(OUTPUT_DIR, f'{basename}-Vlocal_max-{w:02}-unscaled-strict.png')
     plt.imsave(fname, (skel*V_local.max(axis=0))[crop],
                cmap=plt.cm.nipy_spectral, vmin=0, vmax=1)
     scale_responses = V_argmax[skelwidths==w]
@@ -165,5 +165,5 @@ for w in range(3,20,2):
     plt.xlabel(r'scale of maximal response ($\sigma$)')
     #plt.ylabel('# pixels')
     plt.tight_layout()
-    fname = os.path.join(OUTPUT_DIR, f'{basename}-scale_to_argmax_hist-{w:02}-unscaled.png')
+    fname = os.path.join(OUTPUT_DIR, f'{basename}-scale_to_argmax_hist-{w:02}-unscaled-strict.png')
     plt.savefig(fname)
