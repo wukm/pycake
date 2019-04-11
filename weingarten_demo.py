@@ -26,8 +26,8 @@ scales = np.logspace(-1, 4, num=25, base=2)
 W_times = list()
 V_times = list()
 
-placentas = list_by_quality(0)
-OUTPUT_DIR = 'demo_output/weingarten_demo_quality_0-190405'
+placentas = list_by_quality(0,N=1)
+OUTPUT_DIR = 'demo_output/weingarten_demo_quality_0-190411'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import numpy.ma as ma
 from scipy import signal
 import scipy.fftpack as fftpack
 from scipy.special import iv, ive
@@ -130,28 +131,50 @@ def fft_weingarten_eigs(img, sigma=1., kernel=None):
     hxx, hxy, hyy = [np.gradient(gradients[ax0], axis=ax1)
                     for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
+    # where to store eigenvalues
+    #K2 = np.zeros_like(img, dtype='float64')
+    #K1 = np.zeros_like(img, dtype='float64')
+
+    # need to do gf*(G@H)
+    # we hand code it individually, knowing that the eigs are
+    # T/2 +- sqrt(T^2/4 - D)
+    # where T is the trace and D is the determinant
+    # the determinant of HG is det(H)det(G)
+    # and trace is easy
     gf = (1 + hx**2 + hy**2)**(-1.5)
 
     # each of these will have shape (2,2, *img.shape)
+    #G = np.array([[ 1 + hy**2 , -hx*hy],
+    #              [ -hx*hy, 1 + hx**2]])
+    #H = np.array([[hxx,hxy],
+    #             [hxy, hyy]])
 
-    G = np.array([[ 1 + hy**2 , -hx*hy],
-                  [ -hx*hy, 1 + hx**2]])
 
-    H = np.array([[hxx,hxy],
-                 [hxy, hyy]])
 
-    # where to store eigenvalues
-    K2 = np.zeros_like(img, dtype='float64')
-    K1 = np.zeros_like(img, dtype='float64')
+    ## build the 2x2 weingarten map at each pixel and find its eigvals
+    #for i in range(img.shape[0]):
+    #    for j in range(img.shape[1]):
+    #        if img.mask[i,j]:
+    #            continue # don't bother with things outside the masked region
+    #        L = eigvals(gf[i,j]*(H[...,i,j] @ G[...,i,j]))
 
-    # build the 2x2 weingarten map at each pixel and find its eigvals
-    for i in range(img.shape[0]):
-        for j in range(img.shape[1]):
-            if img.mask[i,j]:
-                continue # don't bother with things outside the masked region
-            L = eigvals(gf[i,j]*(H[...,i,j] @ G[...,i,j]))
+    #        K1[i,j], K2[i,j] = L
 
-            K1[i,j], K2[i,j] = L
+    # this could be optimized by eliminating repeated calculations
+    T = hxx*hyy + hxx*hy*hy + hyy*hx*hx - 2*hxy*hx*hy
+    D = (1+hx*hx)*(1+hy*hy) - hx*hx*hy*hy
+    D *= (hxx*hyy - hxy*hxy)
+
+    T = ma.masked_array(T, mask=img.mask)
+    D = ma.masked_array(D, mask=img.mask)
+
+    discriminant = np.sqrt(T**2 / 4 - D)
+
+    K1 = T/2 + discriminant
+    K2 = T/2 - discriminant
+
+    K1 *= gf
+    K2 *= gf
 
     # same thing as reorder_eigs
     L = np.stack((K1,K2))
