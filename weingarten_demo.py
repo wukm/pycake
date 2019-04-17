@@ -90,5 +90,6 @@ for filename in placentas:
     plt.imsave(os.path.join(OUTPUT_DIR, ''.join((name_stub, '-Wargmax.png'))),
                Wargmax, cmap=plt.cm.rainbow)
 
+    plt.imshow(Wmax, fancy=True)
     print('Finished with sample', name_stub)
     print(f'\tFrangi: {V_elapsed} sec\t', f'Wein: {W_elapsed} sec')
